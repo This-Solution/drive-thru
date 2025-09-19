@@ -166,8 +166,9 @@ public class CarDetailsServiceImpl implements CarDetailService {
     public List<CurrentOrderItemResponse> getCurrentOrderDetails(CarDetailRequest carDetailRequest) {
         OrderDetail orderDetail = orderDetailRepository.findFirstByTenantIdAndCarPlateNumberOrderByCreatedDateDesc(carDetailRequest.getTenantId(), carDetailRequest.getCarPlateNumber()).orElseThrow(() -> new CustomException(CustomErrorHolder.ORDER_NOT_FOUND));
         List<OrderItem> orderItems = orderItemRepository.findByOrderId(orderDetail.getOrderId());
+        orderDetail.setOrderStatus(String.valueOf(OrderStatus.DELIVERED));
+        orderDetailRepository.save(orderDetail);
         return orderItems.stream().map(item -> new CurrentOrderItemResponse(item.getName(), item.getQuantity(), item.getPrice())).collect(Collectors.toList());
-
     }
 
     @Override
