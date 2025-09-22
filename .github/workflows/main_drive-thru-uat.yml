@@ -34,7 +34,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: java-app
-          path: ./API/build/libs/drive-thru-service-0.0.1-SNAPSHOT.jar
+          path: ./build/libs/drive-thru-service-0.0.1-SNAPSHOT.jar
 
   deploy:
     runs-on: ubuntu-latest
