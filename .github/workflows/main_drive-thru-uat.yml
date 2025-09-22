@@ -23,26 +23,19 @@ jobs:
         with:
           java-version: '17'
           distribution: 'microsoft'
- 
 
-      - name: Grant execute permission for gradlew
-        run: chmod +x gradlew
-        working-directory: API
-
-      - name: Build with Gradle
-        run: ./gradlew clean build -x test
-        working-directory: API
+      - name: Build with Maven
+        run: mvn clean install
 
       - name: Upload artifact for deployment job
         uses: actions/upload-artifact@v4
         with:
           name: java-app
-          path: ./API/build/libs/drive-thru-service-0.0.1-SNAPSHOT.jar
+          path: '${{ github.workspace }}/target/*.jar'
 
   deploy:
     runs-on: ubuntu-latest
     needs: build
-    
     permissions:
       id-token: write #This is required for requesting the JWT
       contents: read #This is required for actions/checkout
@@ -52,14 +45,13 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: java-app
-          path: . 
-
+      
       - name: Login to Azure
         uses: azure/login@v2
         with:
-          client-id: ${{ secrets.AZUREAPPSERVICE_CLIENTID_E1A6D732CC5F43DE889DD615E3A62D5D }}
-          tenant-id: ${{ secrets.AZUREAPPSERVICE_TENANTID_03E0A1C9C739447D89A78E426AB3EFF0 }}
-          subscription-id: ${{ secrets.AZUREAPPSERVICE_SUBSCRIPTIONID_B953E3EB1E4243A98BE7D2BB509BAA70 }}
+          client-id: ${{ secrets.AZUREAPPSERVICE_CLIENTID_F1A43B0DE39D483BBE4F8E2CC3C087D2 }}
+          tenant-id: ${{ secrets.AZUREAPPSERVICE_TENANTID_F2C51504913B42A1B3363FFF425F92F5 }}
+          subscription-id: ${{ secrets.AZUREAPPSERVICE_SUBSCRIPTIONID_A43713B250E64BEA86A4A1EE974BDA42 }}
 
       - name: Deploy to Azure Web App
         id: deploy-to-webapp
@@ -67,4 +59,5 @@ jobs:
         with:
           app-name: 'drive-thru-uat'
           slot-name: 'Production'
-          package: 'drive-thru-service-*.jar'
+          package: '*.jar'
+          
