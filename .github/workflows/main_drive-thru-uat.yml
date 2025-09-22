@@ -67,4 +67,4 @@ jobs:
         with:
           app-name: 'drive-thru-uat'
           slot-name: 'Production'
-          package: 'drive-thru-service-*.jar'
+          package: './drive-thru-service-0.0.1-SNAPSHOT.jar'
