@@ -6,9 +6,11 @@ import com.azure.storage.blob.sas.BlobSasPermission;
 import com.azure.storage.blob.sas.BlobServiceSasSignatureValues;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.io.InputStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.time.OffsetDateTime;
 
 @Service
@@ -17,10 +19,14 @@ public class AzureFileUploaderService {
     @Autowired
     private BlobContainerClient blobContainerClient;
 
-    public String uploadFile(String folderPath, String fileName, MultipartFile file) throws IOException {
+    public String uploadFile(String folderPath, String fileName, Path filePath) throws IOException {
         String blobPath = String.format("%s/%s", folderPath, fileName);
         BlobClient blobClient = blobContainerClient.getBlobClient(blobPath);
-        blobClient.upload(file.getInputStream(), file.getSize(), true);
+
+        try (InputStream inputStream = Files.newInputStream(filePath)) {
+            blobClient.upload(inputStream, Files.size(filePath), true);
+        }
+
         return blobPath;
     }
 

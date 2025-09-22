@@ -13,14 +13,18 @@ public class CarDetail {
     private Integer carId;
     @Column(name = "TenantId")
     private Integer tenantId;
-    @Column(name = "CarPlateNumber")
-    private String carPlateNumber;
+    @Column(name = "SiteId")
+    private Integer siteId;
+    @Column(name = "CarType")
+    private String carType;
     @Column(name = "CarColor")
     private String carColor;
-    @Column(name = "XmlUrl")
-    private String xmlUrl;
-    @Column(name = "ImageUrl")
-    private String imageUrl;
+    @Column(name = "CarPlateNumber")
+    private String carPlateNumber;
+    @Column(name = "PlateImageUrl")
+    private String plateImageUrl;
+    @Column(name = "CarImageUrl")
+    private String CarImageUrl;
     @Column(name = "CreatedDate")
     private LocalDateTime createdDate;
 
@@ -56,20 +60,36 @@ public class CarDetail {
         this.carColor = carColor;
     }
 
-    public String getXmlUrl() {
-        return xmlUrl;
+    public Integer getSiteId() {
+        return siteId;
     }
 
-    public void setXmlUrl(String xmlUrl) {
-        this.xmlUrl = xmlUrl;
+    public void setSiteId(Integer siteId) {
+        this.siteId = siteId;
     }
 
-    public String getImageUrl() {
-        return imageUrl;
+    public String getCarType() {
+        return carType;
     }
 
-    public void setImageUrl(String imageUrl) {
-        this.imageUrl = imageUrl;
+    public void setCarType(String carType) {
+        this.carType = carType;
+    }
+
+    public String getPlateImageUrl() {
+        return plateImageUrl;
+    }
+
+    public void setPlateImageUrl(String plateImageUrl) {
+        this.plateImageUrl = plateImageUrl;
+    }
+
+    public String getCarImageUrl() {
+        return CarImageUrl;
+    }
+
+    public void setCarImageUrl(String carImageUrl) {
+        CarImageUrl = carImageUrl;
     }
 
     public LocalDateTime getCreatedDate() {
