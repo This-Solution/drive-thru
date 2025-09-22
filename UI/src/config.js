@@ -38,7 +38,7 @@ const config = {
   miniDrawer: false,
   container: false,
   mode: 'light',
-  presetColor: 'theme9',
+  presetColor: 'theme1',
   themeDirection: 'ltr'
 };
 

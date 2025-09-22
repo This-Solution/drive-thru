@@ -55,7 +55,7 @@ const App = () => {
       utils.setItemToStorage('flavour', JSON.stringify(event.data.flavour));
       await renewSession(event.data.refreshToken);
       bindInitData(true);
-      onChangePresetColor(`theme9`);
+      onChangePresetColor(`theme1`);
     }
   };
 

@@ -10,9 +10,13 @@ import { useSelector } from 'store';
 import enums from 'utils/enums';
 import OrderItemCard from './cards/OrderItemCard';
 import MainCard from './MainCard';
+import { useTheme } from '@emotion/react';
+import { CheckCircleTwoTone, CheckOutlined } from '@ant-design/icons';
 
 const ShowCarDetails = ({ user, carDetail }) => {
   const [carDetails, setCarDetails] = useState({});
+
+  const theme = useTheme();
 
   useEffect(() => {
     if (!isEmpty(carDetail)) getCarDetails();
@@ -50,48 +54,57 @@ const ShowCarDetails = ({ user, carDetail }) => {
           </Box>
         </Grid>
         <Grid item xs={4} bgcolor={'#F2F0EF'}>
-          <Box display='flex' flexDirection='column' bgcolor='#F2F0EF'>
+          <Box display='flex' flexDirection='column'>
             <Box
               sx={{
-                py: 2,
-                // borderBottom: idx < 2 ? '1px solid #fff' : 'none',
                 width: '100%',
                 display: 'flex',
-                alignItems: 'center'
+                alignItems: 'center',
+                borderBottom: '1px solid #fff'
               }}
             >
-              <Box sx={{ px: 1 }}>
-                <Box sx={{ width: 28, height: 28 }}>
-                  <Chip
-                    component="span"
-                    color={enums.carStatus[carDetails.carColorStatus]}
-                    sx={{
-                      width: 30,
-                      height: 30,
-                      borderRadius: '50%',
-                      '& .MuiChip-label': {
-                        px: 0.5
-                      },
-                    }}
-                  />
-                  {/* <svg
-                    xmlns='http://www.w3.org/2000/svg'
-                    viewBox='0 0 24 24'
-                    fill='none'
-                    stroke='currentColor'
-                    strokeWidth='2'
-                    strokeLinecap='round'
-                    strokeLinejoin='round'
-                    style={{ width: '100%', height: '100%' }}
-                  >
-                    <circle cx='12' cy='12' r='10' stroke={enums.carStatus[carDetails.carColorStatus]}></circle>
-                    <path d='M9 12l2 2l4-4' stroke={enums.carStatus[carDetails.carColorStatus]}></path>
-                  </svg> */}
-                </Box>
+              <Avatar sx={{ bgcolor: enums.carStatus['GREEN'], width: '30px', height: '30px', ml: 2 }}>
+                <CheckOutlined style={{ fontSize: '16px' }} />
+              </Avatar>
+              <Box sx={{ p: 2 }}>
+                <Typography variant='body1'>Order No (Last 30 days)</Typography>
+                <Typography variant='body1'>10</Typography>
               </Box>
-              <Box>
-                <Typography variant='h5'>Total Order</Typography>
-                <Typography variant='body1'>{carDetails.orderCount}</Typography>
+            </Box>
+          </Box>
+          <Box display='flex' flexDirection='column'>
+            <Box
+              sx={{
+                width: '100%',
+                display: 'flex',
+                alignItems: 'center',
+                borderBottom: '1px solid #fff'
+              }}
+            >
+              <Avatar sx={{ bgcolor: enums.carStatus['RED'], width: '30px', height: '30px', ml: 2 }}>
+                <CheckOutlined style={{ fontSize: '16px' }} />
+              </Avatar>
+              <Box sx={{ p: 2 }}>
+                <Typography variant='body1'>Order No (30-60 days)</Typography>
+                <Typography variant='body1'>12</Typography>
+              </Box>
+            </Box>
+          </Box>
+          <Box display='flex' flexDirection='column'>
+            <Box
+              sx={{
+                width: '100%',
+                display: 'flex',
+                alignItems: 'center',
+                borderBottom: '1px solid #fff'
+              }}
+            >
+              <Avatar sx={{ bgcolor: enums.carStatus['PINK'], width: '30px', height: '30px', ml: 2 }}>
+                <CheckOutlined style={{ fontSize: '16px' }} />
+              </Avatar>
+              <Box sx={{ p: 2 }}>
+                <Typography variant='body1'>Order No (60-90 days)</Typography>
+                <Typography variant='body1'>15</Typography>
               </Box>
             </Box>
           </Box>
@@ -104,6 +117,7 @@ const ShowCarDetails = ({ user, carDetail }) => {
 const ShowLastAndPurchaseOrders = () => {
   const [lastOrders, setlastOrders] = useState([]);
   const [mostPurchaseOrder, setMostPurchaseOrder] = useState([]);
+  const [isLoading, setIsLoading] = useState(false);
   const { user } = useSelector((state) => state.auth);
 
   const { orderWindow } = useStomp();
@@ -115,6 +129,7 @@ const ShowLastAndPurchaseOrders = () => {
   }, [orderWindow]);
 
   const getLastAndMostPurchaseOrders = async () => {
+    setIsLoading(true);
     const payload = {
       tenantId: user.tenantId,
       carPlateNumber: orderWindow.carPlateNumber
@@ -124,82 +139,75 @@ const ShowLastAndPurchaseOrders = () => {
       setlastOrders(data.lastOrders);
       setMostPurchaseOrder(data.mostPurchaseOrders);
     }
+    setIsLoading(false);
   };
 
   return (
     <>
-      <ShowCarDetails user={user} carDetail={orderWindow} />
-      <Stack p={2}>
-        <Typography variant='h5'>Last Order</Typography>
-      </Stack>
-      <Box
-        sx={{
-          maxHeight: '30vh',
-          overflowY: 'auto',
-          mb: 2,
-          '&::-webkit-scrollbar': {
-            display: 'none'
-          }
-        }}
-        px={2}
-      >
-        <Grid container spacing={1}>
-          {lastOrders && lastOrders.length > 0 ? (
-            lastOrders.map((dish, index) => {
-              return (
-                <>
-                  <Grid item xs={12} sm={6} key={index}>
-                    <OrderItemCard dish={dish} />{' '}
-                  </Grid>
-                </>
-              );
-            })
-          ) : (
-            <Grid item xs={12}>
-
-              <Stack alignItems={'center'} justifyContent={'center'} py={6}>
-                <Avatar src={orderNotFound} />
-                <Typography variant='body1'>No Record Found</Typography>
-              </Stack>
+      {!isLoading ? (
+        <>
+          <ShowCarDetails user={user} carDetail={orderWindow} />
+          <Stack p={2}>
+            <Typography variant='h5'>Last Order</Typography>
+          </Stack>
+          <Box
+            sx={{
+              maxHeight: '30vh',
+              overflowY: 'auto',
+              mb: 2,
+              '&::-webkit-scrollbar': {
+                display: 'none'
+              }
+            }}
+            px={2}
+          >
+            <Grid container spacing={1}>
+              {lastOrders.map((dish, index) => {
+                return (
+                  <>
+                    <Grid item xs={12} sm={6} key={index}>
+                      <OrderItemCard dish={dish} />{' '}
+                    </Grid>
+                  </>
+                );
+              })}
             </Grid>
-          )}
-        </Grid>
-      </Box>
-      <Stack p={2}>
-        <Typography variant='h5'>Most Purchased Orders</Typography>
-      </Stack>
-      <Box
-        sx={{
-          maxHeight: '30vh',
-          overflowY: 'auto',
-          mb: 2,
-          '&::-webkit-scrollbar': {
-            display: 'none'
-          }
-        }}
-        px={2}
-      >
-        <Grid container spacing={1}>
-          {mostPurchaseOrder && mostPurchaseOrder.length > 0 ? (
-            mostPurchaseOrder.map((dish, index) => {
-              return (
-                <>
-                  <Grid item xs={12} sm={6} key={index}>
-                    <OrderItemCard dish={dish} />{' '}
-                  </Grid>
-                </>
-              );
-            })
-          ) : (
-            <Grid item xs={12}>
-              <Stack alignItems={'center'} justifyContent={'center'} py={6}>
-                <Avatar src={orderNotFound} />
-                <Typography variant='body1'>No Record Found</Typography>
-              </Stack>
+          </Box>
+          <Stack p={2}>
+            <Typography variant='h5'>Most Purchased Orders</Typography>
+          </Stack>
+          <Box
+            sx={{
+              maxHeight: '30vh',
+              overflowY: 'auto',
+              mb: 2,
+              '&::-webkit-scrollbar': {
+                display: 'none'
+              }
+            }}
+            px={2}
+          >
+            <Grid container spacing={1}>
+              {mostPurchaseOrder.map((dish, index) => {
+                return (
+                  <>
+                    <Grid item xs={12} sm={6} key={index}>
+                      <OrderItemCard dish={dish} />{' '}
+                    </Grid>
+                  </>
+                );
+              })}
             </Grid>
-          )}
-        </Grid>
-      </Box>
+          </Box>
+        </>
+      ) : (
+        <Stack pt={'calc(16px + 45%)'}>
+          <Stack alignItems={'center'} justifyContent={'center'}>
+            <Avatar src={orderNotFound} />
+            <Typography variant='body1'>No Record Found</Typography>
+          </Stack>
+        </Stack>
+      )}
     </>
   );
 };
@@ -208,6 +216,7 @@ const ShowCurrentOrders = () => {
   const [currentOrders, setCurrentOrders] = useState([]);
   const { deliveryWindow } = useStomp();
   const { user } = useSelector((state) => state.auth);
+  const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
     if (!isEmpty(deliveryWindow)) {
@@ -216,6 +225,7 @@ const ShowCurrentOrders = () => {
   }, [deliveryWindow]);
 
   const getCurrentOrders = async () => {
+    setIsLoading(true);
     const payload = {
       tenantId: user.tenantId,
       carPlateNumber: deliveryWindow.carPlateNumber
@@ -225,46 +235,49 @@ const ShowCurrentOrders = () => {
       console.log(data);
       setCurrentOrders(data);
     }
+    setIsLoading(false);
   };
 
   return (
     <>
-      <ShowCarDetails user={user} carDetail={deliveryWindow} />
-      <Stack p={2}>
-        <Typography variant='h5'>Current Order Being Placed</Typography>
-      </Stack>
-      <Box
-        sx={{
-          maxHeight: '30vh',
-          overflowY: 'auto',
-          mb: 2,
-          '&::-webkit-scrollbar': {
-            display: 'none'
-          }
-        }}
-        px={2}
-      >
-        {currentOrders && currentOrders.length > 0 ? (
-          <Grid container spacing={1}>
-            {currentOrders.map((dish, index) => {
-              return (
-                <>
-                  <Grid item xs={12} sm={6} key={index}>
-                    <OrderItemCard dish={dish} />{' '}
-                  </Grid>
-                </>
-              );
-            })}
-          </Grid>
-        ) : (
-          <Grid item xs={12}>
-            <Stack alignItems={'center'} justifyContent={'center'} py={6}>
-              <Avatar src={orderNotFound} />
-              <Typography variant='body1'>No Record Found</Typography>
-            </Stack>
-          </Grid>
-        )}
-      </Box>
+      {!isLoading ? (
+        <>
+          <ShowCarDetails user={user} carDetail={deliveryWindow} />
+          <Stack p={2}>
+            <Typography variant='h5'>Current Order Being Placed</Typography>
+          </Stack>
+          <Box
+            sx={{
+              maxHeight: '30vh',
+              overflowY: 'auto',
+              mb: 2,
+              '&::-webkit-scrollbar': {
+                display: 'none'
+              }
+            }}
+            px={2}
+          >
+            <Grid container spacing={1}>
+              {currentOrders.map((dish, index) => {
+                return (
+                  <>
+                    <Grid item xs={12} sm={6} key={index}>
+                      <OrderItemCard dish={dish} />{' '}
+                    </Grid>
+                  </>
+                );
+              })}
+            </Grid>
+          </Box>
+        </>
+      ) : (
+        <Stack pt={'calc(16px + 45%)'}>
+          <Stack alignItems={'center'} justifyContent={'center'}>
+            <Avatar src={orderNotFound} />
+            <Typography variant='body1'>No Record Found</Typography>
+          </Stack>
+        </Stack>
+      )}
     </>
   );
 };

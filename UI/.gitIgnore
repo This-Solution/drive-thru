@@ -1,0 +1,7 @@
+node_modules
+build/*
+dev-dist/*
+dist/*
+android/.gradle/*
+android/.idea/*
+android/app/build/**/* */

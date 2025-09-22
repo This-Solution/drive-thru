@@ -65,7 +65,7 @@ const AuthLogin = () => {
   const handleFlavorSelect = () => {
     if (!selectedFlavor) return;
     setUserFlavourDetail(selectedFlavor);
-    onChangePresetColor(`theme9`);
+    onChangePresetColor(`theme1`);
   };
 
   const setUserFlavourDetail = async (flavourId) => {
