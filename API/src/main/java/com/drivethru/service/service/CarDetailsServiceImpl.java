@@ -140,10 +140,7 @@ public class CarDetailsServiceImpl implements CarDetailService {
         List<CarDetail> carDetails = carDetailRepository.findByCarPlateNumber(carDetailRequest.getCarPlateNumber());
         List<CameraConfig> cameraConfig = cameraConfigRepository.findByTenantId(carDetailRequest.getTenantId());
 
-        String cameraType = cameraConfig.stream()
-                .map(CameraConfig::getCameraType)
-                .findFirst()
-                .orElse(null);
+        String cameraType = cameraConfig.stream().map(CameraConfig::getCameraType).findFirst().orElse(null);
 
         LocalDateTime now = LocalDateTime.now();
         LocalDateTime days30 = now.minusDays(30);
@@ -165,8 +162,8 @@ public class CarDetailsServiceImpl implements CarDetailService {
             boolean isGreen = CarColorStatus.GREEN.name().equalsIgnoreCase(status);
 
             if (createdDate != null) {
+                countLast30++;
                 if (createdDate.isAfter(days30)) {
-                    countLast30++;
                     if (isRed) redLast30++;
                     if (isGreen) greenLast30++;
                 } else if (createdDate.isAfter(days60) && createdDate.isBefore(days30)) {
@@ -201,9 +198,9 @@ public class CarDetailsServiceImpl implements CarDetailService {
     private String resolveColorStatus(long count, long redCount, long greenCount) {
         if (count == 0) {
             return CarColorStatus.WHITE.name();
-        } else if (count  == redCount) {
+        } else if (count == redCount) {
             return CarColorStatus.RED.name();
-        } else if (count  == greenCount) {
+        } else if (count == greenCount) {
             return CarColorStatus.GREEN.name();
         } else {
             return CarColorStatus.PINK.name();

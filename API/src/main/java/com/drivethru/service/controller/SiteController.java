@@ -4,7 +4,7 @@ import com.drivethru.service.common.ResponseObject;
 import com.drivethru.service.configuration.JwtHelper;
 import com.drivethru.service.constant.RouteConstant;
 import com.drivethru.service.dto.SiteRequest;
-import com.drivethru.service.entity.Site;
+import com.drivethru.service.dto.SiteResponse;
 import com.drivethru.service.service.SiteService;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,24 +26,24 @@ public class SiteController {
     JwtHelper jwtHelper;
 
     @PostMapping
-    public ResponseEntity<ResponseObject<Site>> addSite(@RequestBody SiteRequest siteRequest, HttpServletRequest httpServletRequest) {
+    public ResponseEntity<ResponseObject<SiteResponse>> addSite(@RequestBody SiteRequest siteRequest, HttpServletRequest httpServletRequest) {
         String authHeader = httpServletRequest.getHeader(HttpHeaders.AUTHORIZATION);
         String token = jwtHelper.cleanToken(authHeader);
         String id = jwtHelper.extractUserId(token);
-        ResponseObject<Site> responseObject = new ResponseObject<>();
-        Site site = siteService.addSite(siteRequest, id);
-        responseObject.setData(site);
+        ResponseObject<SiteResponse> responseObject = new ResponseObject<>();
+        SiteResponse siteResponse = siteService.addSite(siteRequest, id);
+        responseObject.setData(siteResponse);
         return new ResponseEntity<>(responseObject, HttpStatus.OK);
     }
 
     @PutMapping("/{siteId}")
-    public ResponseEntity<ResponseObject<Site>> editSite(@PathVariable Integer siteId, @RequestBody SiteRequest siteRequest, HttpServletRequest httpServletRequest) {
+    public ResponseEntity<ResponseObject<SiteResponse>> editSite(@PathVariable Integer siteId, @RequestBody SiteRequest siteRequest, HttpServletRequest httpServletRequest) {
         String authHeader = httpServletRequest.getHeader(HttpHeaders.AUTHORIZATION);
         String token = jwtHelper.cleanToken(authHeader);
         String id = jwtHelper.extractUserId(token);
-        ResponseObject<Site> responseObject = new ResponseObject<>();
-        Site site = siteService.editSite(siteId, siteRequest, id);
-        responseObject.setData(site);
+        ResponseObject<SiteResponse> responseObject = new ResponseObject<>();
+        SiteResponse siteResponse = siteService.editSite(siteId, siteRequest, id);
+        responseObject.setData(siteResponse);
         return new ResponseEntity<>(responseObject, HttpStatus.OK);
     }
 
@@ -54,14 +54,14 @@ public class SiteController {
         String id = jwtHelper.extractUserId(token);
         ResponseObject<String> responseObject = new ResponseObject<>();
         Boolean site = siteService.deleteSite(siteId, id);
-        responseObject.setData("Delete User Successfully");
+        responseObject.setData("Delete Site Successfully");
         return new ResponseEntity<>(responseObject, HttpStatus.OK);
     }
 
     @GetMapping
-    public ResponseEntity<ResponseObject<List<Site>>> getAllUsers() {
-        ResponseObject<List<Site>> responseObject = new ResponseObject<>();
-        List<Site> sites = siteService.getAllSites();
+    public ResponseEntity<ResponseObject<List<SiteResponse>>> getAllUsers() {
+        ResponseObject<List<SiteResponse>> responseObject = new ResponseObject<>();
+        List<SiteResponse> sites = siteService.getAllSites();
         responseObject.setData(sites);
         return new ResponseEntity<>(responseObject, HttpStatus.OK);
     }

@@ -1,21 +1,21 @@
 package com.drivethru.service.service;
 
 import com.drivethru.service.dto.CameraConfigRequest;
-import com.drivethru.service.entity.CameraConfig;
-import com.drivethru.service.entity.Role;
-import com.drivethru.service.entity.UserDetail;
+import com.drivethru.service.dto.CameraConfigResponse;
+import com.drivethru.service.entity.*;
 import com.drivethru.service.entity.types.RoleName;
 import com.drivethru.service.error.CustomErrorHolder;
 import com.drivethru.service.error.CustomException;
-import com.drivethru.service.repository.CameraConfigRepository;
-import com.drivethru.service.repository.RoleRepository;
-import com.drivethru.service.repository.UserDetailRepository;
+import com.drivethru.service.repository.*;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 public class CameraConfigServiceImpl implements CameraConfigService {
@@ -29,14 +29,31 @@ public class CameraConfigServiceImpl implements CameraConfigService {
     @Autowired
     RoleRepository roleRepository;
 
+    @Autowired
+    TenantRepository tenantRepository;
+
+    @Autowired
+    SiteRepository siteRepository;
+
     @Override
-    public List<CameraConfig> getAllCameraConfigs() {
-        return cameraConfigRepository.findAllByIsActiveTrue();
+    public List<CameraConfigResponse> getAllCameraConfigs() {
+        List<CameraConfig> cameraConfigs = cameraConfigRepository.findAllByIsActiveTrue();
+        return cameraConfigs.stream().map(configs -> {
+            CameraConfigResponse cameraConfigResponse = new CameraConfigResponse();
+            BeanUtils.copyProperties(configs, cameraConfigResponse);
+            tenantRepository.findById(configs.getTenantId()).ifPresent(tenant -> cameraConfigResponse.setTenantName(tenant.getTenantName()));
+            userDetailRepository.findById(configs.getCreatedBy()).ifPresent(createdUser -> cameraConfigResponse.setCreateByName(createdUser.getFirstName() + " " + createdUser.getSurName()));
+            if (configs.getUpdatedBy() != null) {
+                userDetailRepository.findById(configs.getUpdatedBy()).ifPresent(updatedUser -> cameraConfigResponse.setUpdateByName(updatedUser.getFirstName() + " " + updatedUser.getSurName()));
+            }
+            return cameraConfigResponse;
+        }).collect(Collectors.toList());
     }
 
-    public CameraConfig addCameraConfigs(CameraConfigRequest cameraConfigRequest, String loginId) {
+    @Override
+    public CameraConfigResponse addCameraConfigs(CameraConfigRequest cameraConfigRequest, String loginId) {
         int loginUserId = Integer.parseInt(loginId);
-        UserDetail detail = userDetailRepository.findById(loginUserId).orElseThrow(() -> new CustomException(CustomErrorHolder.USER_NOT_FOUND));
+        UserDetail detail = userDetailRepository.findByUserIdAndIsActiveTrue(loginUserId);
         Role role = roleRepository.findById(detail.getRoleId()).orElseThrow(() -> new CustomException(CustomErrorHolder.ROLE_NOT_FOUND));
         if (!Objects.equals(role.getRoleName(), RoleName.SUPER_ADMIN.toString())) {
             throw new CustomException(CustomErrorHolder.ONLY_SUPER_ADMIN_CAN_ACCESS);
@@ -52,12 +69,21 @@ public class CameraConfigServiceImpl implements CameraConfigService {
         cameraConfig.setCreatedBy(detail.getUserId());
         cameraConfig.setCreatedDate(LocalDateTime.now());
         cameraConfigRepository.save(cameraConfig);
-        return cameraConfig;
+        CameraConfigResponse cameraConfigResponse = new CameraConfigResponse();
+        BeanUtils.copyProperties(cameraConfig, cameraConfigResponse);
+        Tenant tenant = tenantRepository.findByTenantIdAndIsActiveTrue(cameraConfigRequest.getTenantId());
+        Site site = siteRepository.findBySiteIdAndIsActiveTrue(cameraConfigRequest.getSiteId());
+        UserDetail createdUserDetail = userDetailRepository.findByUserIdAndIsActiveTrue(cameraConfig.getCreatedBy());
+        cameraConfigResponse.setTenantName(tenant.getTenantName());
+        cameraConfigResponse.setSiteName(site.getSiteName());
+        cameraConfigResponse.setCreateByName(createdUserDetail.getFirstName() + " " + createdUserDetail.getSurName());
+        return cameraConfigResponse;
     }
 
-    public CameraConfig editCameraConfigs(Integer cameraConfigId, CameraConfigRequest cameraConfigRequest, String loginId) {
+    @Override
+    public CameraConfigResponse editCameraConfigs(Integer cameraConfigId, CameraConfigRequest cameraConfigRequest, String loginId) {
         int loginUserId = Integer.parseInt(loginId);
-        UserDetail detail = userDetailRepository.findById(loginUserId).orElseThrow(() -> new CustomException(CustomErrorHolder.USER_NOT_FOUND));
+        UserDetail detail = userDetailRepository.findByUserIdAndIsActiveTrue(loginUserId);
         Role role = roleRepository.findById(detail.getRoleId()).orElseThrow(() -> new CustomException(CustomErrorHolder.ROLE_NOT_FOUND));
         if (!Objects.equals(role.getRoleName(), RoleName.SUPER_ADMIN.toString())) {
             throw new CustomException(CustomErrorHolder.ONLY_SUPER_ADMIN_CAN_ACCESS);
@@ -84,13 +110,32 @@ public class CameraConfigServiceImpl implements CameraConfigService {
         cameraConfig.setUpdatedBy(detail.getUserId());
         cameraConfig.setUpdatedDate(LocalDateTime.now());
         cameraConfigRepository.save(cameraConfig);
-        return cameraConfig;
+        CameraConfigResponse cameraConfigResponse = new CameraConfigResponse();
+        BeanUtils.copyProperties(cameraConfig, cameraConfigResponse);
+        Tenant tenant = tenantRepository.findByTenantIdAndIsActiveTrue(cameraConfigRequest.getTenantId());
+        Site site = siteRepository.findBySiteIdAndIsActiveTrue(cameraConfigRequest.getSiteId());
+        UserDetail createdUserDetail = userDetailRepository.findByUserIdAndIsActiveTrue(cameraConfig.getCreatedBy());
+        UserDetail updatedUserDetail = userDetailRepository.findByUserIdAndIsActiveTrue(cameraConfig.getUpdatedBy());
+        cameraConfigResponse.setTenantName(tenant.getTenantName());
+        cameraConfigResponse.setSiteName(site.getSiteName());
+        cameraConfigResponse.setCreateByName(createdUserDetail.getFirstName() + " " + createdUserDetail.getSurName());
+        cameraConfigResponse.setUpdateByName(updatedUserDetail.getFirstName() + " " + updatedUserDetail.getSurName());
+        return cameraConfigResponse;
     }
 
+    @Override
     public boolean deleteCameraConfig(Integer cameraConfigId, String loginId) {
         int loginUserId = Integer.parseInt(loginId);
-        UserDetail detail = userDetailRepository.findById(loginUserId).orElseThrow(() -> new CustomException(CustomErrorHolder.USER_NOT_FOUND));
+        UserDetail detail = userDetailRepository.findByUserIdAndIsActiveTrue(loginUserId);
         Role role = roleRepository.findById(detail.getRoleId()).orElseThrow(() -> new CustomException(CustomErrorHolder.ROLE_NOT_FOUND));
+        if (!Objects.equals(role.getRoleName(), RoleName.SUPER_ADMIN.toString())) {
+            throw new CustomException(CustomErrorHolder.ONLY_SUPER_ADMIN_CAN_ACCESS);
+        }
+        CameraConfig cameraConfig = cameraConfigRepository.findByCameraIdAndIsActiveTrue(cameraConfigId);
+        cameraConfig.setActive(false);
+        cameraConfig.setUpdatedBy(detail.getUserId());
+        cameraConfig.setUpdatedDate(LocalDateTime.now());
+        cameraConfigRepository.save(cameraConfig);
         return true;
     }
 }

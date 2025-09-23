@@ -1,11 +1,18 @@
 package com.drivethru.service.service;
 
-import com.drivethru.service.entity.CameraConfig;
+import com.drivethru.service.dto.CameraConfigRequest;
+import com.drivethru.service.dto.CameraConfigResponse;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 
 @Service
 public interface CameraConfigService {
-    List<CameraConfig> getAllCameraConfigs();
+    List<CameraConfigResponse> getAllCameraConfigs();
+
+    CameraConfigResponse addCameraConfigs(CameraConfigRequest cameraConfigRequest, String loginId);
+
+    CameraConfigResponse editCameraConfigs(Integer cameraConfigId, CameraConfigRequest cameraConfigRequest, String loginId);
+
+    boolean deleteCameraConfig(Integer cameraConfigId, String loginId);
 }

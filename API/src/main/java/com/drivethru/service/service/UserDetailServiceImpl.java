@@ -1,10 +1,7 @@
 package com.drivethru.service.service;
 
 import com.drivethru.service.configuration.JwtHelper;
-import com.drivethru.service.dto.LoginRequest;
-import com.drivethru.service.dto.LoginResponse;
-import com.drivethru.service.dto.LoginTokenResponse;
-import com.drivethru.service.dto.UserDetailRequest;
+import com.drivethru.service.dto.*;
 import com.drivethru.service.entity.Role;
 import com.drivethru.service.entity.Tenant;
 import com.drivethru.service.entity.UserDetail;
@@ -15,12 +12,15 @@ import com.drivethru.service.helper.CryptoHelper;
 import com.drivethru.service.repository.RoleRepository;
 import com.drivethru.service.repository.TenantRepository;
 import com.drivethru.service.repository.UserDetailRepository;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 public class UserDetailServiceImpl implements UserDetailService {
@@ -57,9 +57,6 @@ public class UserDetailServiceImpl implements UserDetailService {
         if (!Objects.equals(encryptedInputPassword, userDetail.getPassword())) {
             throw new CustomException(CustomErrorHolder.PASSWORD_INCORRECT);
         }
-
-        Tenant tenant = tenantRepository.findById(userDetail.getTenantId()).orElseThrow(() -> new CustomException(CustomErrorHolder.TENANT_NOT_FOUND));
-        Role role = roleRepository.findById(userDetail.getRoleId()).orElseThrow(() -> new CustomException(CustomErrorHolder.ROLE_NOT_FOUND));
         LoginResponse loginResponse = new LoginResponse();
         loginResponse.setUserId(userDetail.getUserId());
         loginResponse.setTenantId(userDetail.getTenantId());
@@ -72,11 +69,10 @@ public class UserDetailServiceImpl implements UserDetailService {
         loginTokenResponse.setSessionToken(sessionToken);
 
         return loginTokenResponse;
-
     }
 
     @Override
-    public UserDetail addUser(UserDetailRequest userDetailRequest, String loginId) {
+    public UserDetailResponse addUser(UserDetailRequest userDetailRequest, String loginId) {
         try {
             int loginUserId = Integer.parseInt(loginId);
             UserDetail detail = userDetailRepository.findById(loginUserId).orElseThrow(() -> new CustomException(CustomErrorHolder.USER_NOT_FOUND));
@@ -88,7 +84,7 @@ public class UserDetailServiceImpl implements UserDetailService {
             String encryptedPassword = cryptoHelper.encryptPassword(userDetailRequest.getPassword(), hashKey);
             UserDetail userDetail = new UserDetail();
             userDetail.setTenantId(userDetailRequest.getTenantId());
-            userDetail.setRoleId(role.getRoleId());
+            userDetail.setRoleId(userDetailRequest.getRoleId());
             userDetail.setFirstName(userDetailRequest.getFirstName());
             userDetail.setSurName(userDetailRequest.getSurName());
             userDetail.setEmail(userDetailRequest.getEmail());
@@ -98,14 +94,24 @@ public class UserDetailServiceImpl implements UserDetailService {
             userDetail.setActive(true);
             userDetail.setCreatedBy(detail.getUserId());
             userDetail.setCreatedDate(LocalDateTime.now());
-            return userDetail;
+            userDetailRepository.save(userDetail);
+
+            UserDetailResponse userDetailResponse = new UserDetailResponse();
+            BeanUtils.copyProperties(userDetail, userDetailResponse);
+            Optional<Tenant> tenant = tenantRepository.findById(userDetail.getTenantId());
+            Optional<Role> roles = roleRepository.findById(userDetail.getRoleId());
+            Optional<UserDetail> createdUserDetail = userDetailRepository.findById(userDetail.getCreatedBy());
+            userDetailResponse.setTenantName(tenant.get().getTenantName());
+            userDetailResponse.setRoleName(roles.get().getRoleName());
+            userDetailResponse.setCreatedByName(createdUserDetail.get().getFirstName() + " " + createdUserDetail.get().getSurName());
+            return userDetailResponse;
         } catch (Exception e) {
             throw new CustomException(CustomErrorHolder.ADD_USER_FAILED);
         }
     }
 
     @Override
-    public UserDetail editUser(Integer userId, UserDetailRequest userDetailRequest, String loginId) {
+    public UserDetailResponse editUser(Integer userId, UserDetailRequest userDetailRequest, String loginId) {
         try {
             int loginUserId = Integer.parseInt(loginId);
             UserDetail detail = userDetailRepository.findById(loginUserId).orElseThrow(() -> new CustomException(CustomErrorHolder.USER_NOT_FOUND));
@@ -141,7 +147,18 @@ public class UserDetailServiceImpl implements UserDetailService {
             userDetail.setUpdatedBy(detail.getUserId());
             userDetail.setUpdatedDate(LocalDateTime.now());
             userDetailRepository.save(userDetail);
-            return userDetail;
+
+            UserDetailResponse userDetailResponse = new UserDetailResponse();
+            BeanUtils.copyProperties(userDetail, userDetailResponse);
+            Optional<Tenant> tenant = tenantRepository.findById(userDetail.getTenantId());
+            Optional<Role> roles = roleRepository.findById(userDetail.getRoleId());
+            Optional<UserDetail> createdUserDetail = userDetailRepository.findById(userDetail.getCreatedBy());
+            Optional<UserDetail> updatedUserDetail = userDetailRepository.findById(userDetail.getCreatedBy());
+            userDetailResponse.setTenantName(tenant.get().getTenantName());
+            userDetailResponse.setRoleName(roles.get().getRoleName());
+            userDetailResponse.setCreatedByName(createdUserDetail.get().getFirstName() + " " + createdUserDetail.get().getSurName());
+            userDetailResponse.setUpdateByName(updatedUserDetail.get().getFirstName() + " " + updatedUserDetail.get().getSurName());
+            return userDetailResponse;
         } catch (Exception e) {
             throw new CustomException(CustomErrorHolder.ADD_USER_FAILED);
         }
@@ -164,7 +181,18 @@ public class UserDetailServiceImpl implements UserDetailService {
     }
 
     @Override
-    public List<UserDetail> getAllUser() {
-        return userDetailRepository.findAllByIsActiveTrue();
+    public List<UserDetailResponse> getAllUser() {
+        List<UserDetail> userDetails = userDetailRepository.findAllByIsActiveTrue();
+        return userDetails.stream().map(userDetail -> {
+            UserDetailResponse userDetailResponse = new UserDetailResponse();
+            BeanUtils.copyProperties(userDetail, userDetailResponse);
+            tenantRepository.findById(userDetail.getTenantId()).ifPresent(tenant -> userDetailResponse.setTenantName(tenant.getTenantName()));
+            roleRepository.findById(userDetail.getRoleId()).ifPresent(role -> userDetailResponse.setRoleName(role.getRoleName()));
+            userDetailRepository.findById(userDetail.getCreatedBy()).ifPresent(createdUser -> userDetailResponse.setCreatedByName(createdUser.getFirstName() + " " + createdUser.getSurName()));
+            if (userDetail.getUpdatedBy() != null) {
+                userDetailRepository.findById(userDetail.getUpdatedBy()).ifPresent(updatedUser -> userDetailResponse.setUpdateByName(updatedUser.getFirstName() + " " + updatedUser.getSurName()));
+            }
+            return userDetailResponse;
+        }).collect(Collectors.toList());
     }
 }
