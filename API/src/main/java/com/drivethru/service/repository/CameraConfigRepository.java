@@ -8,7 +8,7 @@ import java.util.List;
 
 @Repository
 public interface CameraConfigRepository extends JpaRepository<CameraConfig, Integer> {
-    CameraConfig findByCameraIpAddress(String cameraIpAddress);
+    List<CameraConfig> findByTenantId(Integer tenantId);
 
     CameraConfig findByOrderIpAddress(String orderIpAddress);
 

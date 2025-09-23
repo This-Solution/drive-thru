@@ -138,8 +138,12 @@ public class CarDetailsServiceImpl implements CarDetailService {
         carDetailResponse.setPlateImageUrl(azureFileUploaderService.generateBlobUrl(carDetail.getPlateImageUrl()));
 
         List<CarDetail> carDetails = carDetailRepository.findByCarPlateNumber(carDetailRequest.getCarPlateNumber());
+        List<CameraConfig> cameraConfig = cameraConfigRepository.findByTenantId(carDetailRequest.getTenantId());
 
-        long totalCount = 0;
+        String cameraType = cameraConfig.stream()
+                .map(CameraConfig::getCameraType)
+                .findFirst()
+                .orElse(null);
 
         LocalDateTime now = LocalDateTime.now();
         LocalDateTime days30 = now.minusDays(30);
@@ -151,7 +155,7 @@ public class CarDetailsServiceImpl implements CarDetailService {
         long count60to90 = 0, red60to90 = 0, green60to90 = 0;
 
         for (CarDetail detail : carDetails) {
-            totalCount++;
+
             LocalDateTime createdDate = detail.getCreatedDate();
 
             Optional<OrderCarStatus> optionalStatus = orderCarStatusRepository.findByCarId(detail.getCarId());
@@ -176,6 +180,11 @@ public class CarDetailsServiceImpl implements CarDetailService {
                 }
             }
         }
+        if ("L".equalsIgnoreCase(cameraType)) {
+            countLast30 = Math.max(0, countLast30 - 1);
+            count30to60 = Math.max(0, count30to60 - 1);
+            count60to90 = Math.max(0, count60to90 - 1);
+        }
 
         carDetailResponse.setLast30DayCount(countLast30);
         carDetailResponse.setLast30DayColorStatus(resolveColorStatus(countLast30, redLast30, greenLast30));
@@ -190,11 +199,11 @@ public class CarDetailsServiceImpl implements CarDetailService {
     }
 
     private String resolveColorStatus(long count, long redCount, long greenCount) {
-        if (count == 1) {
+        if (count == 0) {
             return CarColorStatus.WHITE.name();
-        } else if (count - 1 == redCount) {
+        } else if (count  == redCount) {
             return CarColorStatus.RED.name();
-        } else if (count - 1 == greenCount) {
+        } else if (count  == greenCount) {
             return CarColorStatus.GREEN.name();
         } else {
             return CarColorStatus.PINK.name();
