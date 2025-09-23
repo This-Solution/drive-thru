@@ -7,7 +7,6 @@ import com.drivethru.service.service.CarDetailService;
 import com.drivethru.service.constant.RouteConstant;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -24,7 +23,7 @@ public class CarDetailController {
     @Autowired
     private CarDetailService carDetailService;
 
-    @PostMapping(path = RouteConstant.CAR_WEBHOOK, consumes = MediaType.APPLICATION_JSON_VALUE)
+    @PostMapping(RouteConstant.CAR_WEBHOOK)
     public ResponseEntity<ResponseObject<CarDetail>> carDetail(@RequestBody Map<String, Object> carDetailJson) {
         System.out.println("[CarDetailController] - Received files:" + carDetailJson);
         carDetailService.addCarDetail(carDetailJson);
