@@ -211,10 +211,10 @@ async function getLastAndMostPurchaseOrderAsync(payload) {
 }
 
 
-async function getCameraConfigAsync() {
+async function getCameraConfigAsync(siteId) {
   const config = {
-    method: 'get',
-    url: '/cameraConfig'
+    method: 'post',
+    url: `/cameraConfig/${siteId}`
   }
 
   return await axios(config);

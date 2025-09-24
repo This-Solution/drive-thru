@@ -1,12 +1,14 @@
 // context/StompContext.tsx
 import { Client } from '@stomp/stompjs';
 import { createContext, useContext, useEffect, useRef, useState } from 'react';
+import constants from 'utils/constants';
 
 const StompContext = createContext(undefined);
 
 export const StompProvider = ({ children }) => {
   const [errorMessage, setErrorMessage] = useState('');
   const [orderWindow, setOrderWindow] = useState({});
+  const [cameraName, setCameraName] = useState('');
   const [deliveryWindow, setDeliveryWindow] = useState({});
   const [client, setClient] = useState(null);
 
@@ -24,12 +26,15 @@ export const StompProvider = ({ children }) => {
     try {
       const response = JSON.parse(message.body);
       const cameraType = response.cameraType ?? '';
+      const cameraName = response.cameraName ?? '';
       const carPlateNumber = response.carPlateNumber?.toString() ?? '';
 
       if (cameraType === 'L') {
-        setOrderWindow({ cameraType: cameraType, carPlateNumber: carPlateNumber })
+        setOrderWindow({ ...orderWindow, [cameraName]: carPlateNumber });
+        setCameraName(cameraName);
       } else if (cameraType === 'C') {
-        setDeliveryWindow({ cameraType: cameraType, carPlateNumber: carPlateNumber })
+        setDeliveryWindow({ ...deliveryWindow, [cameraName]: carPlateNumber })
+        setCameraName(cameraName);
       }
     } catch (e) {
       console.error('Error decoding STOMP message:', e);
@@ -38,7 +43,7 @@ export const StompProvider = ({ children }) => {
 
   useEffect(() => {
     const client = new Client({
-      brokerURL: 'ws://dt1.thissolution.com/ws',
+      brokerURL: constants.webSocketUrl,
       reconnectDelay: 5000,
       debug: (msg) => console.log('DEBUG:', msg),
 
@@ -73,6 +78,7 @@ export const StompProvider = ({ children }) => {
         orderWindow,
         deliveryWindow,
         errorMessage,
+        cameraName,
         clientRef
       }}
     >
