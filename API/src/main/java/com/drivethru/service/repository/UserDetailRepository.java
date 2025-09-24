@@ -11,4 +11,6 @@ public interface UserDetailRepository extends JpaRepository<UserDetail, Integer>
     UserDetail findByEmailAndIsActive(String email, boolean isActive);
 
     List<UserDetail> findAllByIsActiveTrue();
+
+    UserDetail findByUserIdAndIsActiveTrue(Integer serId);
 }

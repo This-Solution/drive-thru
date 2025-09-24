@@ -6,6 +6,7 @@ import com.drivethru.service.constant.RouteConstant;
 import com.drivethru.service.dto.LoginRequest;
 import com.drivethru.service.dto.LoginTokenResponse;
 import com.drivethru.service.dto.UserDetailRequest;
+import com.drivethru.service.dto.UserDetailResponse;
 import com.drivethru.service.entity.Tenant;
 import com.drivethru.service.entity.UserDetail;
 import com.drivethru.service.service.UserDetailService;
@@ -37,24 +38,24 @@ public class UserDetailController {
     }
 
     @PostMapping(RouteConstant.ADDUSER)
-    public ResponseEntity<ResponseObject<UserDetail>> addUser(@RequestBody UserDetailRequest userDetailRequest, HttpServletRequest httpServletRequest) {
+    public ResponseEntity<ResponseObject<UserDetailResponse>> addUser(@RequestBody UserDetailRequest userDetailRequest, HttpServletRequest httpServletRequest) {
         String authHeader = httpServletRequest.getHeader(HttpHeaders.AUTHORIZATION);
         String token = jwtHelper.cleanToken(authHeader);
         String id = jwtHelper.extractUserId(token);
-        ResponseObject<UserDetail> responseObject = new ResponseObject<>();
-        UserDetail UserDetail = userDetailService.addUser(userDetailRequest, id);
-        responseObject.setData(UserDetail);
+        ResponseObject<UserDetailResponse> responseObject = new ResponseObject<>();
+        UserDetailResponse userDetailResponse = userDetailService.addUser(userDetailRequest, id);
+        responseObject.setData(userDetailResponse);
         return new ResponseEntity<>(responseObject, HttpStatus.OK);
     }
 
     @PutMapping("/{userId}")
-    public ResponseEntity<ResponseObject<UserDetail>> editUser(@PathVariable Integer userId, @RequestBody UserDetailRequest userDetailRequest, HttpServletRequest httpServletRequest) {
+    public ResponseEntity<ResponseObject<UserDetailResponse>> editUser(@PathVariable Integer userId, @RequestBody UserDetailRequest userDetailRequest, HttpServletRequest httpServletRequest) {
         String authHeader = httpServletRequest.getHeader(HttpHeaders.AUTHORIZATION);
         String token = jwtHelper.cleanToken(authHeader);
         String id = jwtHelper.extractUserId(token);
-        ResponseObject<UserDetail> responseObject = new ResponseObject<>();
-        UserDetail UserDetail = userDetailService.editUser(userId, userDetailRequest, id);
-        responseObject.setData(UserDetail);
+        ResponseObject<UserDetailResponse> responseObject = new ResponseObject<>();
+        UserDetailResponse userDetailResponse = userDetailService.editUser(userId, userDetailRequest, id);
+        responseObject.setData(userDetailResponse);
         return new ResponseEntity<>(responseObject, HttpStatus.OK);
     }
 
@@ -70,10 +71,10 @@ public class UserDetailController {
     }
 
     @GetMapping
-    public ResponseEntity<ResponseObject<List<UserDetail>>> getAllUsers() {
-        ResponseObject<List<UserDetail>> responseObject = new ResponseObject<>();
-        List<UserDetail> userDetails = userDetailService.getAllUser();
-        responseObject.setData(userDetails);
+    public ResponseEntity<ResponseObject<List<UserDetailResponse>>> getAllUsers() {
+        ResponseObject<List<UserDetailResponse>> responseObject = new ResponseObject<>();
+        List<UserDetailResponse> userDetailResponses = userDetailService.getAllUser();
+        responseObject.setData(userDetailResponses);
         return new ResponseEntity<>(responseObject, HttpStatus.OK);
     }
 }

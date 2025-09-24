@@ -1,21 +1,27 @@
 package com.drivethru.service.service;
 
 import com.drivethru.service.dto.SiteRequest;
+import com.drivethru.service.dto.SiteResponse;
 import com.drivethru.service.entity.Role;
 import com.drivethru.service.entity.Site;
+import com.drivethru.service.entity.Tenant;
 import com.drivethru.service.entity.UserDetail;
 import com.drivethru.service.entity.types.RoleName;
 import com.drivethru.service.error.CustomErrorHolder;
 import com.drivethru.service.error.CustomException;
 import com.drivethru.service.repository.RoleRepository;
 import com.drivethru.service.repository.SiteRepository;
+import com.drivethru.service.repository.TenantRepository;
 import com.drivethru.service.repository.UserDetailRepository;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 public class SiteServiceImpl implements SiteService {
@@ -29,10 +35,14 @@ public class SiteServiceImpl implements SiteService {
     @Autowired
     SiteRepository siteRepository;
 
+    @Autowired
+    TenantRepository tenantRepository;
+
+
     @Override
-    public Site addSite(SiteRequest siteRequest, String loginId) {
+    public SiteResponse addSite(SiteRequest siteRequest, String loginId) {
         int loginUserId = Integer.parseInt(loginId);
-        UserDetail detail = userDetailRepository.findById(loginUserId).orElseThrow(() -> new CustomException(CustomErrorHolder.USER_NOT_FOUND));
+        UserDetail detail = userDetailRepository.findByUserIdAndIsActiveTrue(loginUserId);
         Role role = roleRepository.findById(detail.getRoleId()).orElseThrow(() -> new CustomException(CustomErrorHolder.ROLE_NOT_FOUND));
         if (!Objects.equals(role.getRoleName(), RoleName.SUPER_ADMIN.toString())) {
             throw new CustomException(CustomErrorHolder.ONLY_SUPER_ADMIN_CAN_ACCESS);
@@ -49,13 +59,19 @@ public class SiteServiceImpl implements SiteService {
         site.setCreatedBy(detail.getUserId());
         site.setCreatedDate(LocalDateTime.now());
         siteRepository.save(site);
-        return site;
+        SiteResponse siteResponse = new SiteResponse();
+        BeanUtils.copyProperties(site, siteResponse);
+        Tenant tenant = tenantRepository.findByTenantIdAndIsActiveTrue(siteRequest.getTenantId());
+        UserDetail createdUserDetail = userDetailRepository.findByUserIdAndIsActiveTrue(site.getCreatedBy());
+        siteResponse.setTenantName(tenant.getTenantName());
+        siteResponse.setCreatedByName(createdUserDetail.getFirstName() + " " + createdUserDetail.getSurName());
+        return siteResponse;
     }
 
     @Override
-    public Site editSite(Integer siteId, SiteRequest siteRequest, String loginId) {
+    public SiteResponse editSite(Integer siteId, SiteRequest siteRequest, String loginId) {
         int loginUserId = Integer.parseInt(loginId);
-        UserDetail detail = userDetailRepository.findById(loginUserId).orElseThrow(() -> new CustomException(CustomErrorHolder.USER_NOT_FOUND));
+        UserDetail detail = userDetailRepository.findByUserIdAndIsActiveTrue(loginUserId);
         Role role = roleRepository.findById(detail.getRoleId()).orElseThrow(() -> new CustomException(CustomErrorHolder.ROLE_NOT_FOUND));
         if (!Objects.equals(role.getRoleName(), RoleName.SUPER_ADMIN.toString())) {
             throw new CustomException(CustomErrorHolder.ONLY_SUPER_ADMIN_CAN_ACCESS);
@@ -85,13 +101,21 @@ public class SiteServiceImpl implements SiteService {
         site.setUpdatedBy(detail.getUserId());
         site.setUpdatedDate(LocalDateTime.now());
         siteRepository.save(site);
-        return site;
+        SiteResponse siteResponse = new SiteResponse();
+        BeanUtils.copyProperties(site, siteResponse);
+        Tenant tenant = tenantRepository.findByTenantIdAndIsActiveTrue(siteRequest.getTenantId());
+        UserDetail createdUserDetail = userDetailRepository.findByUserIdAndIsActiveTrue(site.getCreatedBy());
+        UserDetail updatedUserDetail = userDetailRepository.findByUserIdAndIsActiveTrue(site.getUpdatedBy());
+        siteResponse.setTenantName(tenant.getTenantName());
+        siteResponse.setCreatedByName(createdUserDetail.getFirstName() + " " + createdUserDetail.getSurName());
+        siteResponse.setUpdateByName(updatedUserDetail.getFirstName() + " " + updatedUserDetail.getSurName());
+        return siteResponse;
     }
 
     @Override
     public boolean deleteSite(Integer siteId, String loginId) {
         int loginUserId = Integer.parseInt(loginId);
-        UserDetail detail = userDetailRepository.findById(loginUserId).orElseThrow(() -> new CustomException(CustomErrorHolder.USER_NOT_FOUND));
+        UserDetail detail = userDetailRepository.findByUserIdAndIsActiveTrue(loginUserId);
         Role role = roleRepository.findById(detail.getRoleId()).orElseThrow(() -> new CustomException(CustomErrorHolder.ROLE_NOT_FOUND));
         if (!Objects.equals(role.getRoleName(), RoleName.SUPER_ADMIN.toString())) {
             throw new CustomException(CustomErrorHolder.ONLY_SUPER_ADMIN_CAN_ACCESS);
@@ -105,7 +129,17 @@ public class SiteServiceImpl implements SiteService {
     }
 
     @Override
-    public List<Site> getAllSites() {
-        return siteRepository.findAllByIsActiveTrue();
+    public List<SiteResponse> getAllSites() {
+        List<Site> sites = siteRepository.findAllByIsActiveTrue();
+        return sites.stream().map(site -> {
+            SiteResponse siteResponse = new SiteResponse();
+            BeanUtils.copyProperties(site, siteResponse);
+            tenantRepository.findById(site.getTenantId()).ifPresent(tenant -> siteResponse.setTenantName(tenant.getTenantName()));
+            userDetailRepository.findById(site.getCreatedBy()).ifPresent(createdUser -> siteResponse.setCreatedByName(createdUser.getFirstName() + " " + createdUser.getSurName()));
+            if (site.getUpdatedBy() != null) {
+                userDetailRepository.findById(site.getUpdatedBy()).ifPresent(updatedUser -> siteResponse.setUpdateByName(updatedUser.getFirstName() + " " + updatedUser.getSurName()));
+            }
+            return siteResponse;
+        }).collect(Collectors.toList());
     }
 }

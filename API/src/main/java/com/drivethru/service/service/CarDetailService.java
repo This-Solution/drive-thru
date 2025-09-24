@@ -5,13 +5,13 @@ import com.drivethru.service.dto.CarDetailResponse;
 import com.drivethru.service.dto.CurrentOrderItemResponse;
 import com.drivethru.service.dto.LastAndMostPurchaseOrderDetailsResponse;
 import org.springframework.stereotype.Service;
-import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
+import java.util.Map;
 
 @Service
 public interface CarDetailService {
-    void addCarDetail(MultipartFile xmlFile, List<MultipartFile> Files);
+    void addCarDetail (Map<String, Object> carDetailJson);
 
     CarDetailResponse getCarDetail(CarDetailRequest carDetailRequest);
 

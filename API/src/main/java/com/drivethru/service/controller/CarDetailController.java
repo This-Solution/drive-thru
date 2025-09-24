@@ -1,10 +1,7 @@
 package com.drivethru.service.controller;
 
 import com.drivethru.service.common.ResponseObject;
-import com.drivethru.service.dto.CarDetailRequest;
-import com.drivethru.service.dto.CarDetailResponse;
-import com.drivethru.service.dto.CurrentOrderItemResponse;
-import com.drivethru.service.dto.LastAndMostPurchaseOrderDetailsResponse;
+import com.drivethru.service.dto.*;
 import com.drivethru.service.entity.CarDetail;
 import com.drivethru.service.service.CarDetailService;
 import com.drivethru.service.constant.RouteConstant;
@@ -27,30 +24,9 @@ public class CarDetailController {
     private CarDetailService carDetailService;
 
     @PostMapping(RouteConstant.CAR_WEBHOOK)
-    public ResponseEntity<ResponseObject<CarDetail>> addCarDetail(@RequestParam Map<String, MultipartFile> files) {
-
-        MultipartFile xmlFile = null;
-        List<MultipartFile> Files = new ArrayList<>();
-
-        System.out.println("[CarDetailController] - Received files:");
-        for (Map.Entry<String, MultipartFile> entry : files.entrySet()) {
-            String fieldName = entry.getKey();
-            MultipartFile file = entry.getValue();
-
-            if (file != null && !file.isEmpty()) {
-                System.out.println(fieldName + ": " + file.getOriginalFilename() + " (" + file.getSize() + " bytes)");
-
-                if (file.getOriginalFilename() != null && file.getOriginalFilename().endsWith("xml")) {
-                    xmlFile = file;
-                } else {
-                    Files.add(file);
-                }
-            } else {
-                System.out.println(fieldName + ": null or empty");
-            }
-        }
-
-        carDetailService.addCarDetail(xmlFile, Files);
+    public ResponseEntity<ResponseObject<CarDetail>> carDetail(@RequestBody Map<String, Object> carDetailJson) {
+        System.out.println("[CarDetailController] - Received files:" + carDetailJson);
+        carDetailService.addCarDetail(carDetailJson);
         return new ResponseEntity<>(null, HttpStatus.OK);
     }
 

@@ -6,7 +6,7 @@ public class RouteConstant {
     public static final String AUTH = "auth";
     public static final String GET_CAR_DETAIL = "/getCarDetail";
     public static final String GET_CURRENT_ORDER_DETAIL = "/getCurrentOrderDetail";
-    public static final String CAR_WEBHOOK = "/carWebhook";
+    public static final String CAR_WEBHOOK = "/webhook";
     public static final String ORDER_WEBHOOK = "/orderWebhook";
     public static final String ROLE = "/role";
     public static final String TENANT = "/tenant";

@@ -11,19 +11,13 @@ import com.drivethru.service.repository.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
-import org.springframework.web.multipart.MultipartFile;
-import org.w3c.dom.Document;
 
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
-import java.io.InputStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -53,114 +47,166 @@ public class CarDetailsServiceImpl implements CarDetailService {
     @Autowired
     SimpMessagingTemplate simpMessagingTemplate;
 
+    @Autowired
+    SiteRepository siteRepository;
 
     @Override
-    public void addCarDetail(MultipartFile xmlFile, List<MultipartFile> Files) {
+    public void addCarDetail(Map<String, Object> carDetailJson) {
         String currentDateFolder = LocalDate.now().format(DateTimeFormatter.ofPattern("dd-MM-yyyy"));
-        String licensePlate = Constants.UNKNOWN;
-        String color = Constants.UNKNOWN;
-        String ipAddress;
+        try {
+            Map<String, Object> car = (Map<String, Object>) carDetailJson.get("car");
+            List<Map<String, Object>> bodyStyles = (List<Map<String, Object>>) car.get("bodyStyle");
+            String carType = (String) bodyStyles.get(0).get("name");
+            List<Map<String, Object>> colors = (List<Map<String, Object>>) car.get("color");
+            String carColor = (String) colors.get(0).get("name");
+            String plateNumber = (String) carDetailJson.get("plate_number");
+            String siteName = (String) carDetailJson.get("static_detail_1");
+            String cameraName = (String) carDetailJson.get("static_detail_2");
 
-        try (InputStream inputStream = xmlFile.getInputStream()) {
-            DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
-            factory.setNamespaceAware(true);
-            DocumentBuilder builder = factory.newDocumentBuilder();
-            Document doc = builder.parse(inputStream);
-            ipAddress = doc.getElementsByTagName("ipAddress").item(0).getTextContent().trim();
-            licensePlate = doc.getElementsByTagName("licensePlate").item(0).getTextContent().trim();
-            color = doc.getElementsByTagName("color").item(0).getTextContent().trim();
-        } catch (Exception e) {
-            throw new CustomException(CustomErrorHolder.CAR_NOT_FOUND);
-        }
-        CarDetail carDetail = new CarDetail();
-        CameraConfig cameraConfig = cameraConfigRepository.findByCameraIpAddress(ipAddress);
-        Tenant tenant = tenantRepository.findById(cameraConfig.getTenantId()).orElseThrow(() -> new CustomException(CustomErrorHolder.TENANT_NOT_FOUND));
-        String cameraType = cameraConfig.getCameraType();
-        CarResponse carResponse = new CarResponse();
+            Site site = siteRepository.findBySiteName(siteName);
+            CameraConfig cameraConfig = cameraConfigRepository.findBySiteIdAndTenantIdAndCameraName(site.getSiteId(), site.getTenantId(), cameraName);
+            String cameraType = cameraConfig.getCameraType();
+            CarResponse carResponse = new CarResponse();
 
-        if (cameraType.equals(Constants.LAN_CAMERA)) {
-            List<String> imagePaths = new ArrayList<>();
-            try {
-                int imageIndex = 1;
-                for (MultipartFile file : Files) {
-                    if (file != null && !file.isEmpty()) {
-                        String imageName = licensePlate + "_" + imageIndex++ + ".jpg";
-                        String uploadedPath = azureFileUploaderService.uploadFile(currentDateFolder, imageName, file);
-                        imagePaths.add(uploadedPath);
-                    }
-                }
-                String xmlBlobPath = azureFileUploaderService.uploadFile(currentDateFolder, licensePlate + ".xml", (MultipartFile) xmlFile);
-                carDetail.setXmlUrl(xmlBlobPath);
+            if (cameraType.equals(Constants.LAN_CAMERA)) {
+                String carImageBase64 = (String) carDetailJson.get("car_image_base64");
+                String plateImageBase64 = (String) carDetailJson.get("plate_image_base64");
 
-            } catch (Exception e) {
-                throw new CustomException(CustomErrorHolder.UPLOAD_FAILED);
+                Path tempDir = Files.createTempDirectory("car-images");
+                Path carImagePath = saveBase64Image(carImageBase64, "car_image.jpg", tempDir);
+                Path plateImagePath = saveBase64Image(plateImageBase64, "plate_image.jpg", tempDir);
+
+                String carImageName = plateNumber + "_car.jpg";
+                String plateImageName = plateNumber + "_plate.jpg";
+                String blobCarPath = azureFileUploaderService.uploadFile(currentDateFolder, carImageName, carImagePath);
+                String blobPlatePath = azureFileUploaderService.uploadFile(currentDateFolder, plateImageName, plateImagePath);
+
+                CarDetail carDetail = new CarDetail();
+                carDetail.setTenantId(site.getTenantId());
+                carDetail.setSiteId(site.getSiteId());
+                carDetail.setCarType(carType);
+                carDetail.setCarColor(carColor);
+                carDetail.setCarPlateNumber(plateNumber);
+                carDetail.setPlateImageUrl(blobPlatePath);
+                carDetail.setCarImageUrl(blobCarPath);
+                carDetail.setCreatedDate(LocalDateTime.now());
+                carDetailRepository.save(carDetail);
+
+                carResponse.setCameraType(Constants.LAN_CAMERA);
+                carResponse.setCarPlateNumber(plateNumber);
+                simpMessagingTemplate.convertAndSend("/topic/send", carResponse);
+
             }
-            carDetail.setTenantId(tenant.getTenantId());
-            carDetail.setImageUrl(String.join(",", imagePaths));
-            carDetail.setCarPlateNumber(licensePlate);
-            carDetail.setCarColor(color);
-            carDetail.setCreatedDate(LocalDateTime.now());
-            carDetailRepository.save(carDetail);
-            carResponse.setCameraType(cameraType);
-            carResponse.setCarPlateNumber(licensePlate);
-            simpMessagingTemplate.convertAndSend("/topic/send", carResponse);
-        }
-        if (cameraType.equals(Constants.COUNTER_CAMERA)) {
-            carResponse.setCarPlateNumber(licensePlate);
-            carResponse.setCameraType(Constants.COUNTER_CAMERA);
-            simpMessagingTemplate.convertAndSend("/topic/send", carResponse);
+            if (cameraType.equals(Constants.COUNTER_CAMERA)) {
+                carResponse.setCameraType(Constants.COUNTER_CAMERA);
+                carResponse.setCarPlateNumber(plateNumber);
+                simpMessagingTemplate.convertAndSend("/topic/send", carResponse);
+            }
 
+        } catch (Exception e) {
+            throw new CustomException(CustomErrorHolder.UPLOAD_FAILED);
         }
     }
+
+
+    private Path saveBase64Image(String base64Image, String fileName, Path directory) {
+        try {
+            if (base64Image.contains(",")) {
+                base64Image = base64Image.substring(base64Image.indexOf(",") + 1);
+            }
+
+            byte[] imageBytes = Base64.getDecoder().decode(base64Image);
+            Path imagePath = directory.resolve(fileName);
+            Files.write(imagePath, imageBytes);
+            return imagePath;
+        } catch (Exception e) {
+            throw new CustomException(CustomErrorHolder.UPLOAD_FAILED);
+        }
+    }
+
 
     @Override
     public CarDetailResponse getCarDetail(CarDetailRequest carDetailRequest) {
         CarDetail carDetail = carDetailRepository.findFirstByTenantIdAndCarPlateNumberOrderByCreatedDateDesc(carDetailRequest.getTenantId(), carDetailRequest.getCarPlateNumber()).orElseThrow(() -> new CustomException(CustomErrorHolder.CAR_NOT_FOUND));
+
         CarDetailResponse carDetailResponse = new CarDetailResponse();
         carDetailResponse.setCarId(carDetail.getCarId());
         carDetailResponse.setCarPlateNumber(carDetail.getCarPlateNumber());
         carDetailResponse.setCarColor(carDetail.getCarColor());
-        String[] imageUrls = carDetail.getImageUrl().split(",");
-        List<String> blobImageUrls = new ArrayList<>();
-
-        for (String imageUrl : imageUrls) {
-            if (imageUrl != null && !imageUrl.trim().isEmpty()) {
-                String blobUrl = azureFileUploaderService.generateBlobUrl(imageUrl.trim());
-                blobImageUrls.add(blobUrl);
-            }
-        }
-
-        carDetailResponse.setImageUrl(blobImageUrls);
+        carDetailResponse.setCarType(carDetail.getCarType());
+        carDetailResponse.setCarImageUrl(azureFileUploaderService.generateBlobUrl(carDetail.getCarImageUrl()));
+        carDetailResponse.setPlateImageUrl(azureFileUploaderService.generateBlobUrl(carDetail.getPlateImageUrl()));
 
         List<CarDetail> carDetails = carDetailRepository.findByCarPlateNumber(carDetailRequest.getCarPlateNumber());
-        long count = 0;
-        long redCount = 0;
-        long greenCount = 0;
+        List<CameraConfig> cameraConfig = cameraConfigRepository.findByTenantId(carDetailRequest.getTenantId());
+
+        String cameraType = cameraConfig.stream().map(CameraConfig::getCameraType).findFirst().orElse(null);
+
+        LocalDateTime now = LocalDateTime.now();
+        LocalDateTime days30 = now.minusDays(30);
+        LocalDateTime days60 = now.minusDays(60);
+        LocalDateTime days90 = now.minusDays(90);
+
+        long countLast30 = 0, redLast30 = 0, greenLast30 = 0;
+        long count30to60 = 0, red30to60 = 0, green30to60 = 0;
+        long count60to90 = 0, red60to90 = 0, green60to90 = 0;
 
         for (CarDetail detail : carDetails) {
-            count++;
+
+            LocalDateTime createdDate = detail.getCreatedDate();
+
             Optional<OrderCarStatus> optionalStatus = orderCarStatusRepository.findByCarId(detail.getCarId());
-            if (optionalStatus.isPresent()) {
-                String status = optionalStatus.get().getStatus();
-                if (CarColorStatus.RED.name().equalsIgnoreCase(status)) {
-                    redCount++;
-                } else if (CarColorStatus.GREEN.name().equalsIgnoreCase(status)) {
-                    greenCount++;
+            String status = optionalStatus.map(OrderCarStatus::getStatus).orElse(null);
+
+            boolean isRed = CarColorStatus.RED.name().equalsIgnoreCase(status);
+            boolean isGreen = CarColorStatus.GREEN.name().equalsIgnoreCase(status);
+
+            if (createdDate != null) {
+                countLast30++;
+                if (createdDate.isAfter(days30)) {
+                    if (isRed) redLast30++;
+                    if (isGreen) greenLast30++;
+                } else if (createdDate.isAfter(days60) && createdDate.isBefore(days30)) {
+                    count30to60++;
+                    if (isRed) red30to60++;
+                    if (isGreen) green30to60++;
+                } else if (createdDate.isAfter(days90) && createdDate.isBefore(days60)) {
+                    count60to90++;
+                    if (isRed) red60to90++;
+                    if (isGreen) green60to90++;
                 }
             }
         }
-        if (count == 1) {
-            carDetailResponse.setCarColorStatus(String.valueOf(CarColorStatus.WHITE));
-        } else if (count - 1 == redCount) {
-            carDetailResponse.setCarColorStatus(String.valueOf(CarColorStatus.RED));
-        } else if (count - 1 == greenCount) {
-            carDetailResponse.setCarColorStatus(String.valueOf(CarColorStatus.GREEN));
-        } else {
-            carDetailResponse.setCarColorStatus(String.valueOf(CarColorStatus.PINK));
+        if ("L".equalsIgnoreCase(cameraType)) {
+            countLast30 = Math.max(0, countLast30 - 1);
+            count30to60 = Math.max(0, count30to60 - 1);
+            count60to90 = Math.max(0, count60to90 - 1);
         }
-        carDetailResponse.setOrderCount(count);
+
+        carDetailResponse.setLast30DayCount(countLast30);
+        carDetailResponse.setLast30DayColorStatus(resolveColorStatus(countLast30, redLast30, greenLast30));
+
+        carDetailResponse.setLast30To60DayCount(count30to60);
+        carDetailResponse.setLast30To60DayColorStatus(resolveColorStatus(count30to60, red30to60, green30to60));
+
+        carDetailResponse.setLast60To90DayCount(count60to90);
+        carDetailResponse.setLast60To90DayColorStatus(resolveColorStatus(count60to90, red60to90, green60to90));
+
         return carDetailResponse;
     }
+
+    private String resolveColorStatus(long count, long redCount, long greenCount) {
+        if (count == 0) {
+            return CarColorStatus.WHITE.name();
+        } else if (count == redCount) {
+            return CarColorStatus.RED.name();
+        } else if (count == greenCount) {
+            return CarColorStatus.GREEN.name();
+        } else {
+            return CarColorStatus.PINK.name();
+        }
+    }
+
 
     @Override
     public List<CurrentOrderItemResponse> getCurrentOrderDetails(CarDetailRequest carDetailRequest) {
@@ -189,8 +235,7 @@ public class CarDetailsServiceImpl implements CarDetailService {
 
             Map<String, Long> totalItemCounts = orderList.stream().collect(Collectors.groupingBy(OrderItem::getName, Collectors.counting()));
 
-            List<OrderItemResponse> mostPurchaseOrders = totalItemCounts.entrySet().stream().sorted(Map.Entry.<String, Long>comparingByValue().reversed()).limit(5).map(entry -> new OrderItemResponse(entry.getKey(), entry.getValue().intValue(), 0.0))
-                    .toList();
+            List<OrderItemResponse> mostPurchaseOrders = totalItemCounts.entrySet().stream().sorted(Map.Entry.<String, Long>comparingByValue().reversed()).limit(5).map(entry -> new OrderItemResponse(entry.getKey(), entry.getValue().intValue(), 0.0)).toList();
 
             response.setLastOrders(lastOrders);
             response.setMostPurchaseOrders(mostPurchaseOrders);
