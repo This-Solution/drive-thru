@@ -55,6 +55,11 @@ const enums = {
     C: 'Delivery'
   },
 
+  cameraTypeConfig: {
+    L: 'L',
+    C: 'C'
+  },
+
   AdminRole: {
     1: 'SUPER_ADMIN',
     2: 'ADMIN',

@@ -16,7 +16,7 @@ const constants = {
   localStorageKey: {
     tokens: 'Tokens'
   },
-  webSocketUrl: 'ws://dt1.thissolution.com/ws',
+  webSocketUrl: 'wss://dt1.thissolution.com/ws',
   defaultErrorMessage: 'Sorry, something went wrong. Please refresh the page or log back in.',
   mimeTypes: {
     pdf: 'application/pdf',

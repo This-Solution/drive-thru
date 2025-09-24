@@ -121,7 +121,7 @@ const ShowCarDetails = ({ carDetails }) => {
   );
 };
 
-const ShowLastAndPurchaseOrders = ({ cameraInfo }) => {
+const OrderCameraView = ({ cameraInfo }) => {
   const [carDetails, setCarDetails] = useState({});
   const [lastOrders, setlastOrders] = useState([]);
   const [mostPurchaseOrder, setMostPurchaseOrder] = useState([]);
@@ -254,7 +254,7 @@ const ShowLastAndPurchaseOrders = ({ cameraInfo }) => {
   );
 };
 
-const ShowCurrentOrders = ({ cameraInfo }) => {
+const DeliveryCameraView = ({ cameraInfo }) => {
   const [currentOrders, setCurrentOrders] = useState([]);
   const [carDetails, setCarDetails] = useState({});
   const { deliveryWindow, cameraName } = useStomp();
@@ -355,16 +355,16 @@ const OrderCard = ({ cameraConfig = {} }) => {
           <Typography variant='h5'>{cameraConfig.cameraName}</Typography>
           <Typography variant='body2'>{`${cameraConfig.description ? cameraConfig.description : ''} (${enums.cameraType[cameraConfig.cameraType]})`}</Typography>
         </Stack>
-        <Avatar src={cameraConfig.cameraType === 'L' ? deliveryMan : shopkeeper} sx={{ width: 40, height: 40 }} />
+        <Avatar src={cameraConfig.cameraType === enums.cameraTypeConfig.L ? deliveryMan : shopkeeper} sx={{ width: 40, height: 40 }} />
       </Stack>
-      {cameraConfig.cameraType === 'L' && (
+      {cameraConfig.cameraType === enums.cameraTypeConfig.L && (
         <>
-          <ShowLastAndPurchaseOrders cameraInfo={cameraConfig.cameraName} />
+          <OrderCameraView cameraInfo={cameraConfig.cameraName} />
         </>
       )}
-      {cameraConfig.cameraType === 'C' && (
+      {cameraConfig.cameraType === enums.cameraTypeConfig.C && (
         <>
-          <ShowCurrentOrders cameraInfo={cameraConfig.cameraName} />
+          <DeliveryCameraView cameraInfo={cameraConfig.cameraName} />
         </>
       )}
     </MainCard>

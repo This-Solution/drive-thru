@@ -2,6 +2,7 @@
 import { Client } from '@stomp/stompjs';
 import { createContext, useContext, useEffect, useRef, useState } from 'react';
 import constants from 'utils/constants';
+import enums from 'utils/enums';
 
 const StompContext = createContext(undefined);
 
@@ -29,10 +30,10 @@ export const StompProvider = ({ children }) => {
       const cameraName = response.cameraName ?? '';
       const carPlateNumber = response.carPlateNumber?.toString() ?? '';
 
-      if (cameraType === 'L') {
+      if (cameraType === enums.cameraTypeConfig.L) {
         setOrderWindow({ ...orderWindow, [cameraName]: carPlateNumber });
         setCameraName(cameraName);
-      } else if (cameraType === 'C') {
+      } else if (cameraType === enums.cameraTypeConfig.C) {
         setDeliveryWindow({ ...deliveryWindow, [cameraName]: carPlateNumber })
         setCameraName(cameraName);
       }
