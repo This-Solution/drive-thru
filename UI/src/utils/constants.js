@@ -35,7 +35,7 @@ const constants = {
     ACT: 'Australia/Sydney'
   },
   dateFormat: 'dd/MM/yyyy',
-  appName: 'App CMS',
+  appName: 'Drive-thru',
   no_image: 'https://stprod0001ts.blob.core.windows.net/cjsales/no-image.jpg',
   comboSizes: [0, 1, 2],
   daysInWeek: ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'],

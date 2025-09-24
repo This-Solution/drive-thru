@@ -24,11 +24,9 @@ import { useNavigate } from 'react-router-dom';
 import ApiService from 'service/ApiService';
 import constants from 'utils/constants.js';
 import dateHelper from 'utils/dateHelper.js';
-import EditSite from './editSite.js';
-import SiteHours from './siteHours.js';
-import Verify from './verify.js';
+import AddEditCamera from './addEditCamera';
 
-const SiteList = () => {
+const CameraList = () => {
   const theme = useTheme();
   const navigate = useNavigate();
   const matchDownMD = useMediaQuery(theme.breakpoints.down('md'));
@@ -222,11 +220,6 @@ const SiteList = () => {
     setEditDialogOpen(true);
   };
 
-  const handleSiteHours = (row) => {
-    setSiteDetails(row);
-    setSiteHoursDialog(true);
-  };
-
   const onSave = async (updateSite) => {
     const siteIndex = sites.findIndex((item) => item.siteId === updateSite.siteId);
     const updatedSites = [...sites];
@@ -242,11 +235,6 @@ const SiteList = () => {
     setConfirmDialogOpen(false);
   };
 
-  const handleVerifyDelivery = async (row) => {
-    setSiteDetails(row);
-    setVerifyDialogOpen(true);
-  };
-
   return (
     <>
       {isLoading ? (
@@ -255,7 +243,7 @@ const SiteList = () => {
         <Grid container rowSpacing={3} columnSpacing={3}>
           <Grid item xs={12} >
             <Stack direction={'row'} justifyContent={'space-between'}>
-              <Stack><Typography variant='h2'>Manage Sites</Typography></Stack>
+              <Stack><Typography variant='h2'>Manage Camera</Typography></Stack>
               <Stack direction={'row'} justifyContent={'end'}>
                 <Button variant='contained' onClick={() => navigate(-1)}>Back</Button>
               </Stack>
@@ -303,7 +291,7 @@ const SiteList = () => {
                             startIcon={<PlusCircleOutlined />}
                             onClick={handleAddClick}
                           >
-                            Add Site
+                            Add Tenant
                           </FlavourButton>
                         )}
                         {/* <FlavourButton fullWidth size='large' variant="outlined" startIcon={<SettingOutlined />} onClick={() => navigate('/operating-hours')}>
@@ -335,17 +323,11 @@ const SiteList = () => {
           </Grid>
         </Grid>
       )}
-      {siteHoursDialog ? (
-        <SiteHours isOpen={siteHoursDialog} handleClose={() => setSiteHoursDialog(false)} siteDetails={siteDetails} />
-      ) : null}
       {isEditDialogOpen ? (
-        <EditSite isOpen={isEditDialogOpen} handleClose={() => setEditDialogOpen(false)} siteDetails={siteDetails} onSave={onSave} />
-      ) : null}
-      {isVerifyDialogOpen ? (
-        <Verify isOpen={isVerifyDialogOpen} handleClose={() => setVerifyDialogOpen(false)} siteDetails={siteDetails} />
+        <AddEditCamera isOpen={isEditDialogOpen} handleClose={() => setEditDialogOpen(false)} siteDetails={siteDetails} onSave={onSave} />
       ) : null}
     </>
   );
 };
 
-export default SiteList;
+export default CameraList;

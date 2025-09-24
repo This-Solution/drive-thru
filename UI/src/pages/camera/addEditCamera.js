@@ -47,7 +47,7 @@ const validationSchema = Yup.object().shape({
   postal: Yup.number().required('Postal is required.')
 });
 
-const EditSite = ({ isOpen, handleClose, siteDetails, onSave }) => {
+const AddEditCamera = ({ isOpen, handleClose, siteDetails, onSave }) => {
   const [isLoading, setLoading] = useState(false);
   const [tenants, setTenants] = useState([]);
   const { flavour } = useSelector((state) => state.auth);
@@ -184,17 +184,9 @@ const EditSite = ({ isOpen, handleClose, siteDetails, onSave }) => {
     });
   };
 
-  // const orderModeOptions = formik.values.supportedOrderModes.map((mode) => ({ value: mode, title: mode }));
-
-  // const MealSizeOptions = formik.values.supportedMealSize.map((size) => ({ value: size, title: size }));
-
-  // const supportedDevicesOptions = Object.entries(enums.supportedDevices).map(([key, value]) => ({ key, value }));
-
-  // const deviceOption = supportedDevicesOptions.filter((option) => formik.values.supportedDevice.includes(option.value));
-
   return (
     <Dialog maxWidth='md' open={isOpen} fullWidth={true}>
-      <MainCard title={siteDetails && siteDetails.siteName ? `Edit ${siteDetails.siteName}` : 'Add Site'} content={false}>
+      <MainCard title={siteDetails && siteDetails.siteName ? `Edit ${siteDetails.siteName}` : 'Add Tenant'} content={false}>
         <FormikProvider value={formik}>
           <Form noValidate onSubmit={formik.handleSubmit}>
             <Box sx={{ overflowY: 'auto', maxHeight: 'calc(100vh - 200px)' }}>
@@ -304,26 +296,6 @@ const EditSite = ({ isOpen, handleClose, siteDetails, onSave }) => {
                       </FormControl>
                     </Stack>
                   </Grid>
-                  {/* <Grid item xs={12} sm={6}>
-                    <Stack spacing={1}>
-                      <InputLabel sx={{ marginBottom: 0.7 }}>Trading Name</InputLabel>
-                      <FormControl>
-                        <TextField
-                          fullWidth
-                          id='tradingName'
-                          name='tradingName'
-                          placeholder='Enter Trading Name'
-                          value={formik.values.tradingName || ''}
-                          onChange={formik.handleChange}
-                          inputProps={{ maxLength: 100 }}
-                          error={Boolean(formik.touched.tradingName && formik.errors.tradingName)}
-                        />
-                        <FormHelperText error={Boolean(formik.touched.tradingName && formik.errors.tradingName)} sx={{ marginLeft: 0 }}>
-                          {formik.touched.tradingName && formik.errors.tradingName}
-                        </FormHelperText>
-                      </FormControl>
-                    </Stack>
-                  </Grid> */}
                   <Grid item xs={12} sm={6}>
                     <Stack spacing={1}>
                       <InputLabel sx={{ marginBottom: 0.7 }}>Address Line 2</InputLabel>
@@ -344,49 +316,6 @@ const EditSite = ({ isOpen, handleClose, siteDetails, onSave }) => {
                       </FormControl>
                     </Stack>
                   </Grid>
-                  {/* <Grid item xs={12} sm={3}>
-                    <Stack spacing={1}>
-                      <InputLabel sx={{ marginBottom: 0.7 }}>ABN</InputLabel>
-                      <FormControl>
-                        <TextField
-                          fullWidth
-                          id='abn'
-                          name='abn'
-                          placeholder='Enter ABN'
-                          value={formik.values.abn || ''}
-                          inputProps={{ maxLength: 15 }}
-                          onChange={formik.handleChange}
-                          onKeyDown={utils.handleNumericKey}
-                          error={Boolean(formik.touched.abn && formik.errors.abn)}
-                        />
-                        <FormHelperText error={Boolean(formik.touched.abn && formik.errors.abn)} sx={{ marginLeft: 0 }}>
-                          {formik.touched.abn && formik.errors.abn}
-                        </FormHelperText>
-                      </FormControl>
-                    </Stack>
-                  </Grid> */}
-                  {/* <Grid item xs={12} sm={3}>
-                    <Stack spacing={1}>
-                      <InputLabel sx={{ marginBottom: 0.7 }}>Voice Phone</InputLabel>
-                      <FormControl>
-                        <TextField
-                          fullWidth
-                          id='voicePhone'
-                          name='voicePhone'
-                          placeholder='Enter Voice Phone'
-                          value={formik.values.voicePhone || ''}
-                          inputProps={{ maxLength: 10 }}
-                          onChange={formik.handleChange}
-                          onKeyDown={utils.handleNumericKey}
-                          error={Boolean(formik.touched.voicePhone && formik.errors.voicePhone)}
-                        />
-                        <FormHelperText error={Boolean(formik.touched.voicePhone && formik.errors.voicePhone)} sx={{ marginLeft: 0 }}>
-                          {formik.touched.voicePhone && formik.errors.voicePhone}
-                        </FormHelperText>
-                      </FormControl>
-                    </Stack>
-                  </Grid> */}
-
                   <Grid item xs={12} sm={6}>
                     <Stack spacing={1}>
                       <InputLabel sx={{ marginBottom: 0.7 }}>City</InputLabel>
@@ -497,206 +426,9 @@ const EditSite = ({ isOpen, handleClose, siteDetails, onSave }) => {
                           </Stack>
                         </Grid>
                       )}
-                      {/* <Grid item xs={12} sm={10}>
-                        <Stack spacing={1}>
-                          <InputLabel sx={{ marginBottom: 0.7 }}>Preparation Time</InputLabel>
-                          <FormControl>
-                            <TextField
-                              fullWidth
-                              id='preparationTime'
-                              name='preparationTime'
-                              placeholder='Enter Preparation Time'
-                              value={formik.values.preparationTime}
-                              onChange={formik.handleChange}
-                              onKeyDown={utils.handleNumericKey}
-                              error={Boolean(formik.touched.preparationTime && formik.errors.preparationTime)}
-                            />
-                            <FormHelperText
-                              error={Boolean(formik.touched.preparationTime && formik.errors.preparationTime)}
-                              sx={{ marginLeft: 0 }}
-                            >
-                              {formik.touched.preparationTime && formik.errors.preparationTime}
-                            </FormHelperText>
-                          </FormControl>
-                        </Stack>
-                      </Grid> */}
-                      {/* <Grid item xs={12} sm={2}>
-                        <InputLabel>Breakfast</InputLabel>
-                        <Stack spacing={2}>
-                          <FormGroup>
-                            <FormControlLabel
-                              control={
-                                <Switch
-                                  id='isBreakfast'
-                                  name='isBreakfast'
-                                  checked={formik.values.isBreakfast}
-                                  onChange={(e) => formik.setFieldValue('isBreakfast', e.target.checked)}
-                                />
-                              }
-                            />
-                          </FormGroup>
-                        </Stack>
-                      </Grid> */}
+
                     </Stack>
                   </Grid>
-                  {/* <Grid item xs={12} sm={6}>
-                    <Stack direction={'row'} spacing={1}>
-                      <Grid item xs={12} sm={6}>
-                        <Stack spacing={1}>
-                          <InputLabel sx={{ marginBottom: 0.7 }}>Latitude</InputLabel>
-                          <FormControl>
-                            <TextField
-                              fullWidth
-                              id='latitude'
-                              name='latitude'
-                              placeholder='Enter Latitude'
-                              value={formik.values.latitude || ''}
-                              inputProps={{ maxLength: 25 }}
-                              onChange={formik.handleChange}
-                              onKeyDown={utils.handleNumericKey}
-                              error={Boolean(formik.touched.latitude && formik.errors.latitude)}
-                            />
-                            <FormHelperText error={Boolean(formik.touched.latitude && formik.errors.latitude)} sx={{ marginLeft: 0 }}>
-                              {formik.touched.latitude && formik.errors.latitude}
-                            </FormHelperText>
-                          </FormControl>
-                        </Stack>
-                      </Grid>
-                      <Grid item xs={12} sm={6}>
-                        <Stack spacing={1}>
-                          <InputLabel sx={{ marginBottom: 0.7 }}>Longitude</InputLabel>
-                          <FormControl>
-                            <TextField
-                              fullWidth
-                              id='longitude'
-                              name='longitude'
-                              placeholder='Enter Longitude'
-                              value={formik.values.longitude || ''}
-                              inputProps={{ maxLength: 25 }}
-                              onChange={formik.handleChange}
-                              onKeyDown={utils.handleNumericKey}
-                              error={Boolean(formik.touched.longitude && formik.errors.longitude)}
-                            />
-                            <FormHelperText error={Boolean(formik.touched.longitude && formik.errors.longitude)} sx={{ marginLeft: 0 }}>
-                              {formik.touched.longitude && formik.errors.longitude}
-                            </FormHelperText>
-                          </FormControl>
-                        </Stack>
-                      </Grid>
-                    </Stack>
-                  </Grid> */}
-                  {/* <Grid item xs={12} sm={6}>
-                    <Stack spacing={1}>
-                      <InputLabel sx={{ marginBottom: 0.7 }}>Supported Order Modes</InputLabel>
-                      <Autocomplete
-                        multiple
-                        fullWidth
-                        id='supportedOrderModes'
-                        name='supportedOrderModes'
-                        options={enums.OrderModes.map((mode) => ({ value: mode, title: mode }))}
-                        value={orderModeOptions || null}
-                        getOptionLabel={(option) => option.title}
-                        isOptionEqualToValue={(option, value) => option.value === value.value}
-                        getOptionSelected={(option, value) => option.value === value.value}
-                        onChange={(event, newValue) => {
-                          formik.setFieldValue(
-                            'supportedOrderModes',
-                            newValue.map((option) => option.value)
-                          );
-                        }}
-                        renderOption={(props, orderModeOption, { selected }) => {
-                          return (
-                            <li {...props} key={orderModeOption.value}>
-                              <Checkbox icon={<CheckBoxOutlineBlankIcon />} checkedIcon={<CheckBoxIcon />} checked={selected} />
-                              {orderModeOption.title}
-                            </li>
-                          );
-                        }}
-                        renderInput={(params) => (
-                          <TextField {...params} error={Boolean(formik.touched.supportedOrderModes && formik.errors.supportedOrderModes)} />
-                        )}
-                      />
-                      <FormHelperText error={Boolean(formik.touched.supportedOrderModes && formik.errors.supportedOrderModes)}>
-                        {formik.touched.supportedOrderModes && formik.errors.supportedOrderModes}
-                      </FormHelperText>
-                    </Stack>
-                  </Grid>
-                  <Grid item xs={12} sm={6}>
-                    <Stack spacing={1}>
-                      <InputLabel sx={{ marginBottom: 0.7 }}>Supported Meal Sizes</InputLabel>
-                      <Autocomplete
-                        multiple
-                        fullWidth
-                        id='supportedMealSize'
-                        name='supportedMealSize'
-                        options={enums.MealSize.map((size) => ({ value: size, title: size }))}
-                        value={MealSizeOptions || null}
-                        getOptionLabel={(option) => enums.ComboSize[option.title]}
-                        isOptionEqualToValue={(option, value) => option.value === value.value}
-                        getOptionSelected={(option, value) => option.value === value.value}
-                        onChange={(event, newValue) => {
-                          formik.setFieldValue(
-                            'supportedMealSize',
-                            newValue.map((option) => option.value)
-                          );
-                        }}
-                        renderOption={(props, mealSizeOption, { selected }) => {
-                          return (
-                            <li {...props} key={mealSizeOption.value}>
-                              <Checkbox icon={<CheckBoxOutlineBlankIcon />} checkedIcon={<CheckBoxIcon />} checked={selected} />
-                              {enums.ComboSize[mealSizeOption.title]}
-                            </li>
-                          );
-                        }}
-                        renderInput={(params) => (
-                          <TextField {...params} error={Boolean(formik.touched.supportedMealSize && formik.errors.supportedMealSize)} />
-                        )}
-                      />
-                      <FormHelperText error={Boolean(formik.touched.supportedMealSize && formik.errors.supportedMealSize)}>
-                        {formik.touched.supportedMealSize && formik.errors.supportedMealSize}
-                      </FormHelperText>
-                    </Stack>
-                  </Grid> */}
-                  {/* <Grid item xs={12} sm={6}>
-                    <Stack spacing={1}>
-                      <InputLabel sx={{ marginBottom: 0.7 }}>Supported Device</InputLabel>
-                      <Autocomplete
-                        multiple
-                        fullWidth
-                        id="supportedDevice"
-                        name="supportedDevice"
-                        options={supportedDevicesOptions}
-                        value={deviceOption}
-                        getOptionLabel={(option) => option.key}
-                        isOptionEqualToValue={(option, value) => option.value === value.value}
-                        onChange={(event, newValue) => {
-                          formik.setFieldValue(
-                            'supportedDevice',
-                            newValue.map((option) => option.value)
-                          );
-                        }}
-                        renderOption={(props, option, { selected }) => (
-                          <li {...props} key={option.key}>
-                            <Checkbox
-                              icon={<CheckBoxOutlineBlankIcon />}
-                              checkedIcon={<CheckBoxIcon />}
-                              checked={selected}
-                            />
-                            {option.key}
-                          </li>
-                        )}
-                        renderInput={(params) => (
-                          <TextField
-                            {...params}
-                            error={Boolean(formik.touched.supportedDevice && formik.errors.supportedDevice)}
-                          />
-                        )}
-                      />
-                      <FormHelperText error={Boolean(formik.touched.supportedDevice && formik.errors.supportedDevice)}>
-                        {formik.touched.supportedDevice && formik.errors.supportedDevice}
-                      </FormHelperText>
-                    </Stack>
-                  </Grid> */}
                 </Grid>
               </DialogContent>
             </Box>
@@ -729,4 +461,10 @@ const EditSite = ({ isOpen, handleClose, siteDetails, onSave }) => {
   );
 };
 
-export default EditSite;
+export default AddEditCamera;
+
+
+
+
+
+

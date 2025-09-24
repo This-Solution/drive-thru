@@ -11,22 +11,20 @@ import enums from 'utils/enums';
 
 const GuestGuard = ({ children }) => {
   const { user } = useSelector((state) => state.auth);
-  const { flavour } = useSelector((state) => state.auth);
+  // const { flavour } = useSelector((state) => state.auth);
   const navigate = useNavigate();
 
   useEffect(() => {
     if (user) {
       if (user.role === enums.userRole.SuperAdmin) {
-        if (flavour) {
-          navigate(config.defaultPath, { replace: true });
-        }
-      } else if (user.role === enums.userRole.EdmExport) {
-        navigate('/maintenance/access-denied', { replace: true });
+        // if (flavour) {
+        navigate('/site', { replace: true });
+        // }
       } else {
         navigate(config.defaultPath, { replace: true });
       }
     }
-  }, [user, flavour, navigate]);
+  }, [user, navigate]);
 
   return children;
 };

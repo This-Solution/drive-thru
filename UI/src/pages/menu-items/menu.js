@@ -23,7 +23,7 @@ const menu = {
   id: 'order-trace',
   type: 'group',
   title: <FormattedMessage id='application' />,
-  roleTags: [enums.userRole.CJAdmin, enums.userRole.SuperAdmin],
+  roleTags: [enums.userRole.Admin, enums.userRole.SuperAdmin],
   children: [
     // {
     //   id: 'banners',
@@ -43,7 +43,7 @@ const menu = {
       type: 'item',
       url: 'order-trace/cars',
       icon: icons.AutoAwesomeMotionOutlined,
-      roleTags: [enums.userRole.CJAdmin, enums.userRole.SuperAdmin],
+      roleTags: [enums.userRole.Admin, enums.userRole.SuperAdmin],
       isShowFilter: true,
       showTitle: true,
     }

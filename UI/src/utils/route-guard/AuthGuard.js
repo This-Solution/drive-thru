@@ -34,7 +34,7 @@ const AuthGuard = ({ children }) => {
       navigate(redirectUri, { replace: true });
     } else {
 
-      navigate(config.defaultPath, { replace: true });
+      // navigate(config.defaultPath, { replace: true });
       // const isSiteAdminOrManager =
       //   user.role === enums.userRole.CJAdmin || user.role === enums.userRole.User || user.role === enums.userRole.SiteManager;
       // if (isSiteAdminOrManager && isSuperAdminRoute(pathname)) {

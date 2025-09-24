@@ -65,7 +65,7 @@ const enums = {
     GREEN: 'green',
     RED: 'red',
     PINK: 'pink',
-    WHITE: 'white'
+    WHITE: 'WHITE'
   },
   displayAdminRole: {
     superAdmin: 'Super Admin',

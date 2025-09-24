@@ -169,6 +169,17 @@ async function getTenantsAsync() {
 }
 
 
+async function saveTenantsAsync(payload) {
+  const config = {
+    method: 'post',
+    url: '/tenant',
+    data: payload
+  };
+
+  return await axios(config);
+}
+
+
 async function getCarDetailsAsync(payload) {
   const config = {
     method: 'post',
@@ -214,7 +225,7 @@ async function getCameraConfigAsync() {
 async function getSitesAsync() {
   const config = {
     method: 'get',
-    url: '/site/list'
+    url: '/site'
   };
   return await axios(config);
 }
@@ -271,7 +282,7 @@ async function setSiteEnabledStatusAsync(siteId, isEnabled) {
 async function updateSiteAsync(siteId, payload) {
   const config = {
     method: 'put',
-    url: `/site/updateSite/${siteId}`,
+    url: `/site/${siteId}`,
     data: payload
   };
   return await axios(config);
@@ -280,7 +291,7 @@ async function updateSiteAsync(siteId, payload) {
 async function addSiteAsync(payload) {
   const config = {
     method: 'post',
-    url: `/site/save`,
+    url: `/site`,
     data: payload
   };
   return await axios(config);
@@ -353,6 +364,7 @@ export default {
   getTenantsAsync,
   getCarDetailsAsync,
   getCurrentOrderAsync,
-  getLastAndMostPurchaseOrderAsync
+  getLastAndMostPurchaseOrderAsync,
+  saveTenantsAsync
 
 };

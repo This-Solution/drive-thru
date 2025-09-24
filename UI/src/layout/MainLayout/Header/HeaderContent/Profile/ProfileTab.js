@@ -84,25 +84,53 @@ const ProfileTab = ({ handleLogout }) => {
         </ListItemIcon>
         <ListItemText primary='Switch To Orderkey HUB' />
       </ListItemButton> */}
+      {/* {user && user.roleId === enums.userRole.SuperAdmin && ( */}
+      <ListItemButton
+        selected={selectedIndex === 1}
+        onClick={(e) => {
+          handleListItemClick(e, 1);
+          e.stopPropagation();
+          navigate('/admin/camera')
+          // setOpenEditProfileDialog(true);
+        }}
+      >
+        <ListItemIcon>
+          <PartitionOutlined />
+        </ListItemIcon>
+        <ListItemText primary='Cameras' />
+      </ListItemButton>
+      <ListItemButton
+        selected={selectedIndex === 2}
+        onClick={(e) => {
+          handleListItemClick(e, 1);
+          e.stopPropagation();
+          navigate('/admin/tenants')
+          // setOpenEditProfileDialog(true);
+        }}
+      >
+        <ListItemIcon>
+          <PartitionOutlined />
+        </ListItemIcon>
+        <ListItemText primary='Tenants' />
+      </ListItemButton>
+      <ListItemButton
+        selected={selectedIndex === 3}
+        onClick={(e) => {
+          handleListItemClick(e, 1);
+          e.stopPropagation();
+          navigate('/admin/sites')
+          // setOpenEditProfileDialog(true);
+        }}
+      >
+        <ListItemIcon>
+          <PartitionOutlined />
+        </ListItemIcon>
+        <ListItemText primary='Sites' />
+      </ListItemButton>
+      {/* )} */}
       {user && user.roleId === enums.userRole.SuperAdmin && (
         <ListItemButton
-          selected={selectedIndex === 1}
-          onClick={(e) => {
-            handleListItemClick(e, 1);
-            e.stopPropagation();
-            // navigate('/admin/sites')
-            // setOpenEditProfileDialog(true);
-          }}
-        >
-          <ListItemIcon>
-            <PartitionOutlined />
-          </ListItemIcon>
-          <ListItemText primary='Sites' />
-        </ListItemButton>
-      )}
-      {user && user.roleId === enums.userRole.SuperAdmin && (
-        <ListItemButton
-          selected={selectedIndex === 2}
+          selected={selectedIndex === 4}
           onClick={(e) => {
             handleListItemClick(e, 1);
             e.stopPropagation();
@@ -142,7 +170,7 @@ const ProfileTab = ({ handleLogout }) => {
         </ListItemIcon>
         <ListItemText primary='Reset Password' />
       </ListItemButton> */}
-      <ListItemButton selected={selectedIndex === 4} onClick={handleLogout}>
+      <ListItemButton selected={selectedIndex === 5} onClick={handleLogout}>
         <ListItemIcon>
           <LogoutOutlined />
         </ListItemIcon>

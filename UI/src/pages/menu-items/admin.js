@@ -49,6 +49,17 @@ const admin = {
       showTitle: true,
     },
     {
+      id: 'TenantList',
+      title: <FormattedMessage id='TenantList' />,
+      subTitle: 'Manage Tenant',
+      type: 'item',
+      url: 'admin/tenants',
+      roleTags: [enums.userRole.SuperAdmin, enums.userRole.CJAdmin, enums.userRole.User, enums.userRole.SiteManager],
+      icon: icons.AccountTreeOutlined,
+      isShowFilter: true,
+      showTitle: false,
+    },
+    {
       id: 'sitelist',
       title: <FormattedMessage id='sitelist' />,
       subTitle: 'Manage Sites',
@@ -57,7 +68,18 @@ const admin = {
       roleTags: [enums.userRole.SuperAdmin, enums.userRole.CJAdmin, enums.userRole.User, enums.userRole.SiteManager],
       icon: icons.AccountTreeOutlined,
       isShowFilter: true,
-      showTitle: true,
+      showTitle: false,
+    },
+    {
+      id: 'cameralist',
+      title: <FormattedMessage id='cameralist' />,
+      subTitle: 'Manage Cameras',
+      type: 'item',
+      url: 'admin/camera',
+      roleTags: [enums.userRole.SuperAdmin, enums.userRole.CJAdmin, enums.userRole.User, enums.userRole.SiteManager],
+      icon: icons.AccountTreeOutlined,
+      isShowFilter: true,
+      showTitle: false,
     },
   ]
 };
