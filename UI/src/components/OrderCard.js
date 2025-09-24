@@ -354,10 +354,30 @@ const ShowCurrentOrders = () => {
           </Box>
         </>
       ) : (
-        <Stack pt={'calc(16px + 45%)'}>
-          <Stack alignItems={'center'} justifyContent={'center'}>
-            <Avatar src={orderNotFound} />
-            <Typography variant='body1'>No Record Found</Typography>
+        <Stack pt={'calc(16px + 25%)'}>
+          <Stack alignItems={'center'} justifyContent={'center'} spacing={2}>
+            {/* <Avatar src={cameraNotFound} sizes='large' /> */}
+            <Box
+              component="img"
+              src={cameraNotFound}
+              alt="Camera not found"
+              sx={{
+                width: '120px',
+                height: '120px',
+                borderRadius: '50%',
+                // Define the animation and apply it
+                // animation: 'spin 4s linear infinite',
+                // '@keyframes spin': {
+                //   '0%': {
+                //     transform: 'rotate(0deg)',
+                //   },
+                //   '100%': {
+                //     transform: 'rotate(360deg)',
+                //   },
+                // },
+              }}
+            />
+            <Typography variant='body1'>Waiting for new Car....</Typography>
           </Stack>
         </Stack>
       )}

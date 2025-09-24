@@ -38,7 +38,7 @@ export const StompProvider = ({ children }) => {
 
   useEffect(() => {
     const client = new Client({
-      brokerURL: 'wss://10.10.1.79:8181/ws',
+      brokerURL: 'ws://dt1.thissolution.com/ws',
       reconnectDelay: 5000,
       debug: (msg) => console.log('DEBUG:', msg),
 
@@ -65,7 +65,6 @@ export const StompProvider = ({ children }) => {
     return () => {
       client.deactivate();
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   return (
