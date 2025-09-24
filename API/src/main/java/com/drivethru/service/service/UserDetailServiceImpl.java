@@ -76,7 +76,7 @@ public class UserDetailServiceImpl implements UserDetailService {
     public UserDetailResponse addUser(UserDetailRequest userDetailRequest, String loginId) {
         try {
             int loginUserId = Integer.parseInt(loginId);
-            UserDetail detail = userDetailRepository.findById(loginUserId).orElseThrow(() -> new CustomException(CustomErrorHolder.USER_NOT_FOUND));
+            UserDetail detail = userDetailRepository.findByUserIdAndIsActiveTrue(loginUserId);
             Role role = roleRepository.findById(detail.getRoleId()).orElseThrow(() -> new CustomException(CustomErrorHolder.ROLE_NOT_FOUND));
             if (!Objects.equals(role.getRoleName(), RoleName.SUPER_ADMIN.toString())) {
                 throw new CustomException(CustomErrorHolder.ONLY_SUPER_ADMIN_CAN_ACCESS);
@@ -99,12 +99,12 @@ public class UserDetailServiceImpl implements UserDetailService {
 
             UserDetailResponse userDetailResponse = new UserDetailResponse();
             BeanUtils.copyProperties(userDetail, userDetailResponse);
-            Optional<Tenant> tenant = tenantRepository.findById(userDetail.getTenantId());
+            Tenant tenant = tenantRepository.findByTenantIdAndIsActiveTrue(userDetail.getTenantId());
             Optional<Role> roles = roleRepository.findById(userDetail.getRoleId());
-            Optional<UserDetail> createdUserDetail = userDetailRepository.findById(userDetail.getCreatedBy());
-            userDetailResponse.setTenantName(tenant.get().getTenantName());
+            UserDetail createdUserDetail = userDetailRepository.findByUserIdAndIsActiveTrue(userDetail.getCreatedBy());
+            userDetailResponse.setTenantName(tenant.getTenantName());
             userDetailResponse.setRoleName(roles.get().getRoleName());
-            userDetailResponse.setCreatedByName(createdUserDetail.get().getFirstName() + " " + createdUserDetail.get().getSurName());
+            userDetailResponse.setCreatedByName(createdUserDetail.getFirstName() + " " + createdUserDetail.getSurName());
             return userDetailResponse;
         } catch (Exception e) {
             throw new CustomException(CustomErrorHolder.ADD_USER_FAILED);
@@ -115,7 +115,7 @@ public class UserDetailServiceImpl implements UserDetailService {
     public UserDetailResponse editUser(Integer userId, UserDetailRequest userDetailRequest, String loginId) {
         try {
             int loginUserId = Integer.parseInt(loginId);
-            UserDetail detail = userDetailRepository.findById(loginUserId).orElseThrow(() -> new CustomException(CustomErrorHolder.USER_NOT_FOUND));
+            UserDetail detail = userDetailRepository.findByUserIdAndIsActiveTrue(loginUserId);
             Role role = roleRepository.findById(detail.getRoleId()).orElseThrow(() -> new CustomException(CustomErrorHolder.ROLE_NOT_FOUND));
             if (!Objects.equals(role.getRoleName(), RoleName.SUPER_ADMIN.toString())) {
                 throw new CustomException(CustomErrorHolder.ONLY_SUPER_ADMIN_CAN_ACCESS);
@@ -151,14 +151,14 @@ public class UserDetailServiceImpl implements UserDetailService {
 
             UserDetailResponse userDetailResponse = new UserDetailResponse();
             BeanUtils.copyProperties(userDetail, userDetailResponse);
-            Optional<Tenant> tenant = tenantRepository.findById(userDetail.getTenantId());
+            Tenant tenant = tenantRepository.findByTenantIdAndIsActiveTrue(userDetail.getTenantId());
             Optional<Role> roles = roleRepository.findById(userDetail.getRoleId());
-            Optional<UserDetail> createdUserDetail = userDetailRepository.findById(userDetail.getCreatedBy());
-            Optional<UserDetail> updatedUserDetail = userDetailRepository.findById(userDetail.getCreatedBy());
-            userDetailResponse.setTenantName(tenant.get().getTenantName());
+            UserDetail createdUserDetail = userDetailRepository.findByUserIdAndIsActiveTrue(userDetail.getCreatedBy());
+            UserDetail updatedUserDetail = userDetailRepository.findByUserIdAndIsActiveTrue(userDetail.getCreatedBy());
+            userDetailResponse.setTenantName(tenant.getTenantName());
             userDetailResponse.setRoleName(roles.get().getRoleName());
-            userDetailResponse.setCreatedByName(createdUserDetail.get().getFirstName() + " " + createdUserDetail.get().getSurName());
-            userDetailResponse.setUpdateByName(updatedUserDetail.get().getFirstName() + " " + updatedUserDetail.get().getSurName());
+            userDetailResponse.setCreatedByName(createdUserDetail.getFirstName() + " " + createdUserDetail.getSurName());
+            userDetailResponse.setUpdateByName(updatedUserDetail.getFirstName() + " " + updatedUserDetail.getSurName());
             return userDetailResponse;
         } catch (Exception e) {
             throw new CustomException(CustomErrorHolder.ADD_USER_FAILED);
@@ -168,12 +168,12 @@ public class UserDetailServiceImpl implements UserDetailService {
     @Override
     public Boolean deleteUser(Integer userId, String loginId) {
         int loginUserId = Integer.parseInt(loginId);
-        UserDetail detail = userDetailRepository.findById(loginUserId).orElseThrow(() -> new CustomException(CustomErrorHolder.USER_NOT_FOUND));
+        UserDetail detail = userDetailRepository.findByUserIdAndIsActiveTrue(loginUserId);
         Role role = roleRepository.findById(detail.getRoleId()).orElseThrow(() -> new CustomException(CustomErrorHolder.ROLE_NOT_FOUND));
         if (!Objects.equals(role.getRoleName(), RoleName.SUPER_ADMIN.toString())) {
             throw new CustomException(CustomErrorHolder.ONLY_SUPER_ADMIN_CAN_ACCESS);
         }
-        UserDetail userDetail = userDetailRepository.findById(userId).orElseThrow(() -> new CustomException(CustomErrorHolder.USER_NOT_FOUND));
+        UserDetail userDetail = userDetailRepository.findByUserIdAndIsActiveTrue(userId);
         userDetail.setActive(false);
         userDetail.setUpdatedBy(detail.getUserId());
         userDetail.setUpdatedDate(LocalDateTime.now());

@@ -1,6 +1,5 @@
 package com.drivethru.service.service;
 
-import com.drivethru.service.dto.SiteResponse;
 import com.drivethru.service.dto.TenantRequest;
 import com.drivethru.service.dto.TenantResponse;
 import com.drivethru.service.entity.Role;
@@ -19,7 +18,6 @@ import org.springframework.stereotype.Service;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Objects;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -36,7 +34,7 @@ public class TenantServiceImpl implements TenantService {
 
     @Override
     public List<TenantResponse> getAllTenant() {
-        List<Tenant> tenants = tenantRepository.findAll();
+        List<Tenant> tenants = tenantRepository.findAllByIsActiveTrue();
         return tenants.stream().map(tenant -> {
             TenantResponse tenantResponse = new TenantResponse();
             BeanUtils.copyProperties(tenant, tenantResponse);
@@ -51,7 +49,7 @@ public class TenantServiceImpl implements TenantService {
     @Override
     public TenantResponse addTenant(TenantRequest tenantRequest, String loginId) {
         int loginUserId = Integer.parseInt(loginId);
-        UserDetail detail = userDetailRepository.findById(loginUserId).orElseThrow(() -> new CustomException(CustomErrorHolder.USER_NOT_FOUND));
+        UserDetail detail = userDetailRepository.findByUserIdAndIsActiveTrue(loginUserId);
         Role role = roleRepository.findById(detail.getRoleId()).orElseThrow(() -> new CustomException(CustomErrorHolder.ROLE_NOT_FOUND));
         if (!Objects.equals(role.getRoleName(), RoleName.SUPER_ADMIN.toString())) {
             throw new CustomException(CustomErrorHolder.ONLY_SUPER_ADMIN_CAN_ACCESS);
@@ -65,15 +63,15 @@ public class TenantServiceImpl implements TenantService {
         tenantRepository.save(tenant);
         TenantResponse tenantResponse = new TenantResponse();
         BeanUtils.copyProperties(tenant, tenantResponse);
-        Optional<UserDetail> createdUserDetail = userDetailRepository.findById(tenant.getCreatedBy());
-        tenantResponse.setCreateByName(createdUserDetail.get().getFirstName() + " " + createdUserDetail.get().getSurName());
+        UserDetail createdUserDetail = userDetailRepository.findByUserIdAndIsActiveTrue(tenant.getCreatedBy());
+        tenantResponse.setCreateByName(createdUserDetail.getFirstName() + " " + createdUserDetail.getSurName());
         return tenantResponse;
     }
 
     @Override
     public TenantResponse editTenant(Integer tenantId, TenantRequest tenantRequest, String loginId) {
         int loginUserId = Integer.parseInt(loginId);
-        UserDetail detail = userDetailRepository.findById(loginUserId).orElseThrow(() -> new CustomException(CustomErrorHolder.USER_NOT_FOUND));
+        UserDetail detail = userDetailRepository.findByUserIdAndIsActiveTrue(loginUserId);
         Role role = roleRepository.findById(detail.getRoleId()).orElseThrow(() -> new CustomException(CustomErrorHolder.ROLE_NOT_FOUND));
         if (!Objects.equals(role.getRoleName(), RoleName.SUPER_ADMIN.toString())) {
             throw new CustomException(CustomErrorHolder.ONLY_SUPER_ADMIN_CAN_ACCESS);
@@ -90,17 +88,17 @@ public class TenantServiceImpl implements TenantService {
         tenantRepository.save(tenant);
         TenantResponse tenantResponse = new TenantResponse();
         BeanUtils.copyProperties(tenant, tenantResponse);
-        Optional<UserDetail> createdUserDetail = userDetailRepository.findById(tenant.getCreatedBy());
-        Optional<UserDetail> updatedUserDetail = userDetailRepository.findById(detail.getUserId());
-        tenantResponse.setCreateByName(createdUserDetail.get().getFirstName() + " " + createdUserDetail.get().getSurName());
-        tenantResponse.setUpdateByName(updatedUserDetail.get().getFirstName() + " " + updatedUserDetail.get().getSurName());
+        UserDetail createdUserDetail = userDetailRepository.findByUserIdAndIsActiveTrue(tenant.getCreatedBy());
+        UserDetail updatedUserDetail = userDetailRepository.findByUserIdAndIsActiveTrue(tenant.getUpdatedBy());
+        tenantResponse.setCreateByName(createdUserDetail.getFirstName() + " " + createdUserDetail.getSurName());
+        tenantResponse.setUpdateByName(updatedUserDetail.getFirstName() + " " + updatedUserDetail.getSurName());
         return tenantResponse;
     }
 
     @Override
     public boolean deleteTenant(Integer tenantId, String loginId) {
         int loginUserId = Integer.parseInt(loginId);
-        UserDetail detail = userDetailRepository.findById(loginUserId).orElseThrow(() -> new CustomException(CustomErrorHolder.USER_NOT_FOUND));
+        UserDetail detail = userDetailRepository.findByUserIdAndIsActiveTrue(loginUserId);
         Role role = roleRepository.findById(detail.getRoleId()).orElseThrow(() -> new CustomException(CustomErrorHolder.ROLE_NOT_FOUND));
         if (!Objects.equals(role.getRoleName(), RoleName.SUPER_ADMIN.toString())) {
             throw new CustomException(CustomErrorHolder.ONLY_SUPER_ADMIN_CAN_ACCESS);
