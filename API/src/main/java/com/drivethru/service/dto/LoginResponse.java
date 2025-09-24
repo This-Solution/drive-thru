@@ -4,8 +4,17 @@ public class LoginResponse {
     private Integer userId;
     private Integer tenantId;
     private Integer roleId;
+    private Integer siteId;
     private String name;
     private String phone;
+
+    public Integer getSiteId() {
+        return siteId;
+    }
+
+    public void setSiteId(Integer siteId) {
+        this.siteId = siteId;
+    }
 
     public String getName() {
         return name;

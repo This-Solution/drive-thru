@@ -8,11 +8,13 @@ import java.util.List;
 
 @Service
 public interface CameraConfigService {
-    List<CameraConfigResponse> getAllCameraConfigs();
+    List<CameraConfigResponse> getAllCameraConfigsBySiteId(Integer siteId);
 
     CameraConfigResponse addCameraConfigs(CameraConfigRequest cameraConfigRequest, String loginId);
 
     CameraConfigResponse editCameraConfigs(Integer cameraConfigId, CameraConfigRequest cameraConfigRequest, String loginId);
 
     boolean deleteCameraConfig(Integer cameraConfigId, String loginId);
+
+    List<CameraConfigResponse> getAllCameraConfigs();
 }

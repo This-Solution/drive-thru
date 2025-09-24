@@ -41,6 +41,7 @@ public class JwtHelper {
         claims.put("name", user.getFirstName() + " " + user.getSurName());
         claims.put("tenantId", user.getTenantId());
         claims.put("roleId", user.getRoleId());
+        claims.put("siteId",user.getSiteId());
         return buildToken(claims, user.getEmail());
     }
 

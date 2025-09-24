@@ -63,6 +63,7 @@ public class UserDetailServiceImpl implements UserDetailService {
         loginResponse.setRoleId(userDetail.getRoleId());
         loginResponse.setName(userDetail.getFirstName() + " " + userDetail.getSurName());
         loginResponse.setPhone(userDetail.getPhone());
+        loginResponse.setSiteId(userDetail.getSiteId());
         String sessionToken = jwtHelper.generateToken(userDetail);
         LoginTokenResponse loginTokenResponse = new LoginTokenResponse();
         loginTokenResponse.setUser(loginResponse);

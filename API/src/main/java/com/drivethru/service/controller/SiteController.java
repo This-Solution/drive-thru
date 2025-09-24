@@ -59,7 +59,7 @@ public class SiteController {
     }
 
     @GetMapping
-    public ResponseEntity<ResponseObject<List<SiteResponse>>> getAllUsers() {
+    public ResponseEntity<ResponseObject<List<SiteResponse>>> getAllSite() {
         ResponseObject<List<SiteResponse>> responseObject = new ResponseObject<>();
         List<SiteResponse> sites = siteService.getAllSites();
         responseObject.setData(sites);

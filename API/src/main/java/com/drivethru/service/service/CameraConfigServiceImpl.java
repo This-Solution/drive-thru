@@ -36,8 +36,8 @@ public class CameraConfigServiceImpl implements CameraConfigService {
     SiteRepository siteRepository;
 
     @Override
-    public List<CameraConfigResponse> getAllCameraConfigs() {
-        List<CameraConfig> cameraConfigs = cameraConfigRepository.findAllByIsActiveTrue();
+    public List<CameraConfigResponse> getAllCameraConfigsBySiteId(Integer siteId) {
+        List<CameraConfig> cameraConfigs = cameraConfigRepository.findAllBySiteIdAndIsActiveTrue(siteId);
         return cameraConfigs.stream().map(configs -> {
             CameraConfigResponse cameraConfigResponse = new CameraConfigResponse();
             BeanUtils.copyProperties(configs, cameraConfigResponse);
@@ -137,5 +137,20 @@ public class CameraConfigServiceImpl implements CameraConfigService {
         cameraConfig.setUpdatedDate(LocalDateTime.now());
         cameraConfigRepository.save(cameraConfig);
         return true;
+    }
+
+    @Override
+    public List<CameraConfigResponse> getAllCameraConfigs() {
+        List<CameraConfig> cameraConfigs = cameraConfigRepository.findAllByIsActiveTrue();
+        return cameraConfigs.stream().map(configs -> {
+            CameraConfigResponse cameraConfigResponse = new CameraConfigResponse();
+            BeanUtils.copyProperties(configs, cameraConfigResponse);
+            tenantRepository.findById(configs.getTenantId()).ifPresent(tenant -> cameraConfigResponse.setTenantName(tenant.getTenantName()));
+            userDetailRepository.findById(configs.getCreatedBy()).ifPresent(createdUser -> cameraConfigResponse.setCreateByName(createdUser.getFirstName() + " " + createdUser.getSurName()));
+            if (configs.getUpdatedBy() != null) {
+                userDetailRepository.findById(configs.getUpdatedBy()).ifPresent(updatedUser -> cameraConfigResponse.setUpdateByName(updatedUser.getFirstName() + " " + updatedUser.getSurName()));
+            }
+            return cameraConfigResponse;
+        }).collect(Collectors.toList());
     }
 }

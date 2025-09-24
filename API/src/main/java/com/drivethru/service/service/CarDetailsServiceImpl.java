@@ -94,12 +94,14 @@ public class CarDetailsServiceImpl implements CarDetailService {
 
                 carResponse.setCameraType(Constants.LAN_CAMERA);
                 carResponse.setCarPlateNumber(plateNumber);
+                carResponse.setCameraName(cameraConfig.getCameraName());
                 simpMessagingTemplate.convertAndSend("/topic/send", carResponse);
 
             }
             if (cameraType.equals(Constants.COUNTER_CAMERA)) {
                 carResponse.setCameraType(Constants.COUNTER_CAMERA);
                 carResponse.setCarPlateNumber(plateNumber);
+                carResponse.setCameraName(cameraConfig.getCameraName());
                 simpMessagingTemplate.convertAndSend("/topic/send", carResponse);
             }
 

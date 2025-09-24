@@ -25,10 +25,10 @@ public class CameraConfigController {
     @Autowired
     JwtHelper jwtHelper;
 
-    @GetMapping
-    public ResponseEntity<ResponseObject<List<CameraConfigResponse>>> getAllCameraConfigs() {
+    @PostMapping("/{SiteId}")
+    public ResponseEntity<ResponseObject<List<CameraConfigResponse>>> getAllCameraConfigsBySiteId(@PathVariable Integer SiteId) {
         ResponseObject<List<CameraConfigResponse>> responseObject = new ResponseObject<>();
-        List<CameraConfigResponse> cameraConfigs = cameraConfigService.getAllCameraConfigs();
+        List<CameraConfigResponse> cameraConfigs = cameraConfigService.getAllCameraConfigsBySiteId(SiteId);
         responseObject.setData(cameraConfigs);
         return new ResponseEntity<>(responseObject, HttpStatus.OK);
     }
@@ -63,6 +63,14 @@ public class CameraConfigController {
         ResponseObject<String> responseObject = new ResponseObject<>();
         Boolean CameraConfig = cameraConfigService.deleteCameraConfig(CameraConfigId, id);
         responseObject.setData("Delete CameraConfig Successfully");
+        return new ResponseEntity<>(responseObject, HttpStatus.OK);
+    }
+
+    @GetMapping
+    public ResponseEntity<ResponseObject<List<CameraConfigResponse>>> getAllCameraConfigs() {
+        ResponseObject<List<CameraConfigResponse>> responseObject = new ResponseObject<>();
+        List<CameraConfigResponse> cameraConfigs = cameraConfigService.getAllCameraConfigs();
+        responseObject.setData(cameraConfigs);
         return new ResponseEntity<>(responseObject, HttpStatus.OK);
     }
 }

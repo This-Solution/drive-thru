@@ -15,6 +15,8 @@ public class UserDetail {
     private Integer tenantId;
     @Column(name = "RoleId")
     private Integer roleId;
+    @Column(name = "SiteId")
+    private Integer siteId;
     @Column(name = "FirstName")
     private String firstName;
     @Column(name = "SurName")
@@ -60,6 +62,14 @@ public class UserDetail {
 
     public void setRoleId(Integer roleId) {
         this.roleId = roleId;
+    }
+
+    public Integer getSiteId() {
+        return siteId;
+    }
+
+    public void setSiteId(Integer siteId) {
+        this.siteId = siteId;
     }
 
     public String getFirstName() {
