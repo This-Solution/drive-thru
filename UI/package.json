@@ -1,9 +1,9 @@
 {
-  "name": "cj-sales",
+  "name": "drive-thru",
   "version": "1.0.0",
   "private": true,
   "scripts": {
-    "start": "HTTPS=true SSL_CRT_FILE=localhost+2.pem SSL_KEY_FILE=localhost+2-key.pem react-app-rewired start",
+    "start": "react-app-rewired start",
     "build": "react-app-rewired build"
   },
   "dependencies": {
