@@ -29,7 +29,6 @@ const App = () => {
 
   useEffect(() => {
     getTentant();
-    getCameraConfig();
     bindInitData(false);
     window.addEventListener('message', handleMessage);
     return () => window.removeEventListener('message', handleMessage);
@@ -41,13 +40,6 @@ const App = () => {
       dispatch(setTenant({ tenants: data }));
     }
   };
-
-  const getCameraConfig = async () => {
-    const { data } = await ApiService.getCameraConfigAsync();
-    if (data) {
-      dispatch(setCameraConfig(data));
-    }
-  }
 
   const handleMessage = async (event) => {
     if (event.data.refreshToken && event.data.flavour) {

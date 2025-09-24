@@ -121,20 +121,19 @@ const ShowCarDetails = ({ carDetails }) => {
   );
 };
 
-const ShowLastAndPurchaseOrders = () => {
+const ShowLastAndPurchaseOrders = ({ cameraInfo }) => {
   const [carDetails, setCarDetails] = useState({});
   const [lastOrders, setlastOrders] = useState([]);
   const [mostPurchaseOrder, setMostPurchaseOrder] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const { user } = useSelector((state) => state.auth);
 
-  const { orderWindow } = useStomp();
-
+  const { orderWindow, cameraName } = useStomp();
   const fetchCarInformation = async () => {
     setIsLoading(true);
     const payload = {
       tenantId: user.tenantId,
-      carPlateNumber: orderWindow.carPlateNumber
+      carPlateNumber: orderWindow[cameraName]
     };
     const [carInfo, orderInfo] = await Promise.all([
       ApiService.getCarDetailsAsync(payload),
@@ -153,7 +152,7 @@ const ShowLastAndPurchaseOrders = () => {
   };
 
   useEffect(() => {
-    if (!isEmpty(orderWindow)) {
+    if (!isEmpty(orderWindow) && cameraName === cameraInfo) {
       fetchCarInformation();
     }
   }, [orderWindow]);
@@ -255,10 +254,10 @@ const ShowLastAndPurchaseOrders = () => {
   );
 };
 
-const ShowCurrentOrders = () => {
+const ShowCurrentOrders = ({ cameraInfo }) => {
   const [currentOrders, setCurrentOrders] = useState([]);
   const [carDetails, setCarDetails] = useState({});
-  const { deliveryWindow } = useStomp();
+  const { deliveryWindow, cameraName } = useStomp();
   const { user } = useSelector((state) => state.auth);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -266,7 +265,7 @@ const ShowCurrentOrders = () => {
     setIsLoading(true);
     const payload = {
       tenantId: user.tenantId,
-      carPlateNumber: deliveryWindow.carPlateNumber
+      carPlateNumber: deliveryWindow[cameraName]
     };
     const [carInfo, orderInfo] = await Promise.all([ApiService.getCarDetailsAsync(payload), ApiService.getCurrentOrderAsync(payload)]);
 
@@ -281,7 +280,7 @@ const ShowCurrentOrders = () => {
   };
 
   useEffect(() => {
-    if (!isEmpty(deliveryWindow)) {
+    if (!isEmpty(deliveryWindow) && cameraName === cameraInfo) {
       fetchCarInformation();
     }
   }, [deliveryWindow]);
@@ -354,18 +353,18 @@ const OrderCard = ({ cameraConfig = {} }) => {
       <Stack direction={'row'} justifyContent={'space-between'} p={2}>
         <Stack>
           <Typography variant='h5'>{cameraConfig.cameraName}</Typography>
-          <Typography variant='body2'>{enums.cameraType[cameraConfig.cameraType]}</Typography>
+          <Typography variant='body2'>{`${cameraConfig.description ? cameraConfig.description : ''} (${enums.cameraType[cameraConfig.cameraType]})`}</Typography>
         </Stack>
         <Avatar src={cameraConfig.cameraType === 'L' ? deliveryMan : shopkeeper} sx={{ width: 40, height: 40 }} />
       </Stack>
       {cameraConfig.cameraType === 'L' && (
         <>
-          <ShowLastAndPurchaseOrders />
+          <ShowLastAndPurchaseOrders cameraInfo={cameraConfig.cameraName} />
         </>
       )}
       {cameraConfig.cameraType === 'C' && (
         <>
-          <ShowCurrentOrders />
+          <ShowCurrentOrders cameraInfo={cameraConfig.cameraName} />
         </>
       )}
     </MainCard>
