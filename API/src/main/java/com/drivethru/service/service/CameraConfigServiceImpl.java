@@ -62,6 +62,7 @@ public class CameraConfigServiceImpl implements CameraConfigService {
         cameraConfig.setTenantId(cameraConfigRequest.getTenantId());
         cameraConfig.setSiteId(cameraConfigRequest.getSiteId());
         cameraConfig.setCameraName(cameraConfigRequest.getCameraName());
+        cameraConfig.setDescription(cameraConfigRequest.getDescription());
         cameraConfig.setCameraType(cameraConfigRequest.getCameraType());
         cameraConfig.setCameraIpAddress(cameraConfigRequest.getCameraIpAddress());
         cameraConfig.setOrderIpAddress(cameraConfigRequest.getOrderIpAddress());
@@ -106,6 +107,9 @@ public class CameraConfigServiceImpl implements CameraConfigService {
         }
         if (cameraConfigRequest.getOrderIpAddress() != null) {
             cameraConfig.setOrderIpAddress(cameraConfigRequest.getOrderIpAddress());
+        }
+        if (cameraConfigRequest.getDescription() != null) {
+            cameraConfig.setDescription(cameraConfigRequest.getDescription());
         }
         cameraConfig.setUpdatedBy(detail.getUserId());
         cameraConfig.setUpdatedDate(LocalDateTime.now());

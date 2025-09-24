@@ -5,8 +5,17 @@ public class CameraConfigRequest {
     private Integer siteId;
     private String cameraName;
     private String cameraType;
+    private String description;
     private String cameraIpAddress;
     private String orderIpAddress;
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
 
     public Integer getTenantId() {
         return tenantId;

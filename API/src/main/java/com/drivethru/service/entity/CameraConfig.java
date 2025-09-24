@@ -19,6 +19,8 @@ public class CameraConfig {
     private String cameraName;
     @Column(name = "CameraType")
     private String cameraType;
+    @Column(name = "Description")
+    private String description;
     @Column(name = "CameraIpAddress")
     private String cameraIpAddress;
     @Column(name = "OrderIpAddress")
@@ -33,6 +35,14 @@ public class CameraConfig {
     private Integer updatedBy;
     @Column(name = "UpdatedDate")
     private LocalDateTime updatedDate;
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
 
     public Integer getCameraId() {
         return cameraId;

@@ -10,6 +10,7 @@ public class CameraConfigResponse {
     private String siteName;
     private String cameraName;
     private String cameraType;
+    private String description;
     private String cameraIpAddress;
     private String orderIpAddress;
     private boolean isActive;
@@ -19,6 +20,14 @@ public class CameraConfigResponse {
     private Integer updatedBy;
     private String updateByName;
     private LocalDateTime updatedDate;
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
 
     public Integer getCameraId() {
         return cameraId;
