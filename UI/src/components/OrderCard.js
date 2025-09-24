@@ -154,24 +154,9 @@ const ShowLastAndPurchaseOrders = () => {
 
   useEffect(() => {
     if (!isEmpty(orderWindow)) {
-      // getLastAndMostPurchaseOrders();
       fetchCarInformation();
     }
   }, [orderWindow]);
-
-  // const getLastAndMostPurchaseOrders = async () => {
-  //   setIsLoading(true);
-  //   const payload = {
-  //     tenantId: user.tenantId,
-  //     carPlateNumber: orderWindow.carPlateNumber
-  //   };
-  //   const { data } = await ApiService.getLastAndMostPurchaseOrderAsync(payload);
-  //   if (data) {
-  //     setlastOrders(data.lastOrders);
-  //     setMostPurchaseOrder(data.mostPurchaseOrders);
-  //   }
-
-  // };
 
   return (
     <>
@@ -252,7 +237,6 @@ const ShowLastAndPurchaseOrders = () => {
       ) : (
         <Stack pt={'calc(16px + 25%)'}>
           <Stack alignItems={'center'} justifyContent={'center'} spacing={2}>
-            {/* <Avatar src={cameraNotFound} sizes='large' /> */}
             <Box
               component="img"
               src={cameraNotFound}
@@ -261,16 +245,6 @@ const ShowLastAndPurchaseOrders = () => {
                 width: '120px',
                 height: '120px',
                 borderRadius: '50%',
-                // Define the animation and apply it
-                // animation: 'spin 4s linear infinite',
-                // '@keyframes spin': {
-                //   '0%': {
-                //     transform: 'rotate(0deg)',
-                //   },
-                //   '100%': {
-                //     transform: 'rotate(360deg)',
-                //   },
-                // },
               }}
             />
             <Typography variant='body1'>Waiting for new Car....</Typography>
@@ -356,7 +330,6 @@ const ShowCurrentOrders = () => {
       ) : (
         <Stack pt={'calc(16px + 25%)'}>
           <Stack alignItems={'center'} justifyContent={'center'} spacing={2}>
-            {/* <Avatar src={cameraNotFound} sizes='large' /> */}
             <Box
               component="img"
               src={cameraNotFound}
@@ -365,16 +338,6 @@ const ShowCurrentOrders = () => {
                 width: '120px',
                 height: '120px',
                 borderRadius: '50%',
-                // Define the animation and apply it
-                // animation: 'spin 4s linear infinite',
-                // '@keyframes spin': {
-                //   '0%': {
-                //     transform: 'rotate(0deg)',
-                //   },
-                //   '100%': {
-                //     transform: 'rotate(360deg)',
-                //   },
-                // },
               }}
             />
             <Typography variant='body1'>Waiting for new Car....</Typography>
