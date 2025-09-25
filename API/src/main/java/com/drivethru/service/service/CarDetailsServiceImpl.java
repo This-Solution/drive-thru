@@ -50,25 +50,42 @@ public class CarDetailsServiceImpl implements CarDetailService {
     @Autowired
     SiteRepository siteRepository;
 
+    @Autowired
+    CarVisitRepository carVisitRepository;
+
     @Override
     public void addCarDetail(Map<String, Object> carDetailJson) {
         String currentDateFolder = LocalDate.now().format(DateTimeFormatter.ofPattern("dd-MM-yyyy"));
+
         try {
             Map<String, Object> car = (Map<String, Object>) carDetailJson.get("car");
             List<Map<String, Object>> bodyStyles = (List<Map<String, Object>>) car.get("bodyStyle");
             String carType = (String) bodyStyles.get(0).get("name");
+
             List<Map<String, Object>> colors = (List<Map<String, Object>>) car.get("color");
             String carColor = (String) colors.get(0).get("name");
+
             String plateNumber = (String) carDetailJson.get("plate_number");
             String siteName = (String) carDetailJson.get("static_detail_1");
             String cameraName = (String) carDetailJson.get("static_detail_2");
 
             Site site = siteRepository.findBySiteName(siteName);
             CameraConfig cameraConfig = cameraConfigRepository.findBySiteIdAndTenantIdAndCameraName(site.getSiteId(), site.getTenantId(), cameraName);
-            String cameraType = cameraConfig.getCameraType();
-            CarResponse carResponse = new CarResponse();
 
-            if (cameraType.equals(Constants.LAN_CAMERA)) {
+            String cameraType = cameraConfig.getCameraType();
+            CarDetail carDetail;
+
+            Optional<CarDetail> existingCarOpt = carDetailRepository.findByCarPlateNumber(plateNumber);
+
+            if (existingCarOpt.isPresent()) {
+                carDetail = existingCarOpt.get();
+            } else {
+                carDetail = new CarDetail();
+                carDetail.setCarType(carType);
+                carDetail.setCarColor(carColor);
+                carDetail.setCarPlateNumber(plateNumber);
+                carDetail.setCreatedDate(LocalDateTime.now());
+
                 String carImageBase64 = (String) carDetailJson.get("car_image_base64");
                 String plateImageBase64 = (String) carDetailJson.get("plate_image_base64");
 
@@ -81,29 +98,27 @@ public class CarDetailsServiceImpl implements CarDetailService {
                 String blobCarPath = azureFileUploaderService.uploadFile(currentDateFolder, carImageName, carImagePath);
                 String blobPlatePath = azureFileUploaderService.uploadFile(currentDateFolder, plateImageName, plateImagePath);
 
-                CarDetail carDetail = new CarDetail();
-                carDetail.setTenantId(site.getTenantId());
-                carDetail.setSiteId(site.getSiteId());
-                carDetail.setCarType(carType);
-                carDetail.setCarColor(carColor);
-                carDetail.setCarPlateNumber(plateNumber);
-                carDetail.setPlateImageUrl(blobPlatePath);
                 carDetail.setCarImageUrl(blobCarPath);
-                carDetail.setCreatedDate(LocalDateTime.now());
-                carDetailRepository.save(carDetail);
+                carDetail.setPlateImageUrl(blobPlatePath);
 
-                carResponse.setCameraType(Constants.LAN_CAMERA);
-                carResponse.setCarPlateNumber(plateNumber);
-                carResponse.setCameraName(cameraConfig.getCameraName());
-                simpMessagingTemplate.convertAndSend("/topic/send", carResponse);
+                carDetail = carDetailRepository.save(carDetail);
+            }
 
-            }
-            if (cameraType.equals(Constants.COUNTER_CAMERA)) {
-                carResponse.setCameraType(Constants.COUNTER_CAMERA);
-                carResponse.setCarPlateNumber(plateNumber);
-                carResponse.setCameraName(cameraConfig.getCameraName());
-                simpMessagingTemplate.convertAndSend("/topic/send", carResponse);
-            }
+            CarVisit carVisit = new CarVisit();
+            carVisit.setCarId(carDetail.getCarId());
+            carVisit.setTenantId(cameraConfig.getTenantId());
+            carVisit.setSiteId(site.getSiteId());
+            carVisit.setCameraId(cameraConfig.getCameraId());
+            carVisit.setCreatedDate(LocalDateTime.now());
+
+            carVisitRepository.save(carVisit);
+
+            CarResponse carResponse = new CarResponse();
+            carResponse.setCameraType(cameraType);
+            carResponse.setCarPlateNumber(plateNumber);
+            carResponse.setCameraName(cameraConfig.getCameraName());
+
+            simpMessagingTemplate.convertAndSend("/topic/send", carResponse);
 
         } catch (Exception e) {
             throw new CustomException(CustomErrorHolder.UPLOAD_FAILED);
@@ -129,17 +144,19 @@ public class CarDetailsServiceImpl implements CarDetailService {
 
     @Override
     public CarDetailResponse getCarDetail(CarDetailRequest carDetailRequest) {
-        CarDetail carDetail = carDetailRepository.findFirstByTenantIdAndCarPlateNumberOrderByCreatedDateDesc(carDetailRequest.getTenantId(), carDetailRequest.getCarPlateNumber()).orElseThrow(() -> new CustomException(CustomErrorHolder.CAR_NOT_FOUND));
+        Optional<CarDetail> carDetail = carDetailRepository.findByCarPlateNumber(carDetailRequest.getCarPlateNumber());
+
+        CarVisit carVisit = carVisitRepository.findFirstByCarIdAndTenantIdOrderByCreatedDateDesc(carDetail.get().getCarId(), carDetailRequest.getTenantId());
 
         CarDetailResponse carDetailResponse = new CarDetailResponse();
-        carDetailResponse.setCarId(carDetail.getCarId());
-        carDetailResponse.setCarPlateNumber(carDetail.getCarPlateNumber());
-        carDetailResponse.setCarColor(carDetail.getCarColor());
-        carDetailResponse.setCarType(carDetail.getCarType());
-        carDetailResponse.setCarImageUrl(azureFileUploaderService.generateBlobUrl(carDetail.getCarImageUrl()));
-        carDetailResponse.setPlateImageUrl(azureFileUploaderService.generateBlobUrl(carDetail.getPlateImageUrl()));
+        carDetailResponse.setCarId(carDetail.get().getCarId());
+        carDetailResponse.setCarPlateNumber(carDetail.get().getCarPlateNumber());
+        carDetailResponse.setCarColor(carDetail.get().getCarColor());
+        carDetailResponse.setCarType(carDetail.get().getCarType());
+        carDetailResponse.setCarImageUrl(azureFileUploaderService.generateBlobUrl(carDetail.get().getCarImageUrl()));
+        carDetailResponse.setPlateImageUrl(azureFileUploaderService.generateBlobUrl(carDetail.get().getPlateImageUrl()));
 
-        List<CarDetail> carDetails = carDetailRepository.findByCarPlateNumber(carDetailRequest.getCarPlateNumber());
+        Optional<CarDetail> carDetails = carDetailRepository.findByCarPlateNumber(carDetailRequest.getCarPlateNumber());
         List<CameraConfig> cameraConfig = cameraConfigRepository.findByTenantId(carDetailRequest.getTenantId());
 
         String cameraType = cameraConfig.stream().map(CameraConfig::getCameraType).findFirst().orElse(null);
@@ -153,32 +170,30 @@ public class CarDetailsServiceImpl implements CarDetailService {
         long count30to60 = 0, red30to60 = 0, green30to60 = 0;
         long count60to90 = 0, red60to90 = 0, green60to90 = 0;
 
-        for (CarDetail detail : carDetails) {
+        LocalDateTime createdDate = carDetails.get().getCreatedDate();
 
-            LocalDateTime createdDate = detail.getCreatedDate();
+        Optional<OrderCarStatus> optionalStatus = orderCarStatusRepository.findByCarId(carDetails.get().getCarId());
+        String status = optionalStatus.map(OrderCarStatus::getStatus).orElse(null);
 
-            Optional<OrderCarStatus> optionalStatus = orderCarStatusRepository.findByCarId(detail.getCarId());
-            String status = optionalStatus.map(OrderCarStatus::getStatus).orElse(null);
+        boolean isRed = CarColorStatus.RED.name().equalsIgnoreCase(status);
+        boolean isGreen = CarColorStatus.GREEN.name().equalsIgnoreCase(status);
 
-            boolean isRed = CarColorStatus.RED.name().equalsIgnoreCase(status);
-            boolean isGreen = CarColorStatus.GREEN.name().equalsIgnoreCase(status);
-
-            if (createdDate != null) {
-                countLast30++;
-                if (createdDate.isAfter(days30)) {
-                    if (isRed) redLast30++;
-                    if (isGreen) greenLast30++;
-                } else if (createdDate.isAfter(days60) && createdDate.isBefore(days30)) {
-                    count30to60++;
-                    if (isRed) red30to60++;
-                    if (isGreen) green30to60++;
-                } else if (createdDate.isAfter(days90) && createdDate.isBefore(days60)) {
-                    count60to90++;
-                    if (isRed) red60to90++;
-                    if (isGreen) green60to90++;
-                }
+        if (createdDate != null) {
+            countLast30++;
+            if (createdDate.isAfter(days30)) {
+                if (isRed) redLast30++;
+                if (isGreen) greenLast30++;
+            } else if (createdDate.isAfter(days60) && createdDate.isBefore(days30)) {
+                count30to60++;
+                if (isRed) red30to60++;
+                if (isGreen) green30to60++;
+            } else if (createdDate.isAfter(days90) && createdDate.isBefore(days60)) {
+                count60to90++;
+                if (isRed) red60to90++;
+                if (isGreen) green60to90++;
             }
         }
+
         if ("L".equalsIgnoreCase(cameraType)) {
             countLast30 = Math.max(0, countLast30 - 1);
             count30to60 = Math.max(0, count30to60 - 1);

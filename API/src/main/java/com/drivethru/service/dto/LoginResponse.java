@@ -5,6 +5,7 @@ public class LoginResponse {
     private Integer tenantId;
     private Integer roleId;
     private Integer siteId;
+    private String siteName;
     private String name;
     private String phone;
 
@@ -14,6 +15,14 @@ public class LoginResponse {
 
     public void setSiteId(Integer siteId) {
         this.siteId = siteId;
+    }
+
+    public String getSiteName() {
+        return siteName;
+    }
+
+    public void setSiteName(String siteName) {
+        this.siteName = siteName;
     }
 
     public String getName() {

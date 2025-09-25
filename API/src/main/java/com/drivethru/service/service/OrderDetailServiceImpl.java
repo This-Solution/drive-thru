@@ -23,6 +23,7 @@ import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
+import java.util.Optional;
 
 @Service
 public class OrderDetailServiceImpl implements OrderDetailService {
@@ -45,6 +46,12 @@ public class OrderDetailServiceImpl implements OrderDetailService {
     @Autowired
     OrderCarStatusRepository orderCarStatusRepository;
 
+    @Autowired
+    SiteRepository siteRepository;
+
+    @Autowired
+    CarVisitRepository carVisitRepository;
+
     @Override
     @Transactional
     public void createdOrder(WebhookOrderRequest webhookOrderRequest) {
@@ -57,17 +64,19 @@ public class OrderDetailServiceImpl implements OrderDetailService {
             Integer totalPrice = (int) Double.parseDouble(totalPriceStr);
             LocalDateTime dateTime = DateAndTimeHelper.parse(webhookOrderRequest.getDatetime());
             CameraConfig cameraConfig = cameraConfigRepository.findByOrderIpAddress(webhookOrderRequest.getSource_ip());
-            Tenant tenant = tenantRepository.findById(cameraConfig.getTenantId()).orElseThrow(() -> new CustomException(CustomErrorHolder.TENANT_NOT_FOUND));
-            CarDetail carDetail = carDetailRepository.findFirstByTenantIdOrderByCreatedDateDesc(tenant.getTenantId()).orElseThrow(() -> new CustomException(CustomErrorHolder.CAR_NOT_FOUND));
+            Site site = siteRepository.findBySiteName(webhookOrderRequest.getSite_name());
+            Tenant tenant = tenantRepository.findById(site.getTenantId()).orElseThrow(() -> new CustomException(CustomErrorHolder.TENANT_NOT_FOUND));
+            Optional<CarVisit> carVisit = carVisitRepository.findFirstByTenantIdOrderByCreatedDateDesc(tenant.getTenantId());
+            Optional<CarDetail> carDetail = carDetailRepository.findById(carVisit.get().getCarId());
 
             OrderDetail orderDetail = new OrderDetail();
             orderDetail.setTotalPrice(totalPrice);
             orderDetail.setSourceIp(webhookOrderRequest.getSource_ip());
             orderDetail.setCreatedDate(dateTime);
-            orderDetail.setTenantId(carDetail.getTenantId());
+            orderDetail.setTenantId(tenant.getTenantId());
             orderDetail.setSiteId(cameraConfig.getSiteId());
-            orderDetail.setCarId(carDetail.getCarId());
-            orderDetail.setCarPlateNumber(carDetail.getCarPlateNumber());
+            orderDetail.setCarId(carDetail.get().getCarId());
+            orderDetail.setCarPlateNumber(carDetail.get().getCarPlateNumber());
             orderDetail.setOrderStatus(String.valueOf(OrderStatus.CREATED));
             orderDetailRepository.save(orderDetail);
 
@@ -94,7 +103,7 @@ public class OrderDetailServiceImpl implements OrderDetailService {
 
             OrderCarStatus orderCarStatus = new OrderCarStatus();
             orderCarStatus.setOrderId(orderDetail.getOrderId());
-            orderCarStatus.setCarId(carDetail.getCarId());
+            orderCarStatus.setCarId(carDetail.get().getCarId());
             orderCarStatus.setTenantId(tenant.getTenantId());
             orderCarStatus.setStatus(String.valueOf(CarColorStatus.GREEN));
             orderCarStatus.setCreatedDate(LocalDateTime.now());
