@@ -1,6 +1,7 @@
 package com.drivethru.service.service;
 
 import com.drivethru.service.constant.Constants;
+import com.drivethru.service.dto.OrderItemCarDetailProjection;
 import com.drivethru.service.dto.WebhookOrderRequest;
 import com.drivethru.service.entity.*;
 import com.drivethru.service.entity.types.CarColorStatus;
@@ -22,8 +23,11 @@ import javax.xml.parsers.DocumentBuilderFactory;
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.Optional;
+import java.util.List;
 
 @Service
 public class OrderDetailServiceImpl implements OrderDetailService {
@@ -112,5 +116,28 @@ public class OrderDetailServiceImpl implements OrderDetailService {
         } catch (Exception e) {
             throw new CustomException(CustomErrorHolder.ORDER_NOT_FOUND);
         }
+    }
+
+    @Override
+    public List<OrderItemCarDetailProjection> getOrderItems(Integer siteId, String itemName, LocalDate localDate, String startTime, String endTime) {
+        if (itemName != null && itemName.trim().isEmpty()) {
+            itemName = null;
+        }
+        LocalDateTime actualStartTime;
+        if (startTime != null) {
+            LocalTime parsedStartTime = LocalTime.parse(startTime);
+            actualStartTime = localDate.atTime(parsedStartTime);
+        } else {
+            actualStartTime = localDate.atTime(LocalTime.MIN);
+        }
+        LocalDateTime actualEndTime;
+        if (endTime != null) {
+            LocalTime parsedEndTime = LocalTime.parse(endTime);
+            actualEndTime = localDate.atTime(parsedEndTime);
+        } else {
+            actualEndTime = localDate.atTime(LocalTime.MAX);
+        }
+        List<OrderItemCarDetailProjection> orderItems = orderItemRepository.findOrderItemsWithCarDetails(siteId, itemName, actualStartTime, actualEndTime);
+        return orderItems;
     }
 }
