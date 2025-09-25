@@ -9,4 +9,6 @@ import java.util.Optional;
 @Repository
 public interface OrderCarStatusRepository extends JpaRepository<OrderCarStatus, Integer> {
     Optional<OrderCarStatus> findByCarId(Integer carId);
+
+    OrderCarStatus findByOrderIdAndCarId(Integer OrderId, Integer CarId);
 }

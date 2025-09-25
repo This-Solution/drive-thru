@@ -4,6 +4,7 @@ import com.drivethru.service.common.ResponseObject;
 import com.drivethru.service.configuration.JwtHelper;
 import com.drivethru.service.dto.*;
 import com.drivethru.service.entity.CarDetail;
+import com.drivethru.service.entity.OrderCarStatus;
 import com.drivethru.service.service.CarDetailService;
 import com.drivethru.service.constant.RouteConstant;
 import jakarta.servlet.http.HttpServletRequest;
@@ -66,6 +67,14 @@ public class CarDetailController {
         ResponseObject<LastAndMostPurchaseOrderDetailsResponse> responseObject = new ResponseObject<>();
         LastAndMostPurchaseOrderDetailsResponse lastAndMostPurchaseOrderDetails = carDetailService.getLastAndMostPurchaseOrderDetails(carDetailRequest);
         responseObject.setData(lastAndMostPurchaseOrderDetails);
+        return new ResponseEntity<>(responseObject, HttpStatus.OK);
+    }
+
+    @PostMapping("/updateStatus")
+    public ResponseEntity<ResponseObject<OrderCarStatus>> updateStatus(@RequestBody UpdateStatusRequest updateStatusRequest) {
+        ResponseObject<OrderCarStatus> responseObject = new ResponseObject<>();
+        OrderCarStatus orderCarStatus = carDetailService.updateStatus(updateStatusRequest);
+        responseObject.setData(orderCarStatus);
         return new ResponseEntity<>(responseObject, HttpStatus.OK);
     }
 

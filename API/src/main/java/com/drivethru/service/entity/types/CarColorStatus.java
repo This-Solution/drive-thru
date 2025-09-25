@@ -4,5 +4,4 @@ public enum CarColorStatus {
     RED,
     GREEN,
     PINK,
-    WHITE
 }

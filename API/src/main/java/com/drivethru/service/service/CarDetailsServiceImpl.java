@@ -145,8 +145,7 @@ public class CarDetailsServiceImpl implements CarDetailService {
     @Override
     public CarDetailResponse getCarDetail(CarDetailRequest carDetailRequest) {
         Optional<CarDetail> carDetail = carDetailRepository.findByCarPlateNumber(carDetailRequest.getCarPlateNumber());
-
-        CarVisit carVisit = carVisitRepository.findFirstByCarIdAndTenantIdOrderByCreatedDateDesc(carDetail.get().getCarId(), carDetailRequest.getTenantId());
+        List<CarVisit> carVisits = carVisitRepository.findByCarId(carDetail.get().getCarId());
 
         CarDetailResponse carDetailResponse = new CarDetailResponse();
         carDetailResponse.setCarId(carDetail.get().getCarId());
@@ -170,31 +169,33 @@ public class CarDetailsServiceImpl implements CarDetailService {
         long count30to60 = 0, red30to60 = 0, green30to60 = 0;
         long count60to90 = 0, red60to90 = 0, green60to90 = 0;
 
-        LocalDateTime createdDate = carDetails.get().getCreatedDate();
+        for (CarVisit detail : carVisits) {
+            LocalDateTime createdDate = carDetails.get().getCreatedDate();
 
-        Optional<OrderCarStatus> optionalStatus = orderCarStatusRepository.findByCarId(carDetails.get().getCarId());
-        String status = optionalStatus.map(OrderCarStatus::getStatus).orElse(null);
+            Optional<OrderCarStatus> optionalStatus = orderCarStatusRepository.findByCarId(carDetails.get().getCarId());
+            String status = optionalStatus.map(OrderCarStatus::getStatus).orElse(null);
 
-        boolean isRed = CarColorStatus.RED.name().equalsIgnoreCase(status);
-        boolean isGreen = CarColorStatus.GREEN.name().equalsIgnoreCase(status);
+            boolean isRed = CarColorStatus.RED.name().equalsIgnoreCase(status);
+            boolean isGreen = CarColorStatus.GREEN.name().equalsIgnoreCase(status);
 
-        if (createdDate != null) {
-            countLast30++;
-            if (createdDate.isAfter(days30)) {
-                if (isRed) redLast30++;
-                if (isGreen) greenLast30++;
-            } else if (createdDate.isAfter(days60) && createdDate.isBefore(days30)) {
-                count30to60++;
-                if (isRed) red30to60++;
-                if (isGreen) green30to60++;
-            } else if (createdDate.isAfter(days90) && createdDate.isBefore(days60)) {
-                count60to90++;
-                if (isRed) red60to90++;
-                if (isGreen) green60to90++;
+            if (createdDate != null) {
+                countLast30++;
+                if (createdDate.isAfter(days30)) {
+                    if (isRed) redLast30++;
+                    if (isGreen) greenLast30++;
+                } else if (createdDate.isAfter(days60) && createdDate.isBefore(days30)) {
+                    count30to60++;
+                    if (isRed) red30to60++;
+                    if (isGreen) green30to60++;
+                } else if (createdDate.isAfter(days90) && createdDate.isBefore(days60)) {
+                    count60to90++;
+                    if (isRed) red60to90++;
+                    if (isGreen) green60to90++;
+                }
             }
         }
 
-        if ("L".equalsIgnoreCase(cameraType)) {
+        if (cameraType.equals(Constants.LAN_CAMERA)) {
             countLast30 = Math.max(0, countLast30 - 1);
             count30to60 = Math.max(0, count30to60 - 1);
             count60to90 = Math.max(0, count60to90 - 1);
@@ -214,7 +215,7 @@ public class CarDetailsServiceImpl implements CarDetailService {
 
     private String resolveColorStatus(long count, long redCount, long greenCount) {
         if (count == 0) {
-            return CarColorStatus.WHITE.name();
+            return CarColorStatus.GREEN.name();
         } else if (count == redCount) {
             return CarColorStatus.RED.name();
         } else if (count == greenCount) {
@@ -228,10 +229,11 @@ public class CarDetailsServiceImpl implements CarDetailService {
     @Override
     public List<CurrentOrderItemResponse> getCurrentOrderDetails(CarDetailRequest carDetailRequest) {
         OrderDetail orderDetail = orderDetailRepository.findFirstByTenantIdAndCarPlateNumberOrderByCreatedDateDesc(carDetailRequest.getTenantId(), carDetailRequest.getCarPlateNumber()).orElseThrow(() -> new CustomException(CustomErrorHolder.ORDER_NOT_FOUND));
+        Double totalPrice = Double.valueOf(orderDetail.getTotalPrice());
         List<OrderItem> orderItems = orderItemRepository.findByOrderId(orderDetail.getOrderId());
         orderDetail.setOrderStatus(String.valueOf(OrderStatus.DELIVERED));
         orderDetailRepository.save(orderDetail);
-        return orderItems.stream().map(item -> new CurrentOrderItemResponse(item.getName(), item.getQuantity(), item.getPrice())).collect(Collectors.toList());
+        return orderItems.stream().map(item -> new CurrentOrderItemResponse(item.getName(), item.getQuantity(), item.getPrice(), totalPrice)).collect(Collectors.toList());
     }
 
     @Override
@@ -262,6 +264,15 @@ public class CarDetailsServiceImpl implements CarDetailService {
     }
 
     @Override
+    public OrderCarStatus updateStatus(UpdateStatusRequest updateStatusRequest) {
+        OrderCarStatus orderCarStatus = orderCarStatusRepository.findByOrderIdAndCarId(updateStatusRequest.getOrderId(), updateStatusRequest.getCarId());
+        orderCarStatus.setStatus(updateStatusRequest.getStatus());
+        orderCarStatus.setNotes(updateStatusRequest.getNotes());
+        orderCarStatusRepository.save(orderCarStatus);
+        return orderCarStatus;
+    }
+
+    @Override
     public List<CameraResponseDTO> latestInfo(String SiteId) {
         int loginSiteId = Integer.parseInt(SiteId);
         List<CameraConfig> cameraConfigList = cameraConfigRepository.findAllBySiteIdAndIsActiveTrue(loginSiteId);
@@ -269,13 +280,21 @@ public class CarDetailsServiceImpl implements CarDetailService {
 
         for (CameraConfig config : cameraConfigList) {
             CarVisit carVisit = carVisitRepository.findFirstByCameraIdOrderByCreatedDateDesc(config.getCameraId());
-            if (carVisit == null) {
+
+            if (carVisit == null) continue;
+
+            LocalDateTime now = LocalDateTime.now();
+            LocalDateTime thresholdTime = now.minusSeconds(config.getReloadTime());
+
+            if (carVisit.getCreatedDate().isBefore(thresholdTime)) {
                 continue;
             }
+
             Optional<CarDetail> carDetailOpt = carDetailRepository.findById(carVisit.getCarId());
             if (!carDetailOpt.isPresent()) {
                 continue;
             }
+
             CarDetail carDetail = carDetailOpt.get();
             CarDetailRequest carDetailRequest = new CarDetailRequest();
             carDetailRequest.setCarPlateNumber(carDetail.getCarPlateNumber());
@@ -284,20 +303,23 @@ public class CarDetailsServiceImpl implements CarDetailService {
             CameraResponseDTO cameraResponseDTO = new CameraResponseDTO();
             cameraResponseDTO.setCameraName(config.getCameraName());
 
-            if (config.getCameraType().equals(Constants.LAN_CAMERA)) {
+            if (Constants.LAN_CAMERA.equals(config.getCameraType())) {
                 CarDetailResponse carDetailResponse = getCarDetail(carDetailRequest);
                 if (carDetailResponse != null) {
                     cameraResponseDTO.setCarDetail(carDetailResponse);
+
                     LastAndMostPurchaseOrderDetailsResponse lastAndMostPurchaseOrderDetailsResponse = getLastAndMostPurchaseOrderDetails(carDetailRequest);
+
                     if (lastAndMostPurchaseOrderDetailsResponse != null) {
                         cameraResponseDTO.setLastAndMostPurchaseOrderDetailsResponse(List.of(lastAndMostPurchaseOrderDetailsResponse));
                     }
                 }
 
-            } else if (config.getCameraType().equals(Constants.COUNTER_CAMERA)) {
+            } else if (Constants.COUNTER_CAMERA.equals(config.getCameraType())) {
                 CarDetailResponse carDetailResponse = getCarDetail(carDetailRequest);
                 if (carDetailResponse != null) {
                     cameraResponseDTO.setCarDetail(carDetailResponse);
+
                     List<CurrentOrderItemResponse> currentOrderDetails = getCurrentOrderDetails(carDetailRequest);
                     if (currentOrderDetails != null && !currentOrderDetails.isEmpty()) {
                         cameraResponseDTO.setCurrentOrderDetails(currentOrderDetails);
@@ -307,6 +329,8 @@ public class CarDetailsServiceImpl implements CarDetailService {
 
             cameraResponseList.add(cameraResponseDTO);
         }
+
         return cameraResponseList;
     }
+
 }
