@@ -91,7 +91,6 @@ const EditSite = ({ isOpen, handleClose, siteDetails, onSave }) => {
         // preparationTime: values.preparationTime
       };
 
-      console.log(payload);
       const { data, error } = siteDetails ? await ApiService.updateSiteAsync(siteDetails.siteId, payload)
         : await ApiService.addSiteAsync(payload);
       if (data) {

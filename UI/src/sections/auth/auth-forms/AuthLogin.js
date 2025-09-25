@@ -132,161 +132,144 @@ const AuthLogin = () => {
   const handelCameraInfo = async (siteId) => {
     const { data } = await ApiService.getCameraConfigAsync(siteId);
     if (data) {
-      // const cameraConfig = {};
-      // data.map((item) => {
-      //   if (item.cameraType === "L") {
-      //     if (!cameraConfig[item.cameraType]) {
-      //       cameraConfig[item.cameraType] = [];
-      //     }
-      //     cameraConfig[item.cameraType].push(item)
-      //   } else if (item.cameraType === "C") {
-      //     if (!cameraConfig[item.cameraType]) {
-      //       cameraConfig[item.cameraType] = [];
-      //     }
-      //     cameraConfig[item.cameraType].push(item);
-      //   }
-      // })
       dispatch(setCameraConfig(data));
     }
   };
 
   return (
     <>
-      {!isLoading ? (
-        <Formik
-          initialValues={{
-            email: '',
-            password: '',
-            authCode: ''
-          }}
-          validationSchema={Yup.object().shape({
-            email: Yup.string().email('Please enter a valid email address.').max(255).required('Email address is required.'),
-            password: Yup.string().max(255).required('Password is required.'),
-            authCode: Yup.number().when(twoFactAuth, {
-              is: () => twoFactAuth === 'true',
-              then: Yup.number().required(`Authentication code is required.`),
-              otherwise: Yup.number().notRequired()
-            })
-          })}
-          onSubmit={async (values, { setSubmitting, setErrors }) => {
-            setLoading(true);
-            setSubmitting(true);
-            const { data, error } = await ApiService.loginAsync(values);
-            setSubmitting(false);
-            if (data) {
-              const token = { session: data.sessionToken };
-              utils.setTokensToStorage(token);
-              // if (data.user.role === enums.userRole.SuperAdmin) {
-              //   setFlavourDialog(true);
-              // } else {
-              // const token = { session: data.sessionToken, refresh: data.refreshToken };
-              // const flavourDetail = getFlavourDetail(data.user.flavourId);
-              // dispatch(setFlavour({ flavour: flavourDetail }));
-              // utils.setItemToStorage('flavour', JSON.stringify(flavourDetail));
-              dispatch(login({ user: data.user, token }));
-              await handelCameraInfo(data.user.siteId);
-              navigate('/order-trace/cars');
-              // }
-            } else if (error) {
-              console.log(error);
-              setErrors(error);
-            }
-            setLoading(false);
-          }}
-        >
-          {({ errors, handleBlur, handleChange, handleSubmit, isSubmitting, touched, values }) => (
-            <form noValidate onSubmit={handleSubmit}>
-              <Grid container spacing={3}>
-                <Grid item xs={12}>
+      <Formik
+        initialValues={{
+          email: '',
+          password: '',
+          authCode: ''
+        }}
+        validationSchema={Yup.object().shape({
+          email: Yup.string().email('Please enter a valid email address.').max(255).required('Email address is required.'),
+          password: Yup.string().max(255).required('Password is required.'),
+          authCode: Yup.number().when(twoFactAuth, {
+            is: () => twoFactAuth === 'true',
+            then: Yup.number().required(`Authentication code is required.`),
+            otherwise: Yup.number().notRequired()
+          })
+        })}
+        onSubmit={async (values, { setSubmitting, setErrors }) => {
+          setSubmitting(true);
+          const { data, error } = await ApiService.loginAsync(values);
+          setSubmitting(false);
+          if (data) {
+            const token = { session: data.sessionToken };
+            utils.setTokensToStorage(token);
+            // if (data.user.role === enums.userRole.SuperAdmin) {
+            //   setFlavourDialog(true);
+            // } else {
+            // const token = { session: data.sessionToken, refresh: data.refreshToken };
+            // const flavourDetail = getFlavourDetail(data.user.flavourId);
+            // dispatch(setFlavour({ flavour: flavourDetail }));
+            // utils.setItemToStorage('flavour', JSON.stringify(flavourDetail));
+            dispatch(login({ user: data.user, token }));
+            await handelCameraInfo(data.user.siteId);
+            navigate('/order-trace/cars');
+            // }
+          } else if (error) {
+            console.log(error);
+            setErrors(error);
+          }
+        }}
+      >
+        {({ errors, handleBlur, handleChange, handleSubmit, isSubmitting, touched, values }) => (
+          <form noValidate onSubmit={handleSubmit}>
+            <Grid container spacing={3}>
+              <Grid item xs={12}>
+                <Stack spacing={0.5}>
+                  <InputLabel htmlFor='email'>Email Address</InputLabel>
+                  <OutlinedInput
+                    id='email'
+                    type='email'
+                    value={values.email}
+                    name='email'
+                    inputProps={{ maxLength: 255 }}
+                    onBlur={handleBlur}
+                    onChange={handleChange}
+                    placeholder='Enter email address'
+                    fullWidth
+                    error={Boolean(touched.email && errors.email)}
+                  />
+                  {touched.email && errors.email && (
+                    <FormHelperText error id='email'>
+                      {errors.email}
+                    </FormHelperText>
+                  )}
+                </Stack>
+              </Grid>
+              <Grid item xs={12}>
+                <Stack spacing={0.5}>
+                  <InputLabel htmlFor='password'>Password</InputLabel>
+                  <OutlinedInput
+                    fullWidth
+                    error={Boolean(touched.password && errors.password)}
+                    id='password'
+                    type={showPassword ? 'text' : 'password'}
+                    value={values.password}
+                    inputProps={{ maxLength: 255 }}
+                    name='password'
+                    onBlur={(event) => {
+                      handleBlur(event);
+                    }}
+                    onChange={handleChange}
+                    endAdornment={
+                      <InputAdornment position='end'>
+                        <IconButton
+                          aria-label='toggle password visibility'
+                          onClick={handleClickShowPassword}
+                          onMouseDown={handleMouseDownPassword}
+                          edge='end'
+                          color='secondary'
+                        >
+                          {showPassword ? <VisibilityOutlined /> : <VisibilityOffOutlined />}
+                        </IconButton>
+                      </InputAdornment>
+                    }
+                    placeholder='Enter password'
+                  />
+
+                  {touched.password && errors.password && (
+                    <FormHelperText error id='password'>
+                      {errors.password}
+                    </FormHelperText>
+                  )}
+                </Stack>
+              </Grid>
+
+              {twoFactAuth === 'true' ? (
+                <Grid item xs={6}>
                   <Stack spacing={0.5}>
-                    <InputLabel htmlFor='email'>Email Address</InputLabel>
-                    <OutlinedInput
-                      id='email'
-                      type='email'
-                      value={values.email}
-                      name='email'
-                      inputProps={{ maxLength: 255 }}
-                      onBlur={handleBlur}
-                      onChange={handleChange}
-                      placeholder='Enter email address'
-                      fullWidth
-                      error={Boolean(touched.email && errors.email)}
-                    />
-                    {touched.email && errors.email && (
-                      <FormHelperText error id='email'>
-                        {errors.email}
-                      </FormHelperText>
-                    )}
-                  </Stack>
-                </Grid>
-                <Grid item xs={12}>
-                  <Stack spacing={0.5}>
-                    <InputLabel htmlFor='password'>Password</InputLabel>
+                    <InputLabel>Authentication Code</InputLabel>
                     <OutlinedInput
                       fullWidth
-                      error={Boolean(touched.password && errors.password)}
-                      id='password'
-                      type={showPassword ? 'text' : 'password'}
-                      value={values.password}
-                      inputProps={{ maxLength: 255 }}
-                      name='password'
+                      error={Boolean(touched.authCode && errors.authCode)}
+                      id='authCode'
+                      value={values.authCode}
+                      inputProps={{ maxLength: 6 }}
+                      name='authCode'
+                      onKeyDown={utils.handleNumericKey}
                       onBlur={(event) => {
                         handleBlur(event);
                       }}
                       onChange={handleChange}
-                      endAdornment={
-                        <InputAdornment position='end'>
-                          <IconButton
-                            aria-label='toggle password visibility'
-                            onClick={handleClickShowPassword}
-                            onMouseDown={handleMouseDownPassword}
-                            edge='end'
-                            color='secondary'
-                          >
-                            {showPassword ? <VisibilityOutlined /> : <VisibilityOffOutlined />}
-                          </IconButton>
-                        </InputAdornment>
-                      }
-                      placeholder='Enter password'
+                      placeholder='Enter authentication code'
                     />
 
-                    {touched.password && errors.password && (
-                      <FormHelperText error id='password'>
-                        {errors.password}
+                    {touched.authCode && errors.authCode && (
+                      <FormHelperText error id='authCode'>
+                        {errors.authCode}
                       </FormHelperText>
                     )}
                   </Stack>
                 </Grid>
+              ) : null}
 
-                {twoFactAuth === 'true' ? (
-                  <Grid item xs={6}>
-                    <Stack spacing={0.5}>
-                      <InputLabel>Authentication Code</InputLabel>
-                      <OutlinedInput
-                        fullWidth
-                        error={Boolean(touched.authCode && errors.authCode)}
-                        id='authCode'
-                        value={values.authCode}
-                        inputProps={{ maxLength: 6 }}
-                        name='authCode'
-                        onKeyDown={utils.handleNumericKey}
-                        onBlur={(event) => {
-                          handleBlur(event);
-                        }}
-                        onChange={handleChange}
-                        placeholder='Enter authentication code'
-                      />
-
-                      {touched.authCode && errors.authCode && (
-                        <FormHelperText error id='authCode'>
-                          {errors.authCode}
-                        </FormHelperText>
-                      )}
-                    </Stack>
-                  </Grid>
-                ) : null}
-
-                {/* <Grid item xs={12} sx={{ mt: -1 }}>
+              {/* <Grid item xs={12} sx={{ mt: -1 }}>
                 <Stack direction='row' justifyContent='space-between' alignItems='center' spacing={2}>
                   <FormControlLabel
                     control={
@@ -305,33 +288,30 @@ const AuthLogin = () => {
                   </Link>
                 </Stack>
               </Grid> */}
-                {errors.submit && (
-                  <Grid item xs={12}>
-                    <FormHelperText error>{errors.submit}</FormHelperText>
-                  </Grid>
-                )}
+              {errors.submit && (
                 <Grid item xs={12}>
-                  <AnimateButton>
-                    <Button
-                      disableElevation
-                      disabled={isSubmitting}
-                      fullWidth
-                      size='large'
-                      type='submit'
-                      variant='contained'
-                      color='primary'
-                    >
-                      Login
-                    </Button>
-                  </AnimateButton>
+                  <FormHelperText error>{errors.submit}</FormHelperText>
                 </Grid>
+              )}
+              <Grid item xs={12}>
+                <AnimateButton>
+                  <Button
+                    disableElevation
+                    disabled={isSubmitting}
+                    fullWidth
+                    size='large'
+                    type='submit'
+                    variant='contained'
+                    color='primary'
+                  >
+                    Login
+                  </Button>
+                </AnimateButton>
               </Grid>
-            </form>
-          )}
-        </Formik>
-      ) : (
-        <Loader />
-      )}
+            </Grid>
+          </form>
+        )}
+      </Formik>
       {openFlavourDialog && flavours && <FlavourDialog />}
     </>
   );

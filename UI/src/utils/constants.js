@@ -17,6 +17,7 @@ const constants = {
     tokens: 'Tokens'
   },
   webSocketUrl: 'wss://dt1.thissolution.com/ws',
+  removeCarTime: 30000,
   defaultErrorMessage: 'Sorry, something went wrong. Please refresh the page or log back in.',
   mimeTypes: {
     pdf: 'application/pdf',

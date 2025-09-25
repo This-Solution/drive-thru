@@ -3,32 +3,27 @@ import {
   Avatar,
   Box,
   CardContent,
-  CardMedia,
-  Chip,
   Divider,
   Grid,
-  IconButton,
   ImageList,
   ImageListItem,
-  ImageListItemBar,
   Link,
   Stack,
   Typography
 } from '@mui/material';
 import shopkeeper from 'assets/images/icons/merchant.png';
 import deliveryMan from 'assets/images/icons/shopkeeper.png';
-import orderNotFound from 'assets/images/logos/OrderNotFound.png';
 import cameraNotFound from 'assets/images/logos/camera.png';
+import orderNotFound from 'assets/images/logos/OrderNotFound.png';
 import { useStomp } from 'contexts/StompContext';
 import { isEmpty } from 'lodash';
 import { useEffect, useState } from 'react';
 import ApiService from 'service/ApiService';
 import { useSelector } from 'store';
+import constants from 'utils/constants';
 import enums from 'utils/enums';
 import OrderItemCard from './cards/OrderItemCard';
 import MainCard from './MainCard';
-import constants from 'utils/constants';
-import Dot from './@extended/Dot';
 
 const ShowCarDetails = ({ carDetails }) => {
   return (
@@ -163,21 +158,27 @@ const ShowCarDetails = ({ carDetails }) => {
   );
 };
 
-const OrderAndCarDetails = ({ carDetails, lastOrders, mostPurchaseOrder, cameraName }) => {
-  // console.log(cameraName)
-  // useEffect(() => {
-  //   const timerId = setTimeout(() => {
-  //     console.log('timeout called', cameraName);
-  //     // const carDetails = { ...orderWindow };
-  //     delete addcamera[cameraName];
-  //     // console.log(carDetails);
-  //     // setOrderWindow(carDetails);
-  //   }, constants.removeCarTime);
+const OrderAndCarDetails = ({ carDetails = {}, lastOrders = [], mostPurchaseOrder = [], cameraName = '', currentOrders = [] }) => {
+  const { orderWindow, setOrderWindow, deliveryWindow, setDeliveryWindow } = useStomp();
 
-  //   return () => {
-  //     clearTimeout(timerId);
-  //   };
-  // });
+  useEffect(() => {
+    const timerId = setTimeout(() => {
+      if (orderWindow[cameraName]) {
+        const carDetail = { ...orderWindow };
+        delete carDetail[cameraName];
+        setOrderWindow(carDetail);
+
+      } else if (deliveryWindow[cameraName]) {
+        const carDetail = { ...deliveryWindow };
+        delete carDetail[cameraName];
+        setDeliveryWindow(carDetail);
+      }
+    }, constants.removeCarTime);
+
+    return () => {
+      clearTimeout(timerId);
+    };
+  });
   return (
     <>
       <ShowCarDetails carDetails={carDetails} />
@@ -254,6 +255,37 @@ const OrderAndCarDetails = ({ carDetails, lastOrders, mostPurchaseOrder, cameraN
           </Box>
         </>
       )}
+
+      {currentOrders && currentOrders.length > 0 && (
+        <>
+          <Stack p={2}>
+            <Typography variant='h5'>Current Order Being Placed</Typography>
+          </Stack>
+          <Box
+            sx={{
+              maxHeight: '30vh',
+              overflowY: 'auto',
+              mb: 2,
+              '&::-webkit-scrollbar': {
+                display: 'none'
+              }
+            }}
+            px={2}
+          >
+            <Grid container spacing={1}>
+              {currentOrders.map((dish, index) => {
+                return (
+                  <>
+                    <Grid item xs={12} sm={6} key={index}>
+                      <OrderItemCard dish={dish} />{' '}
+                    </Grid>
+                  </>
+                );
+              })}
+            </Grid>
+          </Box>
+        </>
+      )}
     </>
   );
 };
@@ -265,12 +297,12 @@ const OrderCameraView = ({ cameraInfo }) => {
   const [isLoading, setIsLoading] = useState(true);
   const { user } = useSelector((state) => state.auth);
 
-  const { orderWindow, cameraName, addcamera } = useStomp();
+  const { orderWindow } = useStomp();
   const fetchCarInformation = async () => {
     setIsLoading(true);
     const payload = {
       tenantId: user.tenantId,
-      carPlateNumber: orderWindow[cameraName]
+      carPlateNumber: orderWindow[cameraInfo]
     };
     const [carInfo, orderInfo] = await Promise.all([
       ApiService.getCarDetailsAsync(payload),
@@ -289,8 +321,12 @@ const OrderCameraView = ({ cameraInfo }) => {
   };
 
   useEffect(() => {
-    if (!isEmpty(orderWindow) && cameraName === cameraInfo && addcamera[cameraName]) {
+    if (!isEmpty(orderWindow) && orderWindow[cameraInfo]) {
       fetchCarInformation();
+    }
+
+    if (!orderWindow[cameraInfo]) {
+      setCarDetails({})
     }
   }, [orderWindow]);
 
@@ -323,7 +359,7 @@ const OrderCameraView = ({ cameraInfo }) => {
 const DeliveryCameraView = ({ cameraInfo }) => {
   const [currentOrders, setCurrentOrders] = useState([]);
   const [carDetails, setCarDetails] = useState({});
-  const { deliveryWindow, cameraName } = useStomp();
+  const { deliveryWindow } = useStomp();
   const { user } = useSelector((state) => state.auth);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -331,7 +367,7 @@ const DeliveryCameraView = ({ cameraInfo }) => {
     setIsLoading(true);
     const payload = {
       tenantId: user.tenantId,
-      carPlateNumber: deliveryWindow[cameraName]
+      carPlateNumber: deliveryWindow[cameraInfo]
     };
     const [carInfo, orderInfo] = await Promise.all([ApiService.getCarDetailsAsync(payload), ApiService.getCurrentOrderAsync(payload)]);
 
@@ -346,47 +382,18 @@ const DeliveryCameraView = ({ cameraInfo }) => {
   };
 
   useEffect(() => {
-    if (!isEmpty(deliveryWindow) && cameraName === cameraInfo) {
+    if (!isEmpty(deliveryWindow) && deliveryWindow[cameraInfo]) {
       fetchCarInformation();
+    }
+    if (!deliveryWindow[cameraInfo]) {
+      setCarDetails({})
     }
   }, [deliveryWindow]);
 
   return (
     <>
-      {!isLoading ? (
-        <>
-          <ShowCarDetails carDetails={carDetails} />
-          {currentOrders && currentOrders.length > 0 && (
-            <>
-              <Stack p={2}>
-                <Typography variant='h5'>Current Order Being Placed</Typography>
-              </Stack>
-              <Box
-                sx={{
-                  maxHeight: '30vh',
-                  overflowY: 'auto',
-                  mb: 2,
-                  '&::-webkit-scrollbar': {
-                    display: 'none'
-                  }
-                }}
-                px={2}
-              >
-                <Grid container spacing={1}>
-                  {currentOrders.map((dish, index) => {
-                    return (
-                      <>
-                        <Grid item xs={12} sm={6} key={index}>
-                          <OrderItemCard dish={dish} />{' '}
-                        </Grid>
-                      </>
-                    );
-                  })}
-                </Grid>
-              </Box>
-            </>
-          )}
-        </>
+      {!isEmpty(carDetails) ? (
+        <OrderAndCarDetails carDetails={carDetails} cameraName={cameraInfo} currentOrders={currentOrders} />
       ) : (
         <Stack pt={'calc(16px + 25%)'}>
           <Stack alignItems={'center'} justifyContent={'center'} spacing={2}>

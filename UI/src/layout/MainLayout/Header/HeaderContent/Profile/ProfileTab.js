@@ -85,7 +85,7 @@ const ProfileTab = ({ handleLogout }) => {
         <ListItemText primary='Switch To Orderkey HUB' />
       </ListItemButton> */}
       {/* {user && user.roleId === enums.userRole.SuperAdmin && ( */}
-      <ListItemButton
+      {user && user.roleId === enums.userRole.SuperAdmin && <ListItemButton
         selected={selectedIndex === 1}
         onClick={(e) => {
           handleListItemClick(e, 1);
@@ -98,8 +98,8 @@ const ProfileTab = ({ handleLogout }) => {
           <PartitionOutlined />
         </ListItemIcon>
         <ListItemText primary='Cameras' />
-      </ListItemButton>
-      <ListItemButton
+      </ListItemButton>}
+      {user && user.roleId === enums.userRole.SuperAdmin && <ListItemButton
         selected={selectedIndex === 2}
         onClick={(e) => {
           handleListItemClick(e, 1);
@@ -112,8 +112,8 @@ const ProfileTab = ({ handleLogout }) => {
           <PartitionOutlined />
         </ListItemIcon>
         <ListItemText primary='Tenants' />
-      </ListItemButton>
-      <ListItemButton
+      </ListItemButton>}
+      {user && user.roleId === enums.userRole.SuperAdmin && <ListItemButton
         selected={selectedIndex === 3}
         onClick={(e) => {
           handleListItemClick(e, 1);
@@ -126,7 +126,7 @@ const ProfileTab = ({ handleLogout }) => {
           <PartitionOutlined />
         </ListItemIcon>
         <ListItemText primary='Sites' />
-      </ListItemButton>
+      </ListItemButton>}
       {/* )} */}
       {user && user.roleId === enums.userRole.SuperAdmin && (
         <ListItemButton

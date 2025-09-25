@@ -71,7 +71,6 @@ const AddEditTenant = ({ isOpen, handleClose, siteDetails, onSave }) => {
         url: values.url,
       };
 
-      console.log(payload);
       const { data, error } = siteDetails ? await ApiService.updateSiteAsync(siteDetails.siteId, payload)
         : await ApiService.saveTenantsAsync(payload);
       if (data) {
