@@ -89,7 +89,7 @@ const getMinutesFromTime = (time) => {
 };
 
 function convertTimeZone(value, timeZone) {
-  return dayjs.utc(value).tz(timeZone).format('hh:mm A');
+  return dayjs.utc(value).tz(timeZone).format('hh:mm');
 };
 
 function formatTimeOnly(value, timeZone = 'Australia/Melbourne') {

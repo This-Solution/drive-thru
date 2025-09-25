@@ -322,6 +322,15 @@ async function getSiteHoursAsync(siteId) {
   return await axios(config);
 }
 
+async function getOrdersAsync(date, openingTime, closingTime) {
+  const config = {
+    method: 'get',
+    url: `/car`,
+    params: { date: date, openingTime: openingTime, closingTime: closingTime }
+  };
+  return await axios(config);
+}
+
 
 export default {
   // auth
@@ -365,6 +374,8 @@ export default {
   getCarDetailsAsync,
   getCurrentOrderAsync,
   getLastAndMostPurchaseOrderAsync,
-  saveTenantsAsync
+  saveTenantsAsync,
+
+  getOrdersAsync
 
 };

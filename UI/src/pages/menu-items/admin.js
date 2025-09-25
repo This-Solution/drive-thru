@@ -81,6 +81,17 @@ const admin = {
       isShowFilter: true,
       showTitle: false,
     },
+    {
+      id: 'searchOrderList',
+      title: <FormattedMessage id='searchOrderList' />,
+      subTitle: 'Manage Orders',
+      type: 'item',
+      url: 'admin/searchOrders',
+      roleTags: [enums.userRole.SuperAdmin, enums.userRole.CJAdmin, enums.userRole.User, enums.userRole.SiteManager],
+      icon: icons.AccountTreeOutlined,
+      isShowFilter: true,
+      showTitle: false,
+    },
   ]
 };
 

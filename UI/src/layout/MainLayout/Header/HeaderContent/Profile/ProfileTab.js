@@ -102,7 +102,7 @@ const ProfileTab = ({ handleLogout }) => {
       <ListItemButton
         selected={selectedIndex === 2}
         onClick={(e) => {
-          handleListItemClick(e, 1);
+          handleListItemClick(e, 2);
           e.stopPropagation();
           navigate('/admin/tenants')
           // setOpenEditProfileDialog(true);
@@ -116,7 +116,7 @@ const ProfileTab = ({ handleLogout }) => {
       <ListItemButton
         selected={selectedIndex === 3}
         onClick={(e) => {
-          handleListItemClick(e, 1);
+          handleListItemClick(e, 3);
           e.stopPropagation();
           navigate('/admin/sites')
           // setOpenEditProfileDialog(true);
@@ -132,7 +132,7 @@ const ProfileTab = ({ handleLogout }) => {
         <ListItemButton
           selected={selectedIndex === 4}
           onClick={(e) => {
-            handleListItemClick(e, 1);
+            handleListItemClick(e, 4);
             e.stopPropagation();
             // navigate('/admin/users')
             // setOpenEditProfileDialog(true);
@@ -170,7 +170,22 @@ const ProfileTab = ({ handleLogout }) => {
         </ListItemIcon>
         <ListItemText primary='Reset Password' />
       </ListItemButton> */}
-      <ListItemButton selected={selectedIndex === 5} onClick={handleLogout}>
+
+      <ListItemButton
+        selected={selectedIndex === 5}
+        onClick={(e) => {
+          handleListItemClick(e, 5);
+          e.stopPropagation();
+          navigate('/admin/searchOrders')
+          // setOpenEditProfileDialog(true);
+        }}
+      >
+        <ListItemIcon>
+          <PartitionOutlined />
+        </ListItemIcon>
+        <ListItemText primary='Search Orders' />
+      </ListItemButton>
+      <ListItemButton selected={selectedIndex === 6} onClick={handleLogout}>
         <ListItemIcon>
           <LogoutOutlined />
         </ListItemIcon>

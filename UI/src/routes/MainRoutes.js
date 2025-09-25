@@ -17,6 +17,7 @@ const SystemUserList = Loadable(lazy(() => import('pages/admin/systemUserList.js
 const SiteList = Loadable(lazy(() => import('pages/site/siteList.js')));
 const TenantList = Loadable(lazy(() => import('pages/tenant/tenantList.js')));
 const CameraList = Loadable(lazy(() => import('pages/camera/cameraList.js')));
+const OrderList = Loadable(lazy(() => import('pages/Orders/searchOrder.js')));
 const SiteDetail = Loadable(lazy(() => import('pages/site/siteDetail.js')));
 const OrderManage = Loadable(lazy(() => import('pages/Orders/orderManage.js')))
 
@@ -51,6 +52,10 @@ const MainRoutes = {
             {
               path: 'camera',
               element: <CameraList />
+            },
+            {
+              path: 'searchOrders',
+              element: <OrderList />
             }
           ]
         },
