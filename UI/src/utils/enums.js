@@ -70,7 +70,7 @@ const enums = {
     GREEN: 'green',
     RED: 'red',
     PINK: 'pink',
-    WHITE: 'WHITE'
+    // WHITE: '#d9dadb'
   },
   displayAdminRole: {
     superAdmin: 'Super Admin',

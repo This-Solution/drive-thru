@@ -11,7 +11,7 @@ const OrderManage = () => {
         {cameraConfig && cameraConfig.length > 0 ? (
           cameraConfig.map((camera, index) => {
             return (
-              <Grid item xs={12} md={12 / cameraConfig.length} key={index}>
+              <Grid item xs={12} md={12 / cameraConfig.length} key={camera.cameraName}>
                 <OrderCard cameraConfig={camera} />
               </Grid>
             );
