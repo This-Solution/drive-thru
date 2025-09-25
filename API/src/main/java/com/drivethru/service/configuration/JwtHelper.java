@@ -98,6 +98,16 @@ public class JwtHelper {
         Integer userId = claims.get("userId", Integer.class);
         return userId != null ? userId.toString() : null;
     }
+    public String extractSiteId(String token) {
+        Claims claims = Jwts.parser()
+                .setSigningKey(getSignInKey())
+                .build()
+                .parseClaimsJws(token)
+                .getBody();
+
+        Integer siteId = claims.get("siteId", Integer.class);
+        return siteId != null ? siteId.toString() : null;
+    }
 
     public String cleanToken(String authHeader) {
         if (authHeader != null && authHeader.startsWith("Bearer ")) {
