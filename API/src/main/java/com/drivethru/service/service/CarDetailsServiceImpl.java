@@ -261,4 +261,52 @@ public class CarDetailsServiceImpl implements CarDetailService {
         return response;
     }
 
+    @Override
+    public List<CameraResponseDTO> latestInfo(String SiteId) {
+        int loginSiteId = Integer.parseInt(SiteId);
+        List<CameraConfig> cameraConfigList = cameraConfigRepository.findAllBySiteIdAndIsActiveTrue(loginSiteId);
+        List<CameraResponseDTO> cameraResponseList = new ArrayList<>();
+
+        for (CameraConfig config : cameraConfigList) {
+            CarVisit carVisit = carVisitRepository.findFirstByCameraIdOrderByCreatedDateDesc(config.getCameraId());
+            if (carVisit == null) {
+                continue;
+            }
+            Optional<CarDetail> carDetailOpt = carDetailRepository.findById(carVisit.getCarId());
+            if (!carDetailOpt.isPresent()) {
+                continue;
+            }
+            CarDetail carDetail = carDetailOpt.get();
+            CarDetailRequest carDetailRequest = new CarDetailRequest();
+            carDetailRequest.setCarPlateNumber(carDetail.getCarPlateNumber());
+            carDetailRequest.setTenantId(config.getTenantId());
+
+            CameraResponseDTO cameraResponseDTO = new CameraResponseDTO();
+            cameraResponseDTO.setCameraName(config.getCameraName());
+
+            if (config.getCameraType().equals(Constants.LAN_CAMERA)) {
+                CarDetailResponse carDetailResponse = getCarDetail(carDetailRequest);
+                if (carDetailResponse != null) {
+                    cameraResponseDTO.setCarDetail(carDetailResponse);
+                    LastAndMostPurchaseOrderDetailsResponse lastAndMostPurchaseOrderDetailsResponse = getLastAndMostPurchaseOrderDetails(carDetailRequest);
+                    if (lastAndMostPurchaseOrderDetailsResponse != null) {
+                        cameraResponseDTO.setLastAndMostPurchaseOrderDetailsResponse(List.of(lastAndMostPurchaseOrderDetailsResponse));
+                    }
+                }
+
+            } else if (config.getCameraType().equals(Constants.COUNTER_CAMERA)) {
+                CarDetailResponse carDetailResponse = getCarDetail(carDetailRequest);
+                if (carDetailResponse != null) {
+                    cameraResponseDTO.setCarDetail(carDetailResponse);
+                    List<CurrentOrderItemResponse> currentOrderDetails = getCurrentOrderDetails(carDetailRequest);
+                    if (currentOrderDetails != null && !currentOrderDetails.isEmpty()) {
+                        cameraResponseDTO.setCurrentOrderDetails(currentOrderDetails);
+                    }
+                }
+            }
+
+            cameraResponseList.add(cameraResponseDTO);
+        }
+        return cameraResponseList;
+    }
 }

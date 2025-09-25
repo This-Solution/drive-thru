@@ -10,4 +10,5 @@ import java.util.Optional;
 public interface CarVisitRepository extends JpaRepository<CarVisit, Integer> {
     CarVisit findFirstByCarIdAndTenantIdOrderByCreatedDateDesc(Integer carId, Integer TenantId);
     Optional<CarVisit> findFirstByTenantIdOrderByCreatedDateDesc(Integer tenantId);
+    CarVisit findFirstByCameraIdOrderByCreatedDateDesc(Integer cameraId);
 }

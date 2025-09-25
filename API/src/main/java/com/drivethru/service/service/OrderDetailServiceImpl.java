@@ -65,7 +65,7 @@ public class OrderDetailServiceImpl implements OrderDetailService {
             LocalDateTime dateTime = DateAndTimeHelper.parse(webhookOrderRequest.getDatetime());
             CameraConfig cameraConfig = cameraConfigRepository.findByOrderIpAddress(webhookOrderRequest.getSource_ip());
             Site site = siteRepository.findBySiteName(webhookOrderRequest.getSite_name());
-            Tenant tenant = tenantRepository.findById(site.getTenantId()).orElseThrow(() -> new CustomException(CustomErrorHolder.TENANT_NOT_FOUND));
+            Tenant tenant = tenantRepository.findById(cameraConfig.getTenantId()).orElseThrow(() -> new CustomException(CustomErrorHolder.TENANT_NOT_FOUND));
             Optional<CarVisit> carVisit = carVisitRepository.findFirstByTenantIdOrderByCreatedDateDesc(tenant.getTenantId());
             Optional<CarDetail> carDetail = carDetailRepository.findById(carVisit.get().getCarId());
 

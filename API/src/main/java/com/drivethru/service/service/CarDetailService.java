@@ -1,9 +1,6 @@
 package com.drivethru.service.service;
 
-import com.drivethru.service.dto.CarDetailRequest;
-import com.drivethru.service.dto.CarDetailResponse;
-import com.drivethru.service.dto.CurrentOrderItemResponse;
-import com.drivethru.service.dto.LastAndMostPurchaseOrderDetailsResponse;
+import com.drivethru.service.dto.*;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -18,4 +15,6 @@ public interface CarDetailService {
     List<CurrentOrderItemResponse> getCurrentOrderDetails(CarDetailRequest carDetailRequest);
 
     LastAndMostPurchaseOrderDetailsResponse getLastAndMostPurchaseOrderDetails(CarDetailRequest carDetailRequest);
+
+    List<CameraResponseDTO> latestInfo(String SiteId);
 }

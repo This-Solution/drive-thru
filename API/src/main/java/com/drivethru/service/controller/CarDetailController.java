@@ -1,11 +1,14 @@
 package com.drivethru.service.controller;
 
 import com.drivethru.service.common.ResponseObject;
+import com.drivethru.service.configuration.JwtHelper;
 import com.drivethru.service.dto.*;
 import com.drivethru.service.entity.CarDetail;
 import com.drivethru.service.service.CarDetailService;
 import com.drivethru.service.constant.RouteConstant;
+import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -22,6 +25,9 @@ public class CarDetailController {
 
     @Autowired
     private CarDetailService carDetailService;
+
+    @Autowired
+    JwtHelper jwtHelper;
 
     @PostMapping(RouteConstant.CAR_WEBHOOK)
     public ResponseEntity<ResponseObject<CarDetail>> carDetail(@RequestBody Map<String, Object> carDetailJson) {
@@ -54,4 +60,14 @@ public class CarDetailController {
         return new ResponseEntity<>(responseObject, HttpStatus.OK);
     }
 
+    @GetMapping("/latest")
+    public ResponseEntity<ResponseObject<List<CameraResponseDTO>>> getLatestCameraInfo(HttpServletRequest httpServletRequest){
+        String authHeader = httpServletRequest.getHeader(HttpHeaders.AUTHORIZATION);
+        String token = jwtHelper.cleanToken(authHeader);
+        String id = jwtHelper.extractSiteId(token);
+        ResponseObject<List<CameraResponseDTO>> responseObject = new ResponseObject<>();
+        List<CameraResponseDTO> cameraResponseList = carDetailService.latestInfo(id);
+        responseObject.setData(cameraResponseList);
+        return new ResponseEntity<>(responseObject, HttpStatus.OK);
+    }
 }
