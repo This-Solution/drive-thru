@@ -8,6 +8,15 @@ public class LoginResponse {
     private String siteName;
     private String name;
     private String phone;
+    private String sessionId;
+
+    public String getSessionId() {
+        return sessionId;
+    }
+
+    public void setSessionId(String sessionId) {
+        this.sessionId = sessionId;
+    }
 
     public Integer getSiteId() {
         return siteId;

@@ -39,6 +39,16 @@ public class UserDetail {
     private Integer updatedBy;
     @Column(name = "UpdatedDate")
     private LocalDateTime updatedDate;
+    @Column(name = "SessionId")
+    private String sessionId;
+
+    public String getSessionId() {
+        return sessionId;
+    }
+
+    public void setSessionId(String sessionId) {
+        this.sessionId = sessionId;
+    }
 
     public Integer getUserId() {
         return userId;
