@@ -53,6 +53,9 @@ public class CarDetailsServiceImpl implements CarDetailService {
     @Autowired
     CarVisitRepository carVisitRepository;
 
+    @Autowired
+    UserDetailRepository userDetailRepository;
+
     @Override
     public void addCarDetail(Map<String, Object> carDetailJson) {
         String currentDateFolder = LocalDate.now().format(DateTimeFormatter.ofPattern("dd-MM-yyyy"));
@@ -70,7 +73,10 @@ public class CarDetailsServiceImpl implements CarDetailService {
             String cameraName = (String) carDetailJson.get("static_detail_2");
 
             Site site = siteRepository.findBySiteName(siteName);
+            Integer siteId= site.getSiteId();
             CameraConfig cameraConfig = cameraConfigRepository.findBySiteIdAndTenantIdAndCameraName(site.getSiteId(), site.getTenantId(), cameraName);
+
+            List<UserDetail> userDetails = userDetailRepository.findBySiteId(siteId);
 
             String cameraType = cameraConfig.getCameraType();
             CarDetail carDetail;
@@ -118,7 +124,9 @@ public class CarDetailsServiceImpl implements CarDetailService {
             carResponse.setCarPlateNumber(plateNumber);
             carResponse.setCameraName(cameraConfig.getCameraName());
 
-            simpMessagingTemplate.convertAndSend("/topic/send", carResponse);
+            for (UserDetail user : userDetails){
+                simpMessagingTemplate.convertAndSend("/topic/send", carResponse);
+            }
 
         } catch (Exception e) {
             throw new CustomException(CustomErrorHolder.UPLOAD_FAILED);
