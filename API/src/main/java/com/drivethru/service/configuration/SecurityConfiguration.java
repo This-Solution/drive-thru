@@ -27,7 +27,7 @@ public class SecurityConfiguration {
         http.csrf(csrf -> csrf.disable())
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("auth/login/**","car/webhook/**","order/orderWebhook/**","ws/**","role/**","tenant/**","cameraConfig/**").permitAll()
+                        .requestMatchers("auth/login","car/webhook/**","order/orderWebhook/**","ws/**","role/**","tenant/**","cameraConfig/**").permitAll()
                         .anyRequest().authenticated())
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
