@@ -52,7 +52,7 @@ export const StompProvider = ({ children }) => {
     };
 
     const client = new Client({
-      brokerURL: 'wss://10.10.1.79:8181/ws',
+      brokerURL: constants.webSocketUrl,
       reconnectDelay: 5000,
       debug: (msg) => console.log('DEBUG:', msg),
 
