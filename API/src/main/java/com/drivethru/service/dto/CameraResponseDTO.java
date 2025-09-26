@@ -4,9 +4,18 @@ import java.util.List;
 
 public class CameraResponseDTO {
     private String cameraName;
+    private String cameraType;
     private CarDetailResponse carDetail;
     private List<LastAndMostPurchaseOrderDetailsResponse> LastAndMostPurchaseOrderDetailsResponse;
     private List<CurrentOrderItemResponse> currentOrderDetails;
+
+    public String getCameraType() {
+        return cameraType;
+    }
+
+    public void setCameraType(String cameraType) {
+        this.cameraType = cameraType;
+    }
 
     public String getCameraName() {
         return cameraName;

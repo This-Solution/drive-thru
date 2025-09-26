@@ -8,6 +8,15 @@ public class CameraConfigRequest {
     private String description;
     private String cameraIpAddress;
     private String orderIpAddress;
+    private Integer reloadTime;
+
+    public Integer getReloadTime() {
+        return reloadTime;
+    }
+
+    public void setReloadTime(Integer reloadTime) {
+        this.reloadTime = reloadTime;
+    }
 
     public String getDescription() {
         return description;

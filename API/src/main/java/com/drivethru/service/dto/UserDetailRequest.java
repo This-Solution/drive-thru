@@ -3,11 +3,20 @@ package com.drivethru.service.dto;
 public class UserDetailRequest {
     private Integer tenantId;
     private Integer roleId;
+    private Integer siteId;
     private String firstName;
     private String surName;
     private String phone;
     private String email;
     private String password;
+
+    public Integer getSiteId() {
+        return siteId;
+    }
+
+    public void setSiteId(Integer siteId) {
+        this.siteId = siteId;
+    }
 
     public Integer getTenantId() {
         return tenantId;

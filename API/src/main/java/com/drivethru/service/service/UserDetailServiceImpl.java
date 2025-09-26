@@ -93,6 +93,7 @@ public class UserDetailServiceImpl implements UserDetailService {
             UserDetail userDetail = new UserDetail();
             userDetail.setTenantId(userDetailRequest.getTenantId());
             userDetail.setRoleId(userDetailRequest.getRoleId());
+            userDetail.setSiteId(userDetailRequest.getSiteId());
             userDetail.setFirstName(userDetailRequest.getFirstName());
             userDetail.setSurName(userDetailRequest.getSurName());
             userDetail.setEmail(userDetailRequest.getEmail());

@@ -156,9 +156,8 @@ public class CarDetailsServiceImpl implements CarDetailService {
         carDetailResponse.setPlateImageUrl(azureFileUploaderService.generateBlobUrl(carDetail.get().getPlateImageUrl()));
 
         Optional<CarDetail> carDetails = carDetailRepository.findByCarPlateNumber(carDetailRequest.getCarPlateNumber());
-        CarVisit carVisit = carVisitRepository.findFirstByCarIdAndTenantIdOrderByCreatedDateDesc(carDetails.get().getCarId(),carDetailRequest.getTenantId());
-        Optional<CameraConfig> cameraConfig =  cameraConfigRepository.findById(carVisit.getCameraId());
-        System.out.println(cameraConfig.get().getCameraType());
+        CarVisit carVisit = carVisitRepository.findFirstByCarIdAndTenantIdOrderByCreatedDateDesc(carDetails.get().getCarId(), carDetailRequest.getTenantId());
+        Optional<CameraConfig> cameraConfig = cameraConfigRepository.findById(carVisit.getCameraId());
 
         String cameraType = cameraConfig.get().getCameraType();
 
@@ -175,10 +174,7 @@ public class CarDetailsServiceImpl implements CarDetailService {
             LocalDateTime createdDate = carDetails.get().getCreatedDate();
 
             List<OrderCarStatus> optionalStatus = orderCarStatusRepository.findByCarId(carDetails.get().getCarId());
-            String status = optionalStatus.stream()
-                    .findFirst()
-                    .map(OrderCarStatus::getStatus)
-                    .orElse(null);
+            String status = optionalStatus.stream().findFirst().map(OrderCarStatus::getStatus).orElse(null);
 
             boolean isRed = CarColorStatus.RED.name().equalsIgnoreCase(status);
             boolean isGreen = CarColorStatus.GREEN.name().equalsIgnoreCase(status);
@@ -244,6 +240,7 @@ public class CarDetailsServiceImpl implements CarDetailService {
     @Override
     public LastAndMostPurchaseOrderDetailsResponse getLastAndMostPurchaseOrderDetails(CarDetailRequest carDetailRequest) {
         OrderDetail orderDetail = orderDetailRepository.findFirstByTenantIdAndCarPlateNumberAndOrderStatusOrderByCreatedDateDesc(carDetailRequest.getTenantId(), carDetailRequest.getCarPlateNumber(), String.valueOf(OrderStatus.DELIVERED)).orElse(null);
+        Double totalOrderItemPrice = orderDetail == null ? 0.0 : orderDetail.getTotalPrice();
         LastAndMostPurchaseOrderDetailsResponse response = new LastAndMostPurchaseOrderDetailsResponse();
         if (orderDetail != null) {
             List<OrderItem> orderItems = orderItemRepository.findByOrderId(orderDetail.getOrderId());
@@ -263,6 +260,7 @@ public class CarDetailsServiceImpl implements CarDetailService {
 
             response.setLastOrders(lastOrders);
             response.setMostPurchaseOrders(mostPurchaseOrders);
+            response.setTotalOrderItemPrice(totalOrderItemPrice);
             return response;
         }
         return response;
@@ -271,29 +269,28 @@ public class CarDetailsServiceImpl implements CarDetailService {
     @Override
     public OrderCarStatus updateStatus(UpdateStatusRequest updateStatusRequest) {
         OrderCarStatus orderCarStatus = orderCarStatusRepository.findByOrderIdAndCarId(updateStatusRequest.getOrderId(), updateStatusRequest.getCarId());
-        orderCarStatus.setStatus(updateStatusRequest.getStatus());
+        orderCarStatus.setStatus(String.valueOf(CarColorStatus.valueOf(updateStatusRequest.getStatus())));
         orderCarStatus.setNotes(updateStatusRequest.getNotes());
         orderCarStatusRepository.save(orderCarStatus);
         return orderCarStatus;
     }
 
     @Override
-    public List<CameraResponseDTO> latestInfo(String SiteId) {
-        int loginSiteId = Integer.parseInt(SiteId);
+    public List<CameraResponseDTO> latestInfo(String siteId) {
+        int loginSiteId = Integer.parseInt(siteId);
+        Optional<Site> site = siteRepository.findById(loginSiteId);
+        int reloadTime = site.get().getReloadTime();
         List<CameraConfig> cameraConfigList = cameraConfigRepository.findAllBySiteIdAndIsActiveTrue(loginSiteId);
         List<CameraResponseDTO> cameraResponseList = new ArrayList<>();
 
         for (CameraConfig config : cameraConfigList) {
-            CarVisit carVisit = carVisitRepository.findFirstByCameraIdOrderByCreatedDateDesc(config.getCameraId());
+            LocalDateTime startOfDay = LocalDate.now().atStartOfDay();
+            CarVisit carVisit = carVisitRepository.findFirstByCameraIdAndCreatedDateAfterOrderByCreatedDateDesc(
+                    config.getCameraId(),
+                    startOfDay
+            );
 
             if (carVisit == null) continue;
-
-            LocalDateTime now = LocalDateTime.now();
-            LocalDateTime thresholdTime = now.minusSeconds(config.getReloadTime());
-
-            if (carVisit.getCreatedDate().isBefore(thresholdTime)) {
-                continue;
-            }
 
             Optional<CarDetail> carDetailOpt = carDetailRepository.findById(carVisit.getCarId());
             if (!carDetailOpt.isPresent()) {
@@ -307,6 +304,7 @@ public class CarDetailsServiceImpl implements CarDetailService {
 
             CameraResponseDTO cameraResponseDTO = new CameraResponseDTO();
             cameraResponseDTO.setCameraName(config.getCameraName());
+            cameraResponseDTO.setCameraType(config.getCameraType());
 
             if (Constants.LAN_CAMERA.equals(config.getCameraType())) {
                 CarDetailResponse carDetailResponse = getCarDetail(carDetailRequest);
