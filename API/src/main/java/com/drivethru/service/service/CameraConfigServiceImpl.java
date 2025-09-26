@@ -42,6 +42,7 @@ public class CameraConfigServiceImpl implements CameraConfigService {
             CameraConfigResponse cameraConfigResponse = new CameraConfigResponse();
             BeanUtils.copyProperties(configs, cameraConfigResponse);
             tenantRepository.findById(configs.getTenantId()).ifPresent(tenant -> cameraConfigResponse.setTenantName(tenant.getTenantName()));
+            siteRepository.findById(configs.getSiteId()).ifPresent(site -> cameraConfigResponse.setSiteName(site.getSiteName()));
             userDetailRepository.findById(configs.getCreatedBy()).ifPresent(createdUser -> cameraConfigResponse.setCreateByName(createdUser.getFirstName() + " " + createdUser.getSurName()));
             if (configs.getUpdatedBy() != null) {
                 userDetailRepository.findById(configs.getUpdatedBy()).ifPresent(updatedUser -> cameraConfigResponse.setUpdateByName(updatedUser.getFirstName() + " " + updatedUser.getSurName()));
@@ -116,8 +117,8 @@ public class CameraConfigServiceImpl implements CameraConfigService {
         cameraConfigRepository.save(cameraConfig);
         CameraConfigResponse cameraConfigResponse = new CameraConfigResponse();
         BeanUtils.copyProperties(cameraConfig, cameraConfigResponse);
-        Tenant tenant = tenantRepository.findByTenantIdAndIsActiveTrue(cameraConfigRequest.getTenantId());
-        Site site = siteRepository.findBySiteIdAndIsActiveTrue(cameraConfigRequest.getSiteId());
+        Tenant tenant = tenantRepository.findByTenantIdAndIsActiveTrue(cameraConfig.getTenantId());
+        Site site = siteRepository.findBySiteIdAndIsActiveTrue(cameraConfig.getSiteId());
         UserDetail createdUserDetail = userDetailRepository.findByUserIdAndIsActiveTrue(cameraConfig.getCreatedBy());
         UserDetail updatedUserDetail = userDetailRepository.findByUserIdAndIsActiveTrue(cameraConfig.getUpdatedBy());
         cameraConfigResponse.setTenantName(tenant.getTenantName());

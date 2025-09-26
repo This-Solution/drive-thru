@@ -35,6 +35,16 @@ public class Site {
     private Integer updatedBy;
     @Column(name = "UpdatedDate")
     private LocalDateTime updatedDate;
+    @Column(name = "ReloadTime")
+    private Integer reloadTime;
+
+    public Integer getReloadTime() {
+        return reloadTime;
+    }
+
+    public void setReloadTime(Integer reloadTime) {
+        this.reloadTime = reloadTime;
+    }
 
     public Integer getSiteId() {
         return siteId;

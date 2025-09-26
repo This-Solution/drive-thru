@@ -20,6 +20,15 @@ public class CameraConfigResponse {
     private Integer updatedBy;
     private String updateByName;
     private LocalDateTime updatedDate;
+    private Integer reloadTime;
+
+    public Integer getReloadTime() {
+        return reloadTime;
+    }
+
+    public void setReloadTime(Integer reloadTime) {
+        this.reloadTime = reloadTime;
+    }
 
     public String getDescription() {
         return description;
