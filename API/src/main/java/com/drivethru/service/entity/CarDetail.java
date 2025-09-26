@@ -7,14 +7,11 @@ import java.time.LocalDateTime;
 @Entity
 @Table(name = "CarDetail", schema = "Vehicle")
 public class CarDetail {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "CarId")
     private Integer carId;
-    @Column(name = "TenantId")
-    private Integer tenantId;
-    @Column(name = "SiteId")
-    private Integer siteId;
     @Column(name = "CarType")
     private String carType;
     @Column(name = "CarColor")
@@ -24,7 +21,7 @@ public class CarDetail {
     @Column(name = "PlateImageUrl")
     private String plateImageUrl;
     @Column(name = "CarImageUrl")
-    private String CarImageUrl;
+    private String carImageUrl;
     @Column(name = "CreatedDate")
     private LocalDateTime createdDate;
 
@@ -36,20 +33,12 @@ public class CarDetail {
         this.carId = carId;
     }
 
-    public Integer getTenantId() {
-        return tenantId;
+    public String getCarType() {
+        return carType;
     }
 
-    public void setTenantId(Integer tenantId) {
-        this.tenantId = tenantId;
-    }
-
-    public String getCarPlateNumber() {
-        return carPlateNumber;
-    }
-
-    public void setCarPlateNumber(String carPlateNumber) {
-        this.carPlateNumber = carPlateNumber;
+    public void setCarType(String carType) {
+        this.carType = carType;
     }
 
     public String getCarColor() {
@@ -60,20 +49,12 @@ public class CarDetail {
         this.carColor = carColor;
     }
 
-    public Integer getSiteId() {
-        return siteId;
+    public String getCarPlateNumber() {
+        return carPlateNumber;
     }
 
-    public void setSiteId(Integer siteId) {
-        this.siteId = siteId;
-    }
-
-    public String getCarType() {
-        return carType;
-    }
-
-    public void setCarType(String carType) {
-        this.carType = carType;
+    public void setCarPlateNumber(String carPlateNumber) {
+        this.carPlateNumber = carPlateNumber;
     }
 
     public String getPlateImageUrl() {
@@ -85,11 +66,11 @@ public class CarDetail {
     }
 
     public String getCarImageUrl() {
-        return CarImageUrl;
+        return carImageUrl;
     }
 
     public void setCarImageUrl(String carImageUrl) {
-        CarImageUrl = carImageUrl;
+        this.carImageUrl = carImageUrl;
     }
 
     public LocalDateTime getCreatedDate() {

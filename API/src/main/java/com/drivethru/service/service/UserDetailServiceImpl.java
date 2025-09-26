@@ -3,6 +3,7 @@ package com.drivethru.service.service;
 import com.drivethru.service.configuration.JwtHelper;
 import com.drivethru.service.dto.*;
 import com.drivethru.service.entity.Role;
+import com.drivethru.service.entity.Site;
 import com.drivethru.service.entity.Tenant;
 import com.drivethru.service.entity.UserDetail;
 import com.drivethru.service.entity.types.RoleName;
@@ -10,6 +11,7 @@ import com.drivethru.service.error.CustomErrorHolder;
 import com.drivethru.service.error.CustomException;
 import com.drivethru.service.helper.CryptoHelper;
 import com.drivethru.service.repository.RoleRepository;
+import com.drivethru.service.repository.SiteRepository;
 import com.drivethru.service.repository.TenantRepository;
 import com.drivethru.service.repository.UserDetailRepository;
 import org.springframework.beans.BeanUtils;
@@ -40,6 +42,9 @@ public class UserDetailServiceImpl implements UserDetailService {
     @Autowired
     CryptoHelper cryptoHelper;
 
+    @Autowired
+    SiteRepository siteRepository;
+
     @Override
     public LoginTokenResponse login(LoginRequest loginRequest) {
         UserDetail userDetail = userDetailRepository.findByEmailAndIsActive(loginRequest.getEmail(), true);
@@ -57,6 +62,7 @@ public class UserDetailServiceImpl implements UserDetailService {
         if (!Objects.equals(encryptedInputPassword, userDetail.getPassword())) {
             throw new CustomException(CustomErrorHolder.PASSWORD_INCORRECT);
         }
+        Optional<Site> site = siteRepository.findById(userDetail.getSiteId());
         LoginResponse loginResponse = new LoginResponse();
         loginResponse.setUserId(userDetail.getUserId());
         loginResponse.setTenantId(userDetail.getTenantId());
@@ -64,6 +70,7 @@ public class UserDetailServiceImpl implements UserDetailService {
         loginResponse.setName(userDetail.getFirstName() + " " + userDetail.getSurName());
         loginResponse.setPhone(userDetail.getPhone());
         loginResponse.setSiteId(userDetail.getSiteId());
+        loginResponse.setSiteName(site.get().getSiteName());
         String sessionToken = jwtHelper.generateToken(userDetail);
         LoginTokenResponse loginTokenResponse = new LoginTokenResponse();
         loginTokenResponse.setUser(loginResponse);

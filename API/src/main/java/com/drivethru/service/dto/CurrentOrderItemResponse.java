@@ -4,11 +4,21 @@ public class CurrentOrderItemResponse {
     private String name;
     private Integer quantity;
     private Double price;
+    private Double totalPrice;
 
-    public CurrentOrderItemResponse(String name, Integer quantity, Double price) {
+    public CurrentOrderItemResponse(String name, Integer quantity, Double price, Double totalPrice) {
         this.name = name;
         this.quantity = quantity;
         this.price = price;
+        this.totalPrice = totalPrice;
+    }
+
+    public Double getTotalPrice() {
+        return totalPrice;
+    }
+
+    public void setTotalPrice(Double totalPrice) {
+        this.totalPrice = totalPrice;
     }
 
     public String getName() {

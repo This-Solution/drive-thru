@@ -1,6 +1,7 @@
 package com.drivethru.service.service;
 
 import com.drivethru.service.constant.Constants;
+import com.drivethru.service.dto.OrderItemCarDetailProjection;
 import com.drivethru.service.dto.WebhookOrderRequest;
 import com.drivethru.service.entity.*;
 import com.drivethru.service.entity.types.CarColorStatus;
@@ -22,7 +23,11 @@ import javax.xml.parsers.DocumentBuilderFactory;
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.util.Optional;
+import java.util.List;
 
 @Service
 public class OrderDetailServiceImpl implements OrderDetailService {
@@ -45,6 +50,12 @@ public class OrderDetailServiceImpl implements OrderDetailService {
     @Autowired
     OrderCarStatusRepository orderCarStatusRepository;
 
+    @Autowired
+    SiteRepository siteRepository;
+
+    @Autowired
+    CarVisitRepository carVisitRepository;
+
     @Override
     @Transactional
     public void createdOrder(WebhookOrderRequest webhookOrderRequest) {
@@ -57,17 +68,19 @@ public class OrderDetailServiceImpl implements OrderDetailService {
             Integer totalPrice = (int) Double.parseDouble(totalPriceStr);
             LocalDateTime dateTime = DateAndTimeHelper.parse(webhookOrderRequest.getDatetime());
             CameraConfig cameraConfig = cameraConfigRepository.findByOrderIpAddress(webhookOrderRequest.getSource_ip());
+            Site site = siteRepository.findBySiteName(webhookOrderRequest.getSite_name());
             Tenant tenant = tenantRepository.findById(cameraConfig.getTenantId()).orElseThrow(() -> new CustomException(CustomErrorHolder.TENANT_NOT_FOUND));
-            CarDetail carDetail = carDetailRepository.findFirstByTenantIdOrderByCreatedDateDesc(tenant.getTenantId()).orElseThrow(() -> new CustomException(CustomErrorHolder.CAR_NOT_FOUND));
+            Optional<CarVisit> carVisit = carVisitRepository.findFirstByTenantIdOrderByCreatedDateDesc(tenant.getTenantId());
+            Optional<CarDetail> carDetail = carDetailRepository.findById(carVisit.get().getCarId());
 
             OrderDetail orderDetail = new OrderDetail();
             orderDetail.setTotalPrice(totalPrice);
             orderDetail.setSourceIp(webhookOrderRequest.getSource_ip());
             orderDetail.setCreatedDate(dateTime);
-            orderDetail.setTenantId(carDetail.getTenantId());
+            orderDetail.setTenantId(tenant.getTenantId());
             orderDetail.setSiteId(cameraConfig.getSiteId());
-            orderDetail.setCarId(carDetail.getCarId());
-            orderDetail.setCarPlateNumber(carDetail.getCarPlateNumber());
+            orderDetail.setCarId(carDetail.get().getCarId());
+            orderDetail.setCarPlateNumber(carDetail.get().getCarPlateNumber());
             orderDetail.setOrderStatus(String.valueOf(OrderStatus.CREATED));
             orderDetailRepository.save(orderDetail);
 
@@ -94,7 +107,7 @@ public class OrderDetailServiceImpl implements OrderDetailService {
 
             OrderCarStatus orderCarStatus = new OrderCarStatus();
             orderCarStatus.setOrderId(orderDetail.getOrderId());
-            orderCarStatus.setCarId(carDetail.getCarId());
+            orderCarStatus.setCarId(carDetail.get().getCarId());
             orderCarStatus.setTenantId(tenant.getTenantId());
             orderCarStatus.setStatus(String.valueOf(CarColorStatus.GREEN));
             orderCarStatus.setCreatedDate(LocalDateTime.now());
@@ -103,5 +116,28 @@ public class OrderDetailServiceImpl implements OrderDetailService {
         } catch (Exception e) {
             throw new CustomException(CustomErrorHolder.ORDER_NOT_FOUND);
         }
+    }
+
+    @Override
+    public List<OrderItemCarDetailProjection> getOrderItems(Integer siteId, String itemName, LocalDate localDate, String startTime, String endTime) {
+        if (itemName != null && itemName.trim().isEmpty()) {
+            itemName = null;
+        }
+        LocalDateTime actualStartTime;
+        if (startTime != null) {
+            LocalTime parsedStartTime = LocalTime.parse(startTime);
+            actualStartTime = localDate.atTime(parsedStartTime);
+        } else {
+            actualStartTime = localDate.atTime(LocalTime.MIN);
+        }
+        LocalDateTime actualEndTime;
+        if (endTime != null) {
+            LocalTime parsedEndTime = LocalTime.parse(endTime);
+            actualEndTime = localDate.atTime(parsedEndTime);
+        } else {
+            actualEndTime = localDate.atTime(LocalTime.MAX);
+        }
+        List<OrderItemCarDetailProjection> orderItems = orderItemRepository.findOrderItemsWithCarDetails(siteId, itemName, actualStartTime, actualEndTime);
+        return orderItems;
     }
 }
