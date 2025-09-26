@@ -278,8 +278,6 @@ public class CarDetailsServiceImpl implements CarDetailService {
     @Override
     public List<CameraResponseDTO> latestInfo(String siteId) {
         int loginSiteId = Integer.parseInt(siteId);
-        Optional<Site> site = siteRepository.findById(loginSiteId);
-        int reloadTime = site.get().getReloadTime();
         List<CameraConfig> cameraConfigList = cameraConfigRepository.findAllBySiteIdAndIsActiveTrue(loginSiteId);
         List<CameraResponseDTO> cameraResponseList = new ArrayList<>();
 
@@ -305,31 +303,8 @@ public class CarDetailsServiceImpl implements CarDetailService {
             CameraResponseDTO cameraResponseDTO = new CameraResponseDTO();
             cameraResponseDTO.setCameraName(config.getCameraName());
             cameraResponseDTO.setCameraType(config.getCameraType());
-
-            if (Constants.LAN_CAMERA.equals(config.getCameraType())) {
-                CarDetailResponse carDetailResponse = getCarDetail(carDetailRequest);
-                if (carDetailResponse != null) {
-                    cameraResponseDTO.setCarDetail(carDetailResponse);
-
-                    LastAndMostPurchaseOrderDetailsResponse lastAndMostPurchaseOrderDetailsResponse = getLastAndMostPurchaseOrderDetails(carDetailRequest);
-
-                    if (lastAndMostPurchaseOrderDetailsResponse != null) {
-                        cameraResponseDTO.setLastAndMostPurchaseOrderDetailsResponse(List.of(lastAndMostPurchaseOrderDetailsResponse));
-                    }
-                }
-
-            } else if (Constants.COUNTER_CAMERA.equals(config.getCameraType())) {
-                CarDetailResponse carDetailResponse = getCarDetail(carDetailRequest);
-                if (carDetailResponse != null) {
-                    cameraResponseDTO.setCarDetail(carDetailResponse);
-
-                    List<CurrentOrderItemResponse> currentOrderDetails = getCurrentOrderDetails(carDetailRequest);
-                    if (currentOrderDetails != null && !currentOrderDetails.isEmpty()) {
-                        cameraResponseDTO.setCurrentOrderDetails(currentOrderDetails);
-                    }
-                }
-            }
-
+            cameraResponseDTO.setCarPlateNumber(carDetail.getCarPlateNumber());
+            cameraResponseDTO.setReloadTime(config.getReloadTime());
             cameraResponseList.add(cameraResponseDTO);
         }
 
