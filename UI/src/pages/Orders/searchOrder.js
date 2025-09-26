@@ -172,11 +172,7 @@ const SearchOrder = () => {
                     </MainCard>
 
                     <Grid item md={12} pt={3}>
-                        <MainCard content={false} onClick={(e) => {
-                            e.stopPropagation();
-                            setSelectedUser(original);
-                            setOpenConfirmDialog(true);
-                        }}>
+                        <MainCard content={false}>
                             {orders && orders.length > 0 ? <Typography pl={2} pt={2} variant='h5'>Orders</Typography> : null}
                             <Grid container spacing={2} p={2}>
                                 {
