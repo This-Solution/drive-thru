@@ -220,6 +220,14 @@ async function getCameraConfigAsync(siteId) {
   return await axios(config);
 }
 
+async function getLastCarAsync() {
+  const config = {
+    method: 'get',
+    url: '/car/latest'
+  }
+  return await axios(config);
+}
+
 // #start-site ======== site =========
 
 async function getSitesAsync() {
@@ -384,6 +392,7 @@ export default {
   getCurrentOrderAsync,
   getLastAndMostPurchaseOrderAsync,
   saveTenantsAsync,
+  getLastCarAsync,
 
   getOrdersAsync,
   saveOrderComment

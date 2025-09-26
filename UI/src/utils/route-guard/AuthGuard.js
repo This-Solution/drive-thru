@@ -18,57 +18,13 @@ const AuthGuard = ({ children }) => {
   const encodedRedirectUrl = encodeURIComponent(`${pathname}${search}${hash}`);
   const redirectUri = isUserLogout ? 'login' : `login?redirect=${encodedRedirectUrl}`;
 
-  // useEffect(() => {
-  //   if (!user) {
-  //     navigate(redirectUri, { replace: true });
-  //   } else {
-  //     const isSiteAdminOrManager = user.role === enums.userRole.User || user.role === enums.userRole.SiteManager;
-  //     if (isSiteAdminOrManager && isAdminRoute(pathname)) {
-  //       navigate('/maintenance/access-denied');
-  //     }
-  //   }
-  // });
-
   useEffect(() => {
     if (!user) {
       navigate(redirectUri, { replace: true });
-    } else {
-
-      // navigate(config.defaultPath, { replace: true });
-      // const isSiteAdminOrManager =
-      //   user.role === enums.userRole.CJAdmin || user.role === enums.userRole.User || user.role === enums.userRole.SiteManager;
-      // if (isSiteAdminOrManager && isSuperAdminRoute(pathname)) {
-      //   navigate('/maintenance/access-denied');
-      // }
     }
-  }, [user, pathname, navigate, redirectUri]);
+  }, [user]);
 
   if (!user) return <></>;
-
-  // const isSuperAdminRoute = (path) => {
-  //   const superAdminRoutes = ['/dashboard/reports'];
-  //   return superAdminRoutes.includes(path);
-  // };
-
-  // const isAdminRoute = (path) => {
-  //   if (user.role === enums.userRole.Admin || (user.role === enums.userRole.SiteManager && ['/admin/sites', '/site/info'].includes(path))) {
-  //     return false;
-  //   }
-  //   const adminRoutes = [
-  //     '/admin',
-  //     '/admin/users',
-  //     '/admin/rules',
-  //     '/order-trace/cars',
-  //     '/addEditRule/save',
-  //     '/admin/notification',
-  //     '/admin/sites',
-  //     '/admin/devices',
-  //     '/admin/employees',
-  //     '/site/info',
-  //     '/order-trace/price-setup',
-  //   ];
-  //   return adminRoutes.includes(path);
-  // };
 
   return children;
 };

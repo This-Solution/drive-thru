@@ -23,8 +23,19 @@ import _ from 'lodash';
 const Header = ({ open, handleDrawerToggle }) => {
   const theme = useTheme();
   const matchDownMD = useMediaQuery(theme.breakpoints.down('lg'));
+  const [site, setSite] = useState({});
 
   const { user } = useSelector((state) => state.auth);
+  const { sites } = useSelector((state) => state.lookup);
+
+
+  useEffect(() => {
+    if (user && sites && sites.length > 0) {
+      const [site] = sites.filter((item) => item.siteId === user.siteId)
+      setSite(site)
+    }
+  }, [sites])
+
   // header content
   const headerContent = useMemo(() => <HeaderContent />, []);
 
@@ -39,7 +50,7 @@ const Header = ({ open, handleDrawerToggle }) => {
       sx={{ width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'space-between', px: 0, py: 1 }}
     >
       <LogoSection isIcon={matchDownMD} sx={{ width: open ? 'auto' : 35, height: 35 }} />
-      <Typography variant='h5'>{user.siteName}</Typography>
+      <Typography variant='h5'>{user.siteName ? user.siteName : site && site.siteName}</Typography>
       {headerContent}
     </Stack>
     // </Toolbar>

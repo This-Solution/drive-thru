@@ -1,12 +1,19 @@
 package com.drivethru.service.dto;
 
-import java.util.List;
 
 public class CameraResponseDTO {
     private String cameraName;
-    private CarDetailResponse carDetail;
-    private List<LastAndMostPurchaseOrderDetailsResponse> LastAndMostPurchaseOrderDetailsResponse;
-    private List<CurrentOrderItemResponse> currentOrderDetails;
+    private String cameraType;
+    private String carPlateNumber;
+    private Integer ReloadTime;
+
+    public Integer getReloadTime() {
+        return ReloadTime;
+    }
+
+    public void setReloadTime(Integer reloadTime) {
+        ReloadTime = reloadTime;
+    }
 
     public String getCameraName() {
         return cameraName;
@@ -16,27 +23,19 @@ public class CameraResponseDTO {
         this.cameraName = cameraName;
     }
 
-    public CarDetailResponse getCarDetail() {
-        return carDetail;
+    public String getCameraType() {
+        return cameraType;
     }
 
-    public void setCarDetail(CarDetailResponse carDetail) {
-        this.carDetail = carDetail;
+    public void setCameraType(String cameraType) {
+        this.cameraType = cameraType;
     }
 
-    public List<LastAndMostPurchaseOrderDetailsResponse> getLastAndMostPurchaseOrderDetailsResponse() {
-        return LastAndMostPurchaseOrderDetailsResponse;
+    public String getCarPlateNumber() {
+        return carPlateNumber;
     }
 
-    public void setLastAndMostPurchaseOrderDetailsResponse(List<LastAndMostPurchaseOrderDetailsResponse> lastAndMostPurchaseOrderDetailsResponse) {
-        LastAndMostPurchaseOrderDetailsResponse = lastAndMostPurchaseOrderDetailsResponse;
-    }
-
-    public List<CurrentOrderItemResponse> getCurrentOrderDetails() {
-        return currentOrderDetails;
-    }
-
-    public void setCurrentOrderDetails(List<CurrentOrderItemResponse> currentOrderDetails) {
-        this.currentOrderDetails = currentOrderDetails;
+    public void setCarPlateNumber(String carPlateNumber) {
+        this.carPlateNumber = carPlateNumber;
     }
 }

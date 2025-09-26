@@ -1,16 +1,5 @@
 import { CheckOutlined } from '@ant-design/icons';
-import {
-  Avatar,
-  Box,
-  CardContent,
-  Divider,
-  Grid,
-  ImageList,
-  ImageListItem,
-  Link,
-  Stack,
-  Typography
-} from '@mui/material';
+import { Avatar, Box, CardContent, Chip, Divider, Grid, ImageList, ImageListItem, Link, Stack, Typography } from '@mui/material';
 import shopkeeper from 'assets/images/icons/merchant.png';
 import deliveryMan from 'assets/images/icons/shopkeeper.png';
 import cameraNotFound from 'assets/images/logos/camera.png';
@@ -20,7 +9,6 @@ import { isEmpty } from 'lodash';
 import { useEffect, useState } from 'react';
 import ApiService from 'service/ApiService';
 import { useSelector } from 'store';
-import constants from 'utils/constants';
 import enums from 'utils/enums';
 import OrderItemCard from './cards/OrderItemCard';
 import MainCard from './MainCard';
@@ -158,7 +146,15 @@ const ShowCarDetails = ({ carDetails }) => {
   );
 };
 
-const OrderAndCarDetails = ({ carDetails = {}, lastOrders = [], mostPurchaseOrder = [], cameraName = '', currentOrders = [] }) => {
+const OrderAndCarDetails = ({
+  carDetails = {},
+  lastOrders = [],
+  totalAmount = 0,
+  mostPurchaseOrder = [],
+  cameraName = '',
+  currentOrders = [],
+  cameraReload = 0
+}) => {
   const { orderWindow, setOrderWindow, deliveryWindow, setDeliveryWindow } = useStomp();
 
   useEffect(() => {
@@ -167,13 +163,12 @@ const OrderAndCarDetails = ({ carDetails = {}, lastOrders = [], mostPurchaseOrde
         const carDetail = { ...orderWindow };
         delete carDetail[cameraName];
         setOrderWindow(carDetail);
-
       } else if (deliveryWindow[cameraName]) {
         const carDetail = { ...deliveryWindow };
         delete carDetail[cameraName];
         setDeliveryWindow(carDetail);
       }
-    }, constants.removeCarTime);
+    }, cameraReload * 1000);
 
     return () => {
       clearTimeout(timerId);
@@ -186,7 +181,19 @@ const OrderAndCarDetails = ({ carDetails = {}, lastOrders = [], mostPurchaseOrde
         <>
           {' '}
           <Stack px={2} pb={2}>
-            <Typography variant='h5'>Last Order</Typography>
+            <Stack direction={'row'} justifyContent={'space-between'}>
+              <Typography variant='h5'>Last Order</Typography>
+              <Chip
+                label={<Typography sx={{ fontSize: 10, lineHeight: 1 }}>{totalAmount}</Typography>}
+                sx={{
+                  backgroundColor: '#b4d8f0',
+                  borderRadius: '20px',
+                  height: 'auto',
+                  px: 1.5,
+                  py: 0.5
+                }}
+              />
+            </Stack>
           </Stack>
           <Box
             sx={{
@@ -290,20 +297,23 @@ const OrderAndCarDetails = ({ carDetails = {}, lastOrders = [], mostPurchaseOrde
   );
 };
 
-const OrderCameraView = ({ cameraInfo }) => {
+const OrderCameraView = ({ cameraInfo, cameraReload }) => {
   const [carDetails, setCarDetails] = useState({});
   const [lastOrders, setlastOrders] = useState([]);
+  const [totalAmount, setTotalAmount] = useState(0);
   const [mostPurchaseOrder, setMostPurchaseOrder] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const { user } = useSelector((state) => state.auth);
+  const { lastCars } = useSelector((state) => state.lookup);
 
-  const { orderWindow } = useStomp();
+  const { orderWindow, setOrderWindow } = useStomp();
   const fetchCarInformation = async () => {
     setIsLoading(true);
     const payload = {
       tenantId: user.tenantId,
       carPlateNumber: orderWindow[cameraInfo]
     };
+
     const [carInfo, orderInfo] = await Promise.all([
       ApiService.getCarDetailsAsync(payload),
       ApiService.getLastAndMostPurchaseOrderAsync(payload)
@@ -316,9 +326,19 @@ const OrderCameraView = ({ cameraInfo }) => {
     if (orderInfo && orderInfo.data) {
       setlastOrders(orderInfo.data.lastOrders);
       setMostPurchaseOrder(orderInfo.data.mostPurchaseOrders);
+      setTotalAmount(orderInfo.data.totalOrderItemPrice);
     }
     setIsLoading(false);
   };
+
+  useEffect(() => {
+    if (lastCars && lastCars.length > 0) {
+      const carDetail = lastCars.find((item) => item.cameraName === cameraInfo);
+      if (!isEmpty(carDetail)) {
+        setOrderWindow({ ...orderWindow, [carDetail.cameraName]: carDetail.carPlateNumber });
+      }
+    }
+  }, [lastCars]);
 
   useEffect(() => {
     if (!isEmpty(orderWindow) && orderWindow[cameraInfo]) {
@@ -326,15 +346,21 @@ const OrderCameraView = ({ cameraInfo }) => {
     }
 
     if (!orderWindow[cameraInfo]) {
-      setCarDetails({})
+      setCarDetails({});
     }
   }, [orderWindow]);
-
 
   return (
     <>
       {!isEmpty(carDetails) ? (
-        <OrderAndCarDetails carDetails={carDetails} lastOrders={lastOrders} mostPurchaseOrder={mostPurchaseOrder} cameraName={cameraInfo} />
+        <OrderAndCarDetails
+          carDetails={carDetails}
+          lastOrders={lastOrders}
+          totalAmount={totalAmount}
+          mostPurchaseOrder={mostPurchaseOrder}
+          cameraName={cameraInfo}
+          cameraReload={cameraReload}
+        />
       ) : (
         <Stack pt={'calc(16px + 25%)'}>
           <Stack alignItems={'center'} justifyContent={'center'} spacing={2}>
@@ -348,7 +374,7 @@ const OrderCameraView = ({ cameraInfo }) => {
                 borderRadius: '50%'
               }}
             />
-            <Typography variant="body1">Waiting for next car...</Typography>
+            <Typography variant='body1'>Waiting for next car...</Typography>
           </Stack>
         </Stack>
       )}
@@ -356,18 +382,20 @@ const OrderCameraView = ({ cameraInfo }) => {
   );
 };
 
-const DeliveryCameraView = ({ cameraInfo }) => {
+const DeliveryCameraView = ({ cameraInfo, cameraReload }) => {
   const [currentOrders, setCurrentOrders] = useState([]);
   const [carDetails, setCarDetails] = useState({});
-  const { deliveryWindow } = useStomp();
+  const { deliveryWindow, setDeliveryWindow } = useStomp();
   const { user } = useSelector((state) => state.auth);
+  const { lastCars } = useSelector((state) => state.lookup);
+
   const [isLoading, setIsLoading] = useState(true);
 
-  const fetchCarInformation = async () => {
+  const fetchCarInformation = async (carPlateNumber = '') => {
     setIsLoading(true);
     const payload = {
       tenantId: user.tenantId,
-      carPlateNumber: deliveryWindow[cameraInfo]
+      carPlateNumber: deliveryWindow[cameraInfo] ? deliveryWindow[cameraInfo] : carPlateNumber
     };
     const [carInfo, orderInfo] = await Promise.all([ApiService.getCarDetailsAsync(payload), ApiService.getCurrentOrderAsync(payload)]);
 
@@ -382,18 +410,27 @@ const DeliveryCameraView = ({ cameraInfo }) => {
   };
 
   useEffect(() => {
+    if (lastCars && lastCars.length > 0) {
+      const carDetail = lastCars.find((item) => item.cameraName === cameraInfo);
+      if (!isEmpty(carDetail)) {
+        setDeliveryWindow({ ...deliveryWindow, [carDetail.cameraName]: carDetail.carPlateNumber });
+      }
+    }
+  }, [lastCars]);
+
+  useEffect(() => {
     if (!isEmpty(deliveryWindow) && deliveryWindow[cameraInfo]) {
       fetchCarInformation();
     }
     if (!deliveryWindow[cameraInfo]) {
-      setCarDetails({})
+      setCarDetails({});
     }
   }, [deliveryWindow]);
 
   return (
     <>
       {!isEmpty(carDetails) ? (
-        <OrderAndCarDetails carDetails={carDetails} cameraName={cameraInfo} currentOrders={currentOrders} />
+        <OrderAndCarDetails carDetails={carDetails} cameraName={cameraInfo} currentOrders={currentOrders} cameraReload={cameraReload} />
       ) : (
         <Stack pt={'calc(16px + 25%)'}>
           <Stack alignItems={'center'} justifyContent={'center'} spacing={2}>
@@ -407,7 +444,7 @@ const DeliveryCameraView = ({ cameraInfo }) => {
                 borderRadius: '50%'
               }}
             />
-            <Typography variant="body1">Waiting for next car...</Typography>
+            <Typography variant='body1'>Waiting for next car...</Typography>
           </Stack>
         </Stack>
       )}
@@ -416,7 +453,6 @@ const DeliveryCameraView = ({ cameraInfo }) => {
 };
 
 const OrderCard = ({ cameraConfig = {} }) => {
-
   return (
     <MainCard content={false} sx={{ minHeight: '90vh' }}>
       <Stack direction={'row'} justifyContent={'space-between'} p={2}>
@@ -428,12 +464,12 @@ const OrderCard = ({ cameraConfig = {} }) => {
       </Stack>
       {cameraConfig.cameraType === enums.cameraTypeConfig.L && (
         <>
-          <OrderCameraView cameraInfo={cameraConfig.cameraName} />
+          <OrderCameraView cameraInfo={cameraConfig.cameraName} cameraReload={cameraConfig.reloadTime} />
         </>
       )}
       {cameraConfig.cameraType === enums.cameraTypeConfig.C && (
         <>
-          <DeliveryCameraView cameraInfo={cameraConfig.cameraName} />
+          <DeliveryCameraView cameraInfo={cameraConfig.cameraName} cameraReload={cameraConfig.reloadTime} />
         </>
       )}
     </MainCard>

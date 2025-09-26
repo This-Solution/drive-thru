@@ -19,6 +19,7 @@ public class SiteResponse {
     private Integer updatedBy;
     private String updateByName;
     private LocalDateTime updatedDate;
+    private Integer reloadTime;
 
     public Integer getSiteId() {
         return siteId;

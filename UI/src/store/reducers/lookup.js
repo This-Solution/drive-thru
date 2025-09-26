@@ -6,7 +6,9 @@ const initialState = {
   roles: [],
   flavours: [],
   tenants: [],
-  cameraConfig: []
+  cameraConfig: [],
+  sites: [],
+  lastCars: []
 };
 
 // ==============================|| SLICE - MENU ||============================== //
@@ -31,10 +33,18 @@ const lookup = createSlice({
 
     setCameraConfig(state, action) {
       state.cameraConfig = action.payload;
+    },
+
+    setSites(state, action) {
+      state.sites = action.payload;
+    },
+
+    setLastCars(state, action) {
+      state.lastCars = action.payload;
     }
   }
 });
 
 export default lookup.reducer;
 
-export const { setLookup, clearLookup, setTenant, setCameraConfig } = lookup.actions;
+export const { setLookup, clearLookup, setTenant, setCameraConfig, setSites, setLastCars } = lookup.actions;
