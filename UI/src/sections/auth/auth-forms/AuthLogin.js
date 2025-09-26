@@ -160,17 +160,8 @@ const AuthLogin = () => {
           if (data) {
             const token = { session: data.sessionToken };
             utils.setTokensToStorage(token);
-            // if (data.user.role === enums.userRole.SuperAdmin) {
-            //   setFlavourDialog(true);
-            // } else {
-            // const token = { session: data.sessionToken, refresh: data.refreshToken };
-            // const flavourDetail = getFlavourDetail(data.user.flavourId);
-            // dispatch(setFlavour({ flavour: flavourDetail }));
-            // utils.setItemToStorage('flavour', JSON.stringify(flavourDetail));
             dispatch(login({ user: data.user, token }));
             await handelCameraInfo(data.user.siteId);
-            navigate('/order-trace/cars');
-            // }
           } else if (error) {
             console.log(error);
             setErrors(error);

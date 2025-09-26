@@ -12,14 +12,15 @@ import enums from 'utils/enums';
 const GuestGuard = ({ children }) => {
   const { user } = useSelector((state) => state.auth);
   const navigate = useNavigate();
-
+  let defaultPath;
   useEffect(() => {
     if (user) {
       if (user.roleId === enums.userRole.SuperAdmin) {
-        navigate('/admin/sites', { replace: true });
+        defaultPath = '/admin/sites';
       } else {
-        navigate(config.defaultPath, { replace: true });
+        defaultPath = config.defaultPath;
       }
+      navigate(defaultPath, { replace: true });
     }
   }, [user, navigate]);
 

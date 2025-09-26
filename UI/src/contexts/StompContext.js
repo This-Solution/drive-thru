@@ -1,6 +1,7 @@
 // context/StompContext.tsx
 import { Client } from '@stomp/stompjs';
 import { createContext, useContext, useEffect, useRef, useState } from 'react';
+import { useSelector } from 'store';
 import constants from 'utils/constants';
 import enums from 'utils/enums';
 
@@ -12,7 +13,7 @@ export const StompProvider = ({ children }) => {
   const [deliveryWindow, setDeliveryWindow] = useState({});
   const [client, setClient] = useState(null);
 
-
+  const { user } = useSelector((state) => state.auth);
   const clientRef = useRef(null);
 
   useEffect(() => {
@@ -45,12 +46,17 @@ export const StompProvider = ({ children }) => {
   };
 
   useEffect(() => {
+    console.log(user)
+    const connectionHeaders = {
+      'client-id': JSON.stringify(user)
+    };
+
     const client = new Client({
-      brokerURL: constants.webSocketUrl,
+      brokerURL: 'wss://10.10.1.79:8181/ws',
       reconnectDelay: 5000,
       debug: (msg) => console.log('DEBUG:', msg),
 
-      onConnect: () => {
+      onConnect: (frame) => {
         console.log('Connected to WebSocket server!');
         setClient(client);
       },
@@ -67,13 +73,13 @@ export const StompProvider = ({ children }) => {
         console.error('WebSocket error:', event);
       }
     });
-
+    client.connectHeaders = connectionHeaders;
     client.activate();
 
     return () => {
       client.deactivate();
     };
-  }, []);
+  }, [user]);
 
   return (
     <StompContext.Provider
