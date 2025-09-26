@@ -41,6 +41,13 @@ const App = () => {
     }
   };
 
+  const getCameraInfo = async (siteId) => {
+    const { data } = await ApiService.getCameraConfigAsync(siteId);
+    if (data) {
+      dispatch(setCameraConfig(data));
+    }
+  };
+
   const handleMessage = async (event) => {
     if (event.data.refreshToken && event.data.flavour) {
       dispatch(setFlavour({ flavour: event.data.flavour }));
@@ -77,6 +84,7 @@ const App = () => {
       const currentTokenUser = jwtDecode(token.session);
       // dispatch(setFlavour({ flavour: JSON.parse(flavour) }));
       dispatch(setAuthDetail({ user: currentTokenUser, token }));
+      getCameraInfo(currentTokenUser.siteId)
       setIsTokenChecked(false);
     } else {
       setIsTokenChecked(false);

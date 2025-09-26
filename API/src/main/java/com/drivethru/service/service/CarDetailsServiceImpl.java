@@ -156,9 +156,11 @@ public class CarDetailsServiceImpl implements CarDetailService {
         carDetailResponse.setPlateImageUrl(azureFileUploaderService.generateBlobUrl(carDetail.get().getPlateImageUrl()));
 
         Optional<CarDetail> carDetails = carDetailRepository.findByCarPlateNumber(carDetailRequest.getCarPlateNumber());
-        List<CameraConfig> cameraConfig = cameraConfigRepository.findByTenantId(carDetailRequest.getTenantId());
+        CarVisit carVisit = carVisitRepository.findFirstByCarIdAndTenantIdOrderByCreatedDateDesc(carDetails.get().getCarId(),carDetailRequest.getTenantId());
+        Optional<CameraConfig> cameraConfig =  cameraConfigRepository.findById(carVisit.getCameraId());
+        System.out.println(cameraConfig.get().getCameraType());
 
-        String cameraType = cameraConfig.stream().map(CameraConfig::getCameraType).findFirst().orElse(null);
+        String cameraType = cameraConfig.get().getCameraType();
 
         LocalDateTime now = LocalDateTime.now();
         LocalDateTime days30 = now.minusDays(30);
@@ -172,8 +174,11 @@ public class CarDetailsServiceImpl implements CarDetailService {
         for (CarVisit detail : carVisits) {
             LocalDateTime createdDate = carDetails.get().getCreatedDate();
 
-            Optional<OrderCarStatus> optionalStatus = orderCarStatusRepository.findByCarId(carDetails.get().getCarId());
-            String status = optionalStatus.map(OrderCarStatus::getStatus).orElse(null);
+            List<OrderCarStatus> optionalStatus = orderCarStatusRepository.findByCarId(carDetails.get().getCarId());
+            String status = optionalStatus.stream()
+                    .findFirst()
+                    .map(OrderCarStatus::getStatus)
+                    .orElse(null);
 
             boolean isRed = CarColorStatus.RED.name().equalsIgnoreCase(status);
             boolean isGreen = CarColorStatus.GREEN.name().equalsIgnoreCase(status);

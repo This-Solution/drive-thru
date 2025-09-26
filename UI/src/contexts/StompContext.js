@@ -9,7 +9,6 @@ const StompContext = createContext(undefined);
 export const StompProvider = ({ children }) => {
   const [errorMessage, setErrorMessage] = useState('');
   const [orderWindow, setOrderWindow] = useState({});
-  const [cameraName, setCameraName] = useState('');
   const [deliveryWindow, setDeliveryWindow] = useState({});
   const [client, setClient] = useState(null);
 
@@ -29,13 +28,16 @@ export const StompProvider = ({ children }) => {
       const cameraType = response.cameraType ?? '';
       const cameraName = response.cameraName ?? '';
       const carPlateNumber = response.carPlateNumber?.toString() ?? '';
-
       if (cameraType === enums.cameraTypeConfig.L) {
-        setOrderWindow({ ...orderWindow, [cameraName]: carPlateNumber });
-        setCameraName(cameraName);
+        setOrderWindow((prev) => ({
+          ...prev,
+          [cameraName]: carPlateNumber
+        }));
       } else if (cameraType === enums.cameraTypeConfig.C) {
-        setDeliveryWindow({ ...deliveryWindow, [cameraName]: carPlateNumber })
-        setCameraName(cameraName);
+        setDeliveryWindow((prev) => ({
+          ...prev,
+          [cameraName]: carPlateNumber
+        }));
       }
     } catch (e) {
       console.error('Error decoding STOMP message:', e);
@@ -77,9 +79,10 @@ export const StompProvider = ({ children }) => {
     <StompContext.Provider
       value={{
         orderWindow,
+        setOrderWindow,
         deliveryWindow,
+        setDeliveryWindow,
         errorMessage,
-        cameraName,
         clientRef
       }}
     >

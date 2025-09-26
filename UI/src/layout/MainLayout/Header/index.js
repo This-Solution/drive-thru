@@ -22,20 +22,9 @@ import _ from 'lodash';
 
 const Header = ({ open, handleDrawerToggle }) => {
   const theme = useTheme();
-  const [tenant, setTenant] = useState('')
   const matchDownMD = useMediaQuery(theme.breakpoints.down('lg'));
 
   const { user } = useSelector((state) => state.auth);
-  const { tenants } = useSelector((state) => state.lookup);
-
-
-  useEffect(() => {
-    if (!_.isEmpty(tenants)) {
-      const tenant = _.find(tenants, (t) => t.tenantId === user.tenantId);
-      setTenant(tenant)
-    }
-  }, [user])
-
   // header content
   const headerContent = useMemo(() => <HeaderContent />, []);
 
@@ -50,7 +39,7 @@ const Header = ({ open, handleDrawerToggle }) => {
       sx={{ width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'space-between', px: 0, py: 1 }}
     >
       <LogoSection isIcon={matchDownMD} sx={{ width: open ? 'auto' : 35, height: 35 }} />
-      {tenant && <Typography variant='h5'>{tenant.tenantName}</Typography>}
+      <Typography variant='h5'>{user.siteName}</Typography>
       {headerContent}
     </Stack>
     // </Toolbar>
