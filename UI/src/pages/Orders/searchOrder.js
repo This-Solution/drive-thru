@@ -16,6 +16,7 @@ import * as Yup from 'yup';
 import apiService from 'service/ApiService';
 import dateHelper from 'utils/dateHelper';
 import CommentDialog from './commentdialog';
+import utils from 'utils/utils';
 
 const SearchOrder = () => {
     const theme = useTheme();
@@ -201,7 +202,7 @@ const SearchOrder = () => {
                                                     </FormHelperText>
                                                 </Grid>
 
-                                                <Grid item md={3}>
+                                                {/* <Grid item md={3}>
                                                     <TextField
                                                         label="Search Orders"
                                                         variant="outlined"
@@ -211,7 +212,7 @@ const SearchOrder = () => {
                                                         value={search}
                                                         onChange={handleSearchChange}
                                                     />
-                                                </Grid>
+                                                </Grid> */}
 
                                                 <Grid item md={2}>
                                                     <Button type="submit" variant="contained" fullWidth>
@@ -238,6 +239,7 @@ const SearchOrder = () => {
                                                 <TableCell>Order Date</TableCell>
                                                 <TableCell>Plate Number</TableCell>
                                                 <TableCell>Car Color</TableCell>
+                                                {/* <TableCell>Total</TableCell> */}
                                                 <TableCell align="right">Actions</TableCell>
                                             </TableRow>
                                         </TableHead>
@@ -253,6 +255,7 @@ const SearchOrder = () => {
                                                 <TableCell>{dateHelper.formatDate(order.createdDate)}</TableCell>
                                                 <TableCell>{order.carPlateNumber}</TableCell>
                                                 <TableCell>{order.carColor}</TableCell>
+                                                {/* <TableCell>{order.totalAmount ? order.totalAmount : 0}</TableCell> */}
                                                 <TableCell align="right">
                                                     <IconButton
                                                         size="small"
@@ -276,16 +279,16 @@ const SearchOrder = () => {
                                                                 <TableHead>
                                                                     <TableRow>
                                                                         <TableCell>Item Name</TableCell>
-                                                                        <TableCell align="right">Quantity</TableCell>
-                                                                        <TableCell align="right">Price ($)</TableCell>
+                                                                        <TableCell align="center">Quantity</TableCell>
+                                                                        <TableCell align="center">Price ($)</TableCell>
                                                                     </TableRow>
                                                                 </TableHead>
                                                                 <TableBody>
                                                                     {order.items.map((item, i) => (
                                                                         <TableRow key={i}>
                                                                             <TableCell>{item.name}</TableCell>
-                                                                            <TableCell align="right">{item.quantity}</TableCell>
-                                                                            <TableCell align="right">{item.price}</TableCell>
+                                                                            <TableCell align="center">{item.quantity}</TableCell>
+                                                                            <TableCell align="center">{utils.formatCurrency(item.price)}</TableCell>
                                                                         </TableRow>
                                                                     ))}
                                                                 </TableBody>
