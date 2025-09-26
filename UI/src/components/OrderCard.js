@@ -348,7 +348,7 @@ const OrderCameraView = ({ cameraInfo }) => {
                 borderRadius: '50%'
               }}
             />
-            <Typography variant='body1'>Waiting for new Car....</Typography>
+            <Typography variant="body1">Waiting for next car...</Typography>
           </Stack>
         </Stack>
       )}
@@ -407,7 +407,7 @@ const DeliveryCameraView = ({ cameraInfo }) => {
                 borderRadius: '50%'
               }}
             />
-            <Typography variant='body1'>Waiting for new Car....</Typography>
+            <Typography variant="body1">Waiting for next car...</Typography>
           </Stack>
         </Stack>
       )}
