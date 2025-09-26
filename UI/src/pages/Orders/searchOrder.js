@@ -1,7 +1,13 @@
 import { useTheme } from '@emotion/react';
 import { useNavigate } from 'react-router-dom';
 import { Form, FormikProvider, useFormik } from 'formik';
-import { Typography, Grid, Stack, Button, TextField, useMediaQuery, InputLabel, FormHelperText, Chip } from '@mui/material';
+import {
+    Typography, Grid, Stack, Button, TextField, useMediaQuery, FormHelperText, Collapse, Box, Table, TableBody,
+    TableCell, TableContainer, TableHead, TableRow
+} from '@mui/material';
+import { UpOutlined, DownOutlined } from '@ant-design/icons';
+import CommentIcon from '@mui/icons-material/Comment';
+import IconButton from 'components/@extended/IconButton';
 import MainCard from 'components/MainCard';
 import ScrollX from 'components/ScrollX';
 import { useState } from 'react';
@@ -9,13 +15,17 @@ import { DatePicker, TimePicker } from '@mui/x-date-pickers';
 import * as Yup from 'yup';
 import apiService from 'service/ApiService';
 import dateHelper from 'utils/dateHelper';
+import CommentDialog from './commentdialog';
 
 const SearchOrder = () => {
     const theme = useTheme();
     const matchDownMD = useMediaQuery(theme.breakpoints.down('md'));
     const navigate = useNavigate();
     const [search, setSearch] = useState('');
-    const [orders, setOrders] = useState(null);
+    const [orders, setOrders] = useState([]);
+    const [openIndex, setOpenIndex] = useState(null);
+    const [commentDialogOpen, setCommentDialogOpen] = useState(false);
+    const [selectedOrder, setSelectedOrder] = useState(null);
 
     const orderSchema = Yup.object().shape({
         date: Yup.date()
@@ -51,9 +61,53 @@ const SearchOrder = () => {
         setSearch(event.target.value);
     };
 
+    const handleCommentClick = (order) => {
+        setSelectedOrder(order);
+        setCommentDialogOpen(true);
+    };
+
+    const handleDialogSave = async (payload) => {
+        try {
+            await apiService.saveOrderComment(payload);
+            setCommentDialogOpen(false);
+        } catch (error) {
+            console.error('Error saving comment:', error);
+        }
+    };
+
+    const handleDialogCancel = () => {
+        setCommentDialogOpen(false);
+    };
+
     const handleTimeChange = (fieldName) => (value) => {
         formik.setFieldValue(fieldName, value);
     };
+
+    const handleToggle = (index) => {
+        setOpenIndex(openIndex === index ? null : index);
+    };
+
+    const groupedOrders = Object.values(
+        orders.reduce((acc, item) => {
+            if (!acc[item.orderId]) {
+                acc[item.orderId] = {
+                    carColor: item.carColor,
+                    carId: item.carId,
+                    carPlateNumber: item.carPlateNumber,
+                    createdDate: item.createdDate,
+                    items: []
+                };
+            }
+            acc[item.orderId].items.push({
+                name: item.name,
+                quantity: item.quantity,
+                price: item.price
+            });
+            return acc;
+        }, {})
+    );
+
+    console.log(groupedOrders);
 
     return (
         <>
@@ -85,6 +139,7 @@ const SearchOrder = () => {
                                                         id="date"
                                                         name="date"
                                                         value={formik.values.date}
+                                                        label="Date"
                                                         onChange={(value) => formik.setFieldValue('date', value)}
                                                         renderInput={(params) => (
                                                             <TextField
@@ -106,6 +161,7 @@ const SearchOrder = () => {
                                                     <TimePicker
                                                         id="openingTime"
                                                         name="openingTime"
+                                                        label="Start Time"
                                                         value={formik.values.openingTime}
                                                         onChange={handleTimeChange('openingTime')}
                                                         renderInput={(params) => (
@@ -127,6 +183,7 @@ const SearchOrder = () => {
                                                     <TimePicker
                                                         id="closingTime"
                                                         name="closingTime"
+                                                        label="Close Time"
                                                         value={formik.values.closingTime}
                                                         onChange={handleTimeChange('closingTime')}
                                                         renderInput={(params) => (
@@ -156,7 +213,6 @@ const SearchOrder = () => {
                                                     />
                                                 </Grid>
 
-                                                {/* Submit Button */}
                                                 <Grid item md={2}>
                                                     <Button type="submit" variant="contained" fullWidth>
                                                         Search
@@ -171,51 +227,91 @@ const SearchOrder = () => {
                         </ScrollX>
                     </MainCard>
 
-                    <Grid item md={12} pt={3}>
-                        <MainCard content={false}>
-                            {orders && orders.length > 0 ? <Typography pl={2} pt={2} variant='h5'>Orders</Typography> : null}
-                            <Grid container spacing={2} p={2}>
-                                {
-                                    orders && orders.map((item, index) => {
-                                        return (
-                                            <Grid item md={4} key={index}>
-                                                <Stack
-                                                    direction="row"
-                                                    spacing={2}
-                                                    sx={{
-                                                        cursor: 'pointer',
-                                                        backgroundColor: '#fafafa',
-                                                        padding: 2,
-                                                        borderRadius: 2,
-                                                        transition: 'background-color 0.3s ease',
-                                                    }}
+                    <Grid container spacing={2} p={2}>
+                        {groupedOrders && groupedOrders.map((order, index) => (
+                            <Grid item md={12} key={order.orderId}>
+                                <TableContainer>
+                                    <Table size="small">
+                                        <TableHead>
+                                            <TableRow sx={{ backgroundColor: "#f5f5f5" }}>
+                                                <TableCell />
+                                                <TableCell>Order Date</TableCell>
+                                                <TableCell>Plate Number</TableCell>
+                                                <TableCell>Car Color</TableCell>
+                                                <TableCell align="right">Actions</TableCell>
+                                            </TableRow>
+                                        </TableHead>
+
+                                        <TableBody>
+                                            <TableRow hover>
+                                                <TableCell>
+                                                    <IconButton size="small" onClick={() => handleToggle(index)}>
+                                                        {openIndex === index ? <UpOutlined /> : <DownOutlined />}
+                                                    </IconButton>
+                                                </TableCell>
+
+                                                <TableCell>{dateHelper.formatDate(order.createdDate)}</TableCell>
+                                                <TableCell>{order.carPlateNumber}</TableCell>
+                                                <TableCell>{order.carColor}</TableCell>
+                                                <TableCell align="right">
+                                                    <IconButton
+                                                        size="small"
+                                                        onClick={(e) => {
+                                                            e.stopPropagation();
+                                                            handleCommentClick(order);
+                                                        }}
+                                                    >
+                                                        <CommentIcon sx={{ color: theme.palette.primary.main }} />
+                                                    </IconButton>
+                                                </TableCell>
+                                            </TableRow>
+                                            <TableRow>
+                                                <TableCell
+                                                    style={{ paddingBottom: 0, paddingTop: 0 }}
+                                                    colSpan={5}
                                                 >
-                                                    <Stack>
-                                                        <Typography variant='body1'>{item.name}</Typography>
-                                                        <Typography variant='body2'>${item.price}</Typography>
-                                                    </Stack>
-                                                    <Stack>
-                                                        <Chip
-                                                            label={<Typography sx={{ fontSize: 10, lineHeight: 1 }}>{item.quantity}</Typography>}
-                                                            sx={{
-                                                                backgroundColor: '#b4d8f0',
-                                                                borderRadius: '20px',
-                                                                height: 'auto',
-                                                                px: 1.5,
-                                                                py: 0.5
-                                                            }}
-                                                        />
-                                                    </Stack>
-                                                </Stack>
-                                            </Grid>
-                                        );
-                                    })
-                                }
+                                                    <Collapse in={openIndex === index} timeout="auto" unmountOnExit>
+                                                        <Box sx={{ margin: 2 }}>
+                                                            <Table size="small">
+                                                                <TableHead>
+                                                                    <TableRow>
+                                                                        <TableCell>Item Name</TableCell>
+                                                                        <TableCell align="right">Quantity</TableCell>
+                                                                        <TableCell align="right">Price ($)</TableCell>
+                                                                    </TableRow>
+                                                                </TableHead>
+                                                                <TableBody>
+                                                                    {order.items.map((item, i) => (
+                                                                        <TableRow key={i}>
+                                                                            <TableCell>{item.name}</TableCell>
+                                                                            <TableCell align="right">{item.quantity}</TableCell>
+                                                                            <TableCell align="right">{item.price}</TableCell>
+                                                                        </TableRow>
+                                                                    ))}
+                                                                </TableBody>
+                                                            </Table>
+                                                        </Box>
+                                                    </Collapse>
+                                                </TableCell>
+                                            </TableRow>
+                                        </TableBody>
+                                    </Table>
+                                </TableContainer>
                             </Grid>
-                        </MainCard>
+                        ))}
                     </Grid>
+
+
                 </Grid>
             </Grid >
+            {commentDialogOpen && selectedOrder ? (
+                <CommentDialog
+                    open={commentDialogOpen}
+                    onSave={handleDialogSave}
+                    onCancel={handleDialogCancel}
+                    selectedOrder={selectedOrder}
+                />
+            ) : null}
         </>
     );
 };

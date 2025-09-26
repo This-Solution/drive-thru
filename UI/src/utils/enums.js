@@ -67,9 +67,9 @@ const enums = {
     4: 'DELIVERY_OPERATOR'
   },
   carStatus: {
-    GREEN: 'green',
-    RED: 'red',
-    PINK: 'pink',
+    GREEN: 'GREEN',
+    RED: 'RED',
+    PINK: 'PINK'
     // WHITE: '#d9dadb'
   },
   displayAdminRole: {

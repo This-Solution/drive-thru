@@ -331,6 +331,15 @@ async function getOrdersAsync(date, openingTime, closingTime) {
   return await axios(config);
 }
 
+async function saveOrderComment(payload) {
+  const config = {
+    method: 'post',
+    url: `/car/updateStatus`,
+    data: payload
+  };
+  return await axios(config);
+}
+
 
 export default {
   // auth
@@ -376,6 +385,7 @@ export default {
   getLastAndMostPurchaseOrderAsync,
   saveTenantsAsync,
 
-  getOrdersAsync
+  getOrdersAsync,
+  saveOrderComment
 
 };
