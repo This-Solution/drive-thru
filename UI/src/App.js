@@ -15,7 +15,7 @@ import ApiService from 'service/ApiService';
 import { setAuthDetail, setFlavour, setTokens } from 'store/reducers/auth';
 import ThemeCustomization from 'themes';
 import utils from 'utils/utils';
-import { setCameraConfig, setTenant } from 'store/reducers/lookup';
+import { setCameraConfig, setLastCars, setLatest, setSites, setTenant } from 'store/reducers/lookup';
 import { openSnackbar } from 'store/reducers/snackbar';
 import useConfig from 'hooks/useConfig';
 
@@ -29,10 +29,26 @@ const App = () => {
 
   useEffect(() => {
     getTentant();
+    getSites();
+    getLastCarInfo()
     bindInitData(false);
     window.addEventListener('message', handleMessage);
     return () => window.removeEventListener('message', handleMessage);
   }, []);
+
+  const getLastCarInfo = async () => {
+    const { data } = await ApiService.getLastCarAsync();
+    if (data) {
+      dispatch(setLastCars(data))
+    }
+  }
+
+  const getSites = async () => {
+    const { data } = await ApiService.getSitesAsync();
+    if (data) {
+      dispatch(setSites(data));
+    }
+  }
 
   const getTentant = async () => {
     const { data } = await ApiService.getTenantsAsync();

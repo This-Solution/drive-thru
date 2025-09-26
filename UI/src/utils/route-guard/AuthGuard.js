@@ -33,11 +33,13 @@ const AuthGuard = ({ children }) => {
     if (!user) {
       navigate(redirectUri, { replace: true });
     } else {
-
-      // navigate(config.defaultPath, { replace: true });
-      // const isSiteAdminOrManager =
-      //   user.role === enums.userRole.CJAdmin || user.role === enums.userRole.User || user.role === enums.userRole.SiteManager;
-      // if (isSiteAdminOrManager && isSuperAdminRoute(pathname)) {
+      if (user.roleId === enums.userRole.SuperAdmin) {
+        navigate('/admin/sites', { replace: true });
+      } else if (user.roleId === enums.userRole.Admin) {
+        navigate(redirectUri, { replace: true });
+      }
+      // else {
+      //   console.log("auth called")
       //   navigate('/maintenance/access-denied');
       // }
     }
