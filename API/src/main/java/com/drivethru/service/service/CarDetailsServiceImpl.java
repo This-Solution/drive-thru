@@ -299,7 +299,7 @@ public class CarDetailsServiceImpl implements CarDetailService {
             throw new CustomException(CustomErrorHolder.ORDER_NOT_FOUND);
         }
         orderCarStatus.setStatus(updateStatusRequest.getStatus());
-        orderCarStatus.setNotes(updateStatusRequest.getNotes());
+        orderCarStatus.setNotes(updateStatusRequest.getComment());
         orderCarStatusRepository.save(orderCarStatus);
         return orderCarStatus;
     }
@@ -316,7 +316,8 @@ public class CarDetailsServiceImpl implements CarDetailService {
         List<CameraResponseDTO> cameraResponseList = new ArrayList<>();
 
         for (CameraConfig config : cameraConfigList) {
-            LocalDateTime startOfDay = LocalDate.now().atStartOfDay().minusSeconds(reloadTime);
+//            LocalDateTime startOfDay = LocalDate.now().atStartOfDay().minusSeconds(reloadTime);
+            LocalDateTime startOfDay = LocalDate.now().atStartOfDay();
             CarVisit carVisit = carVisitRepository.findFirstByCameraIdAndCreatedDateAfterOrderByCreatedDateDesc(config.getCameraId(), startOfDay);
 
             if (carVisit == null) {

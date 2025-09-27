@@ -4,7 +4,7 @@ public class UpdateStatusRequest {
     private Integer orderId;
     private Integer carId;
     private String status;
-    private String notes;
+    private String comment;
 
     public Integer getOrderId() {
         return orderId;
@@ -30,11 +30,11 @@ public class UpdateStatusRequest {
         this.status = status;
     }
 
-    public String getNotes() {
-        return notes;
+    public String getComment() {
+        return comment;
     }
 
-    public void setNotes(String notes) {
-        this.notes = notes;
+    public void setComment(String comment) {
+        this.comment = comment;
     }
 }
