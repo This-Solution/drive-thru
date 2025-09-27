@@ -59,80 +59,96 @@ public class CarDetailsServiceImpl implements CarDetailService {
     @Override
     public void addCarDetail(Map<String, Object> carDetailJson) {
         String currentDateFolder = LocalDate.now().format(DateTimeFormatter.ofPattern("dd-MM-yyyy"));
+        String carType;
+        String carColor;
+        String plateNumber;
+        String siteName;
+        String cameraName;
+        String carImageBase64;
+        String plateImageBase64;
 
         try {
             Map<String, Object> car = (Map<String, Object>) carDetailJson.get("car");
             List<Map<String, Object>> bodyStyles = (List<Map<String, Object>>) car.get("bodyStyle");
-            String carType = (String) bodyStyles.get(0).get("name");
-
             List<Map<String, Object>> colors = (List<Map<String, Object>>) car.get("color");
-            String carColor = (String) colors.get(0).get("name");
 
-            String plateNumber = (String) carDetailJson.get("plate_number");
-            String siteName = (String) carDetailJson.get("static_detail_1");
-            String cameraName = (String) carDetailJson.get("static_detail_2");
+            carType = (String) bodyStyles.get(0).get("name");
+            carColor = (String) colors.get(0).get("name");
 
-            Site site = siteRepository.findBySiteName(siteName);
-            Integer siteId= site.getSiteId();
-            CameraConfig cameraConfig = cameraConfigRepository.findBySiteIdAndTenantIdAndCameraName(site.getSiteId(), site.getTenantId(), cameraName);
+            plateNumber = (String) carDetailJson.get("plate_number");
+            siteName = (String) carDetailJson.get("static_detail_1");
+            cameraName = (String) carDetailJson.get("static_detail_2");
 
-            List<UserDetail> userDetails = userDetailRepository.findBySiteId(siteId);
+            carImageBase64 = (String) carDetailJson.get("car_image_base64");
+            plateImageBase64 = (String) carDetailJson.get("plate_image_base64");
 
-            String cameraType = cameraConfig.getCameraType();
-            CarDetail carDetail;
+        } catch (Exception e) {
+            throw new CustomException(CustomErrorHolder.FAILED_CONVERT_DATA);
+        }
 
-            Optional<CarDetail> existingCarOpt = carDetailRepository.findByCarPlateNumber(plateNumber);
+        Site site = siteRepository.findBySiteName(siteName);
+        if (site == null) {
+            throw new CustomException(CustomErrorHolder.SITE_NOT_FOUND);
+        }
+        Integer siteId = site.getSiteId();
 
-            if (existingCarOpt.isPresent()) {
-                carDetail = existingCarOpt.get();
-            } else {
-                carDetail = new CarDetail();
-                carDetail.setCarType(carType);
-                carDetail.setCarColor(carColor);
-                carDetail.setCarPlateNumber(plateNumber);
-                carDetail.setCreatedDate(LocalDateTime.now());
+        CameraConfig cameraConfig = cameraConfigRepository.findBySiteIdAndTenantIdAndCameraName(site.getSiteId(), site.getTenantId(), cameraName);
+        if (cameraConfig == null) {
+            throw new CustomException(CustomErrorHolder.CAMERA_CONFIG_NOT_FOUND);
+        }
+        String cameraType = cameraConfig.getCameraType();
 
-                String carImageBase64 = (String) carDetailJson.get("car_image_base64");
-                String plateImageBase64 = (String) carDetailJson.get("plate_image_base64");
+        List<UserDetail> userDetails = userDetailRepository.findBySiteId(siteId);
+        Optional<CarDetail> existingCar = carDetailRepository.findByCarPlateNumber(plateNumber);
+        CarDetail carDetail;
 
+        if (existingCar.isPresent()) {
+            carDetail = existingCar.get();
+        } else {
+            carDetail = new CarDetail();
+            carDetail.setCarType(carType);
+            carDetail.setCarColor(carColor);
+            carDetail.setCarPlateNumber(plateNumber);
+            carDetail.setCreatedDate(LocalDateTime.now());
+
+            try {
                 Path tempDir = Files.createTempDirectory("car-images");
+
                 Path carImagePath = saveBase64Image(carImageBase64, "car_image.jpg", tempDir);
                 Path plateImagePath = saveBase64Image(plateImageBase64, "plate_image.jpg", tempDir);
 
                 String carImageName = plateNumber + "_car.jpg";
                 String plateImageName = plateNumber + "_plate.jpg";
+
                 String blobCarPath = azureFileUploaderService.uploadFile(currentDateFolder, carImageName, carImagePath);
                 String blobPlatePath = azureFileUploaderService.uploadFile(currentDateFolder, plateImageName, plateImagePath);
 
                 carDetail.setCarImageUrl(blobCarPath);
                 carDetail.setPlateImageUrl(blobPlatePath);
-
-                carDetail = carDetailRepository.save(carDetail);
+            } catch (Exception e) {
+                throw new CustomException(CustomErrorHolder.IMAGE_UPLOAD_FAILED);
             }
+            carDetail = carDetailRepository.save(carDetail);
+        }
 
-            CarVisit carVisit = new CarVisit();
-            carVisit.setCarId(carDetail.getCarId());
-            carVisit.setTenantId(cameraConfig.getTenantId());
-            carVisit.setSiteId(site.getSiteId());
-            carVisit.setCameraId(cameraConfig.getCameraId());
-            carVisit.setCreatedDate(LocalDateTime.now());
+        CarVisit carVisit = new CarVisit();
+        carVisit.setCarId(carDetail.getCarId());
+        carVisit.setTenantId(cameraConfig.getTenantId());
+        carVisit.setSiteId(site.getSiteId());
+        carVisit.setCameraId(cameraConfig.getCameraId());
+        carVisit.setCreatedDate(LocalDateTime.now());
 
-            carVisitRepository.save(carVisit);
+        carVisitRepository.save(carVisit);
 
-            CarResponse carResponse = new CarResponse();
-            carResponse.setCameraType(cameraType);
-            carResponse.setCarPlateNumber(plateNumber);
-            carResponse.setCameraName(cameraConfig.getCameraName());
+        CarResponse carResponse = new CarResponse();
+        carResponse.setCameraType(cameraType);
+        carResponse.setCarPlateNumber(plateNumber);
+        carResponse.setCameraName(cameraConfig.getCameraName());
 
-            for (UserDetail user : userDetails){
-                simpMessagingTemplate.convertAndSend("/topic/send", carResponse);
-            }
-
-        } catch (Exception e) {
-            throw new CustomException(CustomErrorHolder.UPLOAD_FAILED);
+        for (UserDetail user : userDetails) {
+            simpMessagingTemplate.convertAndSend("/topic/send", carResponse);
         }
     }
-
 
     private Path saveBase64Image(String base64Image, String fileName, Path directory) {
         try {
@@ -291,10 +307,7 @@ public class CarDetailsServiceImpl implements CarDetailService {
 
         for (CameraConfig config : cameraConfigList) {
             LocalDateTime startOfDay = LocalDate.now().atStartOfDay();
-            CarVisit carVisit = carVisitRepository.findFirstByCameraIdAndCreatedDateAfterOrderByCreatedDateDesc(
-                    config.getCameraId(),
-                    startOfDay
-            );
+            CarVisit carVisit = carVisitRepository.findFirstByCameraIdAndCreatedDateAfterOrderByCreatedDateDesc(config.getCameraId(), startOfDay);
 
             if (carVisit == null) continue;
 
