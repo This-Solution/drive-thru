@@ -298,7 +298,7 @@ public class CarDetailsServiceImpl implements CarDetailService {
         if (orderCarStatus == null) {
             throw new CustomException(CustomErrorHolder.ORDER_NOT_FOUND);
         }
-        orderCarStatus.setStatus(String.valueOf(CarColorStatus.valueOf(updateStatusRequest.getStatus().toUpperCase())));
+        orderCarStatus.setStatus(updateStatusRequest.getStatus());
         orderCarStatus.setNotes(updateStatusRequest.getNotes());
         orderCarStatusRepository.save(orderCarStatus);
         return orderCarStatus;
