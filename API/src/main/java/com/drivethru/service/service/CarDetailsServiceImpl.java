@@ -307,21 +307,27 @@ public class CarDetailsServiceImpl implements CarDetailService {
     @Override
     public List<CameraResponseDTO> latestInfo(String siteId) {
         int loginSiteId = Integer.parseInt(siteId);
+        Optional<Site> site = siteRepository.findById(loginSiteId);
+        int reloadTime = site.get().getReloadTime();
         List<CameraConfig> cameraConfigList = cameraConfigRepository.findAllBySiteIdAndIsActiveTrue(loginSiteId);
+        if (cameraConfigList == null) {
+            throw new CustomException(CustomErrorHolder.CAMERA_CONFIG_NOT_FOUND);
+        }
         List<CameraResponseDTO> cameraResponseList = new ArrayList<>();
 
         for (CameraConfig config : cameraConfigList) {
-            LocalDateTime startOfDay = LocalDate.now().atStartOfDay();
+            LocalDateTime startOfDay = LocalDate.now().atStartOfDay().minusSeconds(reloadTime);
             CarVisit carVisit = carVisitRepository.findFirstByCameraIdAndCreatedDateAfterOrderByCreatedDateDesc(config.getCameraId(), startOfDay);
 
-            if (carVisit == null) continue;
-
-            Optional<CarDetail> carDetailOpt = carDetailRepository.findById(carVisit.getCarId());
-            if (!carDetailOpt.isPresent()) {
+            if (carVisit == null) {
+                throw new CustomException(CustomErrorHolder.CAR_VISIT_NOT_FOUND);
+            }
+            Optional<CarDetail> carDetails = carDetailRepository.findById(carVisit.getCarId());
+            if (!carDetails.isPresent()) {
                 continue;
             }
 
-            CarDetail carDetail = carDetailOpt.get();
+            CarDetail carDetail = carDetails.get();
             CarDetailRequest carDetailRequest = new CarDetailRequest();
             carDetailRequest.setCarPlateNumber(carDetail.getCarPlateNumber());
             carDetailRequest.setTenantId(config.getTenantId());

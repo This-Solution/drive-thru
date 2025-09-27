@@ -18,4 +18,6 @@ public class CustomErrorHolder {
     public static final CustomError ADD_USER_FAILED = new CustomError("ERROR", "Failed to Add User", "Failed to add new user.");
     public static final CustomError ONLY_SUPER_ADMIN_CAN_ACCESS = new CustomError("ERROR", "Super Admin Access Required", "Only Super Admin can perform this action.");
     public static final CustomError EMAIL_INCORRECT = new CustomError("ERROR", "Invalid Email", "The email address entered is invalid.");
+    public static final CustomError CAR_VISIT_NOT_FOUND = new CustomError("ERROR", "CarVisit Not Found", "The specified car visit was not found.");
+
 }
