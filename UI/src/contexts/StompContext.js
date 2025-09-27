@@ -18,9 +18,9 @@ export const StompProvider = ({ children }) => {
 
   useEffect(() => {
     if (client) {
-      client.subscribe('/topic/send', handleMessage)
+      client.subscribe('/topic/send', handleMessage);
     }
-  }, [client])
+  }, [client]);
 
   const handleMessage = (message) => {
     if (!message.body) return;
@@ -32,12 +32,12 @@ export const StompProvider = ({ children }) => {
       if (cameraType === enums.cameraTypeConfig.L) {
         setOrderWindow((prev) => ({
           ...prev,
-          [cameraName]: carPlateNumber
+          [cameraName]: carPlateNumber,
         }));
       } else if (cameraType === enums.cameraTypeConfig.C) {
         setDeliveryWindow((prev) => ({
           ...prev,
-          [cameraName]: carPlateNumber
+          [cameraName]: carPlateNumber,
         }));
       }
     } catch (e) {
@@ -46,9 +46,8 @@ export const StompProvider = ({ children }) => {
   };
 
   useEffect(() => {
-    console.log(user)
     const connectionHeaders = {
-      'client-id': JSON.stringify(user)
+      'client-id': JSON.stringify(user),
     };
 
     const client = new Client({
@@ -71,7 +70,7 @@ export const StompProvider = ({ children }) => {
       },
       onWebSocketError: (event) => {
         console.error('WebSocket error:', event);
-      }
+      },
     });
     client.connectHeaders = connectionHeaders;
     client.activate();
@@ -89,7 +88,7 @@ export const StompProvider = ({ children }) => {
         deliveryWindow,
         setDeliveryWindow,
         errorMessage,
-        clientRef
+        clientRef,
       }}
     >
       {children}

@@ -1,5 +1,17 @@
 import { CheckOutlined } from '@ant-design/icons';
-import { Avatar, Box, CardContent, Chip, Divider, Grid, ImageList, ImageListItem, Link, Stack, Typography } from '@mui/material';
+import {
+  Avatar,
+  Box,
+  CardContent,
+  Chip,
+  Divider,
+  Grid,
+  ImageList,
+  ImageListItem,
+  Link,
+  Stack,
+  Typography,
+} from '@mui/material';
 import shopkeeper from 'assets/images/icons/merchant.png';
 import deliveryMan from 'assets/images/icons/shopkeeper.png';
 import cameraNotFound from 'assets/images/logos/camera.png';
@@ -20,7 +32,12 @@ const ShowCarDetails = ({ carDetails }) => {
         <Box sx={{ width: 400, m: 'auto' }}>
           <ImageList variant='standard' cols={2} gap={2}>
             <ImageListItem>
-              <img src={carDetails.carImageUrl} alt={'car'} loading='lazy' style={{ width: '100%', height: 'auto', display: 'block' }} />
+              <img
+                src={carDetails.carImageUrl}
+                alt={'car'}
+                loading='lazy'
+                style={{ width: '100%', height: 'auto', display: 'block' }}
+              />
             </ImageListItem>
             <ImageListItem>
               <img
@@ -47,7 +64,7 @@ const ShowCarDetails = ({ carDetails }) => {
                       textOverflow: 'ellipsis',
                       whiteSpace: 'nowrap',
                       display: 'block',
-                      textDecoration: 'none'
+                      textDecoration: 'none',
                     }}
                   >
                     Car Plate Number
@@ -67,7 +84,7 @@ const ShowCarDetails = ({ carDetails }) => {
                       textOverflow: 'ellipsis',
                       whiteSpace: 'nowrap',
                       display: 'block',
-                      textDecoration: 'none'
+                      textDecoration: 'none',
                     }}
                   >
                     Car Type
@@ -87,7 +104,7 @@ const ShowCarDetails = ({ carDetails }) => {
                       textOverflow: 'ellipsis',
                       whiteSpace: 'nowrap',
                       display: 'block',
-                      textDecoration: 'none'
+                      textDecoration: 'none',
                     }}
                   >
                     Car Color
@@ -103,37 +120,82 @@ const ShowCarDetails = ({ carDetails }) => {
             </Grid>
             <Grid item xs={12}>
               <Stack spacing={1} px={2} pt={1}>
-                <Stack direction={'row'} alignItems={'center'} justifyContent={'space-between'}>
+                <Stack
+                  direction={'row'}
+                  alignItems={'center'}
+                  justifyContent={'space-between'}
+                >
                   <Stack direction={'row'} spacing={2}>
-                    <Avatar sx={{ bgcolor: enums.carStatus[carDetails.last30DayColorStatus], width: '15px', height: '15px' }}>
+                    <Avatar
+                      sx={{
+                        bgcolor:
+                          enums.carStatus[carDetails.last30DayColorStatus],
+                        width: '15px',
+                        height: '15px',
+                      }}
+                    >
                       <CheckOutlined style={{ fontSize: '10px' }} />
                     </Avatar>
-                    <Typography variant='subtitle2'>Orders (Last 30 Days)</Typography>
+                    <Typography variant='subtitle2'>
+                      Orders (Last 30 Days)
+                    </Typography>
                   </Stack>
                   <Stack>
-                    <Typography variant='subtitle2'>{carDetails.last30DayCount}</Typography>
+                    <Typography variant='subtitle2'>
+                      {carDetails.last30DayCount}
+                    </Typography>
                   </Stack>
                 </Stack>
-                <Stack direction={'row'} alignItems={'center'} justifyContent={'space-between'}>
+                <Stack
+                  direction={'row'}
+                  alignItems={'center'}
+                  justifyContent={'space-between'}
+                >
                   <Stack direction={'row'} spacing={2}>
-                    <Avatar sx={{ bgcolor: enums.carStatus[carDetails.last30To60DayColorStatus], width: '15px', height: '15px' }}>
+                    <Avatar
+                      sx={{
+                        bgcolor:
+                          enums.carStatus[carDetails.last30To60DayColorStatus],
+                        width: '15px',
+                        height: '15px',
+                      }}
+                    >
                       <CheckOutlined style={{ fontSize: '10px' }} />
                     </Avatar>
-                    <Typography variant='subtitle2'>Orders (30-60 Days)</Typography>
+                    <Typography variant='subtitle2'>
+                      Orders (30-60 Days)
+                    </Typography>
                   </Stack>
                   <Stack>
-                    <Typography variant='subtitle2'>{carDetails.last30To60DayCount}</Typography>
+                    <Typography variant='subtitle2'>
+                      {carDetails.last30To60DayCount}
+                    </Typography>
                   </Stack>
                 </Stack>
-                <Stack direction={'row'} alignItems={'center'} justifyContent={'space-between'}>
+                <Stack
+                  direction={'row'}
+                  alignItems={'center'}
+                  justifyContent={'space-between'}
+                >
                   <Stack direction={'row'} spacing={2}>
-                    <Avatar sx={{ bgcolor: enums.carStatus[carDetails.last60To90DayColorStatus], width: '15px', height: '15px' }}>
+                    <Avatar
+                      sx={{
+                        bgcolor:
+                          enums.carStatus[carDetails.last60To90DayColorStatus],
+                        width: '15px',
+                        height: '15px',
+                      }}
+                    >
                       <CheckOutlined style={{ fontSize: '10px' }} />
                     </Avatar>
-                    <Typography variant='subtitle2'>Orders (60-90 Days)</Typography>
+                    <Typography variant='subtitle2'>
+                      Orders (60-90 Days)
+                    </Typography>
                   </Stack>
                   <Stack>
-                    <Typography variant='subtitle2'>{carDetails.last60To90DayCount}</Typography>
+                    <Typography variant='subtitle2'>
+                      {carDetails.last60To90DayCount}
+                    </Typography>
                   </Stack>
                 </Stack>
               </Stack>
@@ -153,9 +215,10 @@ const OrderAndCarDetails = ({
   mostPurchaseOrder = [],
   cameraName = '',
   currentOrders = [],
-  cameraReload = 0
+  cameraReload = 0,
 }) => {
-  const { orderWindow, setOrderWindow, deliveryWindow, setDeliveryWindow } = useStomp();
+  const { orderWindow, setOrderWindow, deliveryWindow, setDeliveryWindow } =
+    useStomp();
 
   useEffect(() => {
     const timerId = setTimeout(() => {
@@ -184,13 +247,17 @@ const OrderAndCarDetails = ({
             <Stack direction={'row'} justifyContent={'space-between'}>
               <Typography variant='h5'>Last Order</Typography>
               <Chip
-                label={<Typography sx={{ fontSize: 10, lineHeight: 1 }}>{totalAmount}</Typography>}
+                label={
+                  <Typography sx={{ fontSize: 10, lineHeight: 1 }}>
+                    {totalAmount}
+                  </Typography>
+                }
                 sx={{
                   backgroundColor: '#b4d8f0',
                   borderRadius: '20px',
                   height: 'auto',
                   px: 1.5,
-                  py: 0.5
+                  py: 0.5,
                 }}
               />
             </Stack>
@@ -201,8 +268,8 @@ const OrderAndCarDetails = ({
               overflowY: 'auto',
               mb: 2,
               '&::-webkit-scrollbar': {
-                display: 'none'
-              }
+                display: 'none',
+              },
             }}
             px={2}
           >
@@ -234,8 +301,8 @@ const OrderAndCarDetails = ({
               overflowY: 'auto',
               mb: 2,
               '&::-webkit-scrollbar': {
-                display: 'none'
-              }
+                display: 'none',
+              },
             }}
             px={2}
           >
@@ -274,8 +341,8 @@ const OrderAndCarDetails = ({
               overflowY: 'auto',
               mb: 2,
               '&::-webkit-scrollbar': {
-                display: 'none'
-              }
+                display: 'none',
+              },
             }}
             px={2}
           >
@@ -311,12 +378,12 @@ const OrderCameraView = ({ cameraInfo, cameraReload }) => {
     setIsLoading(true);
     const payload = {
       tenantId: user.tenantId,
-      carPlateNumber: orderWindow[cameraInfo]
+      carPlateNumber: orderWindow[cameraInfo],
     };
 
     const [carInfo, orderInfo] = await Promise.all([
       ApiService.getCarDetailsAsync(payload),
-      ApiService.getLastAndMostPurchaseOrderAsync(payload)
+      ApiService.getLastAndMostPurchaseOrderAsync(payload),
     ]);
 
     if (carInfo && carInfo.data) {
@@ -335,7 +402,10 @@ const OrderCameraView = ({ cameraInfo, cameraReload }) => {
     if (lastCars && lastCars.length > 0) {
       const carDetail = lastCars.find((item) => item.cameraName === cameraInfo);
       if (!isEmpty(carDetail)) {
-        setOrderWindow({ ...orderWindow, [carDetail.cameraName]: carDetail.carPlateNumber });
+        setOrderWindow({
+          ...orderWindow,
+          [carDetail.cameraName]: carDetail.carPlateNumber,
+        });
       }
     }
   }, [lastCars]);
@@ -371,7 +441,7 @@ const OrderCameraView = ({ cameraInfo, cameraReload }) => {
               sx={{
                 width: '120px',
                 height: '120px',
-                borderRadius: '50%'
+                borderRadius: '50%',
               }}
             />
             <Typography variant='body1'>Waiting for next car...</Typography>
@@ -395,9 +465,14 @@ const DeliveryCameraView = ({ cameraInfo, cameraReload }) => {
     setIsLoading(true);
     const payload = {
       tenantId: user.tenantId,
-      carPlateNumber: deliveryWindow[cameraInfo] ? deliveryWindow[cameraInfo] : carPlateNumber
+      carPlateNumber: deliveryWindow[cameraInfo]
+        ? deliveryWindow[cameraInfo]
+        : carPlateNumber,
     };
-    const [carInfo, orderInfo] = await Promise.all([ApiService.getCarDetailsAsync(payload), ApiService.getCurrentOrderAsync(payload)]);
+    const [carInfo, orderInfo] = await Promise.all([
+      ApiService.getCarDetailsAsync(payload),
+      ApiService.getCurrentOrderAsync(payload),
+    ]);
 
     if (carInfo && carInfo.data) {
       setCarDetails(carInfo.data);
@@ -413,7 +488,10 @@ const DeliveryCameraView = ({ cameraInfo, cameraReload }) => {
     if (lastCars && lastCars.length > 0) {
       const carDetail = lastCars.find((item) => item.cameraName === cameraInfo);
       if (!isEmpty(carDetail)) {
-        setDeliveryWindow({ ...deliveryWindow, [carDetail.cameraName]: carDetail.carPlateNumber });
+        setDeliveryWindow({
+          ...deliveryWindow,
+          [carDetail.cameraName]: carDetail.carPlateNumber,
+        });
       }
     }
   }, [lastCars]);
@@ -430,7 +508,12 @@ const DeliveryCameraView = ({ cameraInfo, cameraReload }) => {
   return (
     <>
       {!isEmpty(carDetails) ? (
-        <OrderAndCarDetails carDetails={carDetails} cameraName={cameraInfo} currentOrders={currentOrders} cameraReload={cameraReload} />
+        <OrderAndCarDetails
+          carDetails={carDetails}
+          cameraName={cameraInfo}
+          currentOrders={currentOrders}
+          cameraReload={cameraReload}
+        />
       ) : (
         <Stack pt={'calc(16px + 25%)'}>
           <Stack alignItems={'center'} justifyContent={'center'} spacing={2}>
@@ -441,7 +524,7 @@ const DeliveryCameraView = ({ cameraInfo, cameraReload }) => {
               sx={{
                 width: '120px',
                 height: '120px',
-                borderRadius: '50%'
+                borderRadius: '50%',
               }}
             />
             <Typography variant='body1'>Waiting for next car...</Typography>
@@ -457,19 +540,35 @@ const OrderCard = ({ cameraConfig = {} }) => {
     <MainCard content={false} sx={{ minHeight: '90vh' }}>
       <Stack direction={'row'} justifyContent={'space-between'} p={2}>
         <Stack>
-          <Typography variant='h5'>{`${cameraConfig.cameraName} (${enums.cameraType[cameraConfig.cameraType]}`})</Typography>
+          <Typography variant='h5'>
+            {`${cameraConfig.cameraName} (${enums.cameraType[cameraConfig.cameraType]}`}
+            )
+          </Typography>
           <Typography variant='body2'>{`${cameraConfig.description ? cameraConfig.description : ''}`}</Typography>
         </Stack>
-        <Avatar src={cameraConfig.cameraType === enums.cameraTypeConfig.L ? deliveryMan : shopkeeper} sx={{ width: 40, height: 40 }} />
+        <Avatar
+          src={
+            cameraConfig.cameraType === enums.cameraTypeConfig.L
+              ? deliveryMan
+              : shopkeeper
+          }
+          sx={{ width: 40, height: 40 }}
+        />
       </Stack>
       {cameraConfig.cameraType === enums.cameraTypeConfig.L && (
         <>
-          <OrderCameraView cameraInfo={cameraConfig.cameraName} cameraReload={cameraConfig.reloadTime} />
+          <OrderCameraView
+            cameraInfo={cameraConfig.cameraName}
+            cameraReload={cameraConfig.reloadTime}
+          />
         </>
       )}
       {cameraConfig.cameraType === enums.cameraTypeConfig.C && (
         <>
-          <DeliveryCameraView cameraInfo={cameraConfig.cameraName} cameraReload={cameraConfig.reloadTime} />
+          <DeliveryCameraView
+            cameraInfo={cameraConfig.cameraName}
+            cameraReload={cameraConfig.reloadTime}
+          />
         </>
       )}
     </MainCard>

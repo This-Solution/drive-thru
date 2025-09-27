@@ -14,7 +14,7 @@ import {
   MenuItem,
   OutlinedInput,
   Select,
-  Stack
+  Stack,
 } from '@mui/material';
 
 // third party
@@ -71,7 +71,9 @@ const AuthLogin = () => {
     setLoading(true);
     dispatch(setFlavour({ flavour: flavourDetail }));
     utils.setItemToStorage('flavour', JSON.stringify(flavourDetail));
-    const { data, error } = await ApiService.renewSessionAsync({ refreshToken: token.refresh });
+    const { data, error } = await ApiService.renewSessionAsync({
+      refreshToken: token.refresh,
+    });
     setLoading(false);
     if (data) {
       const token = { session: data.sessionToken, refresh: data.refreshToken };
@@ -87,12 +89,19 @@ const AuthLogin = () => {
   };
 
   const getFlavourDetail = (flavourId) => {
-    const flavourDetail = flavours && flavours.flavours.find((flavour) => flavour.flavourId === flavourId);
+    const flavourDetail =
+      flavours &&
+      flavours.flavours.find((flavour) => flavour.flavourId === flavourId);
     return flavourDetail;
   };
 
   const FlavourDialog = () => (
-    <Dialog open={true} onClose={() => setFlavourDialog(false)} maxWidth='sm' fullWidth>
+    <Dialog
+      open={true}
+      onClose={() => setFlavourDialog(false)}
+      maxWidth='sm'
+      fullWidth
+    >
       <DialogTitle>Select Flavor</DialogTitle>
       <DialogContent>
         <Grid item xs={12} sm={12}>
@@ -103,7 +112,9 @@ const AuthLogin = () => {
               name='flavourId'
               displayEmpty
               value={selectedFlavor}
-              onChange={(event) => setSelectedFlavor(Number(event.target.value))}
+              onChange={(event) =>
+                setSelectedFlavor(Number(event.target.value))
+              }
             >
               <MenuItem value=''>
                 <em>Select Flavour</em>
@@ -122,7 +133,13 @@ const AuthLogin = () => {
         <Button onClick={() => setFlavourDialog(false)} disabled={isLoading}>
           Cancel
         </Button>
-        <LoadingButton loading={isLoading} variant='contained' onClick={handleFlavorSelect} disabled={!selectedFlavor} color='primary'>
+        <LoadingButton
+          loading={isLoading}
+          variant='contained'
+          onClick={handleFlavorSelect}
+          disabled={!selectedFlavor}
+          color='primary'
+        >
           Confirm
         </LoadingButton>
       </DialogActions>
@@ -142,16 +159,19 @@ const AuthLogin = () => {
         initialValues={{
           email: '',
           password: '',
-          authCode: ''
+          authCode: '',
         }}
         validationSchema={Yup.object().shape({
-          email: Yup.string().email('Please enter a valid email address.').max(255).required('Email address is required.'),
+          email: Yup.string()
+            .email('Please enter a valid email address.')
+            .max(255)
+            .required('Email address is required.'),
           password: Yup.string().max(255).required('Password is required.'),
           authCode: Yup.number().when(twoFactAuth, {
             is: () => twoFactAuth === 'true',
             then: Yup.number().required(`Authentication code is required.`),
-            otherwise: Yup.number().notRequired()
-          })
+            otherwise: Yup.number().notRequired(),
+          }),
         })}
         onSubmit={async (values, { setSubmitting, setErrors }) => {
           setSubmitting(true);
@@ -168,7 +188,15 @@ const AuthLogin = () => {
           }
         }}
       >
-        {({ errors, handleBlur, handleChange, handleSubmit, isSubmitting, touched, values }) => (
+        {({
+          errors,
+          handleBlur,
+          handleChange,
+          handleSubmit,
+          isSubmitting,
+          touched,
+          values,
+        }) => (
           <form noValidate onSubmit={handleSubmit}>
             <Grid container spacing={3}>
               <Grid item xs={12}>
@@ -217,7 +245,11 @@ const AuthLogin = () => {
                           edge='end'
                           color='secondary'
                         >
-                          {showPassword ? <VisibilityOutlined /> : <VisibilityOffOutlined />}
+                          {showPassword ? (
+                            <VisibilityOutlined />
+                          ) : (
+                            <VisibilityOffOutlined />
+                          )}
                         </IconButton>
                       </InputAdornment>
                     }
