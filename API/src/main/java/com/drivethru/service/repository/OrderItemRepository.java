@@ -24,7 +24,6 @@ public interface OrderItemRepository extends JpaRepository<OrderItem, Integer> {
             "cd.CarPlateNumber AS carPlateNumber, " +
             "cd.CarColor AS carColor, " +
             "cd.CarId AS carId " +
-            "od.TotalPrice AS totalPrice" +
             "FROM Sales.OrderItem oi " +
             "INNER JOIN Sales.OrderDetail od ON oi.OrderId = od.OrderId " +
             "INNER JOIN Vehicle.CarDetail cd ON od.CarId = cd.CarId " +

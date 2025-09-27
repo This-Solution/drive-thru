@@ -21,6 +21,4 @@ public interface OrderItemCarDetailProjection {
     String getCarColor();
 
     Integer getCarId();
-
-    String getTotalPrice();
 }
