@@ -168,22 +168,26 @@ public class CarDetailsServiceImpl implements CarDetailService {
 
     @Override
     public CarDetailResponse getCarDetail(CarDetailRequest carDetailRequest) {
-        Optional<CarDetail> carDetail = carDetailRepository.findByCarPlateNumber(carDetailRequest.getCarPlateNumber());
-        List<CarVisit> carVisits = carVisitRepository.findByCarId(carDetail.get().getCarId());
+        Optional<CarDetail> carDetails = carDetailRepository.findByCarPlateNumber(carDetailRequest.getCarPlateNumber());
+        if (carDetails.isEmpty()) {
+            throw new CustomException(CustomErrorHolder.CAR_NOT_FOUND);
+        }
+        CarDetail carDetail = carDetails.get();
+
+        List<CarVisit> carVisits = carVisitRepository.findByCarId(carDetail.getCarId());
 
         CarDetailResponse carDetailResponse = new CarDetailResponse();
-        carDetailResponse.setCarId(carDetail.get().getCarId());
-        carDetailResponse.setCarPlateNumber(carDetail.get().getCarPlateNumber());
-        carDetailResponse.setCarColor(carDetail.get().getCarColor());
-        carDetailResponse.setCarType(carDetail.get().getCarType());
-        carDetailResponse.setCarImageUrl(azureFileUploaderService.generateBlobUrl(carDetail.get().getCarImageUrl()));
-        carDetailResponse.setPlateImageUrl(azureFileUploaderService.generateBlobUrl(carDetail.get().getPlateImageUrl()));
+        carDetailResponse.setCarId(carDetail.getCarId());
+        carDetailResponse.setCarPlateNumber(carDetail.getCarPlateNumber());
+        carDetailResponse.setCarColor(carDetail.getCarColor());
+        carDetailResponse.setCarType(carDetail.getCarType());
+        carDetailResponse.setCarImageUrl(azureFileUploaderService.generateBlobUrl(carDetail.getCarImageUrl()));
+        carDetailResponse.setPlateImageUrl(azureFileUploaderService.generateBlobUrl(carDetail.getPlateImageUrl()));
 
-        Optional<CarDetail> carDetails = carDetailRepository.findByCarPlateNumber(carDetailRequest.getCarPlateNumber());
-        CarVisit carVisit = carVisitRepository.findFirstByCarIdAndTenantIdOrderByCreatedDateDesc(carDetails.get().getCarId(), carDetailRequest.getTenantId());
-        Optional<CameraConfig> cameraConfig = cameraConfigRepository.findById(carVisit.getCameraId());
+        CarVisit latestVisit = carVisitRepository.findFirstByCarIdAndTenantIdOrderByCreatedDateDesc(carDetail.getCarId(), carDetailRequest.getTenantId());
+        Optional<CameraConfig> cameraConfig = cameraConfigRepository.findById(latestVisit.getCameraId());
 
-        String cameraType = cameraConfig.get().getCameraType();
+        String cameraType = cameraConfig.map(CameraConfig::getCameraType).orElse("");
 
         LocalDateTime now = LocalDateTime.now();
         LocalDateTime days30 = now.minusDays(30);
@@ -194,36 +198,34 @@ public class CarDetailsServiceImpl implements CarDetailService {
         long count30to60 = 0, red30to60 = 0, green30to60 = 0;
         long count60to90 = 0, red60to90 = 0, green60to90 = 0;
 
-        for (CarVisit detail : carVisits) {
-            LocalDateTime createdDate = carDetails.get().getCreatedDate();
+        for (CarVisit visit : carVisits) {
+            LocalDateTime createdDate = visit.getCreatedDate();
 
-            List<OrderCarStatus> optionalStatus = orderCarStatusRepository.findByCarId(carDetails.get().getCarId());
-            String status = optionalStatus.stream().findFirst().map(OrderCarStatus::getStatus).orElse(null);
+            List<OrderCarStatus> statusList = orderCarStatusRepository.findByCarId(carDetail.getCarId());
+            String status = statusList.stream().findFirst().map(OrderCarStatus::getStatus).orElse(null);
 
             boolean isRed = CarColorStatus.RED.name().equalsIgnoreCase(status);
             boolean isGreen = CarColorStatus.GREEN.name().equalsIgnoreCase(status);
 
-            if (createdDate != null) {
+            if (createdDate.isAfter(days30)) {
                 countLast30++;
-                if (createdDate.isAfter(days30)) {
-                    if (isRed) redLast30++;
-                    if (isGreen) greenLast30++;
-                } else if (createdDate.isAfter(days60) && createdDate.isBefore(days30)) {
-                    count30to60++;
-                    if (isRed) red30to60++;
-                    if (isGreen) green30to60++;
-                } else if (createdDate.isAfter(days90) && createdDate.isBefore(days60)) {
-                    count60to90++;
-                    if (isRed) red60to90++;
-                    if (isGreen) green60to90++;
-                }
+                if (isRed) redLast30++;
+                if (isGreen) greenLast30++;
+            } else if (createdDate.isAfter(days60) && createdDate.isBefore(days30)) {
+                count30to60++;
+                if (isRed) red30to60++;
+                if (isGreen) green30to60++;
+            } else if (createdDate.isAfter(days90) && createdDate.isBefore(days60)) {
+                count60to90++;
+                if (isRed) red60to90++;
+                if (isGreen) green60to90++;
             }
         }
 
-        if (cameraType.equals(Constants.LAN_CAMERA)) {
-            countLast30 = Math.max(0, countLast30 - 1);
-            count30to60 = Math.max(0, count30to60 - 1);
-            count60to90 = Math.max(0, count60to90 - 1);
+        if (Constants.LAN_CAMERA.equals(cameraType) && carVisits.size() == 1) {
+            countLast30 = 0;
+            redLast30 = 0;
+            greenLast30 = 0;
         }
 
         carDetailResponse.setLast30DayCount(countLast30);
@@ -293,7 +295,10 @@ public class CarDetailsServiceImpl implements CarDetailService {
     @Override
     public OrderCarStatus updateStatus(UpdateStatusRequest updateStatusRequest) {
         OrderCarStatus orderCarStatus = orderCarStatusRepository.findByOrderIdAndCarId(updateStatusRequest.getOrderId(), updateStatusRequest.getCarId());
-        orderCarStatus.setStatus(String.valueOf(CarColorStatus.valueOf(updateStatusRequest.getStatus())));
+        if (orderCarStatus == null) {
+            throw new CustomException(CustomErrorHolder.ORDER_NOT_FOUND);
+        }
+        orderCarStatus.setStatus(String.valueOf(CarColorStatus.valueOf(updateStatusRequest.getStatus().toUpperCase())));
         orderCarStatus.setNotes(updateStatusRequest.getNotes());
         orderCarStatusRepository.save(orderCarStatus);
         return orderCarStatus;
