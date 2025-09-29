@@ -104,19 +104,46 @@ public class CarDetailsServiceImpl implements CarDetailService {
 
         List<UserDetail> userDetails = userDetailRepository.findBySiteId(siteId);
         Optional<CarDetail> existingCar = carDetailRepository.findByCarPlateNumber(plateNumber);
+        OffsetDateTime time = OffsetDateTime.parse(timestamp);
+        LocalDateTime createdDate = time.toLocalDateTime();
         CarDetail carDetail;
 
         if (existingCar.isPresent()) {
             carDetail = existingCar.get();
+            double existingConfidence = Double.parseDouble(carDetail.getConfidence());
+            if (imageConfidence > existingConfidence) {
+                carDetail.setCarType(carType);
+                carDetail.setCarColor(carColor);
+                carDetail.setConfidence(String.valueOf(imageConfidence));
+                carDetail.setCreatedDate(createdDate);
+
+                try {
+                    Path tempDir = Files.createTempDirectory("car-images");
+
+                    Path carImagePath = saveBase64Image(carImageBase64, "car_image.jpg", tempDir);
+                    Path plateImagePath = saveBase64Image(plateImageBase64, "plate_image.jpg", tempDir);
+
+                    String carImageName = plateNumber + "_car.jpg";
+                    String plateImageName = plateNumber + "_plate.jpg";
+
+                    String blobCarPath = azureFileUploaderService.uploadFile(currentDateFolder, carImageName, carImagePath);
+                    String blobPlatePath = azureFileUploaderService.uploadFile(currentDateFolder, plateImageName, plateImagePath);
+
+                    carDetail.setCarImageUrl(blobCarPath);
+                    carDetail.setPlateImageUrl(blobPlatePath);
+                } catch (Exception e) {
+                    throw new CustomException(CustomErrorHolder.IMAGE_UPLOAD_FAILED);
+                }
+                carDetail = carDetailRepository.save(carDetail);
+            }
+
         } else {
             carDetail = new CarDetail();
             carDetail.setCarType(carType);
             carDetail.setCarColor(carColor);
             carDetail.setCarPlateNumber(plateNumber);
             carDetail.setConfidence(String.valueOf(imageConfidence));
-            OffsetDateTime time = OffsetDateTime.parse(timestamp);
-            LocalDateTime createdDateUtc = time.toLocalDateTime();
-            carDetail.setCreatedDate(createdDateUtc);
+            carDetail.setCreatedDate(createdDate);
 
             try {
                 Path tempDir = Files.createTempDirectory("car-images");
@@ -138,15 +165,18 @@ public class CarDetailsServiceImpl implements CarDetailService {
             carDetail = carDetailRepository.save(carDetail);
         }
 
-        CarVisit carVisit = new CarVisit();
-        carVisit.setCarId(carDetail.getCarId());
-        carVisit.setTenantId(cameraConfig.getTenantId());
-        carVisit.setSiteId(site.getSiteId());
-        carVisit.setCameraId(cameraConfig.getCameraId());
-        carVisit.setCreatedDate(LocalDateTime.now());
+        LocalDateTime threeMinutesAgo = LocalDateTime.now().minusMinutes(3);
+        boolean recentVisitExists = carVisitRepository.existsByCarIdAndSiteIdAndCameraIdAndCreatedDateAfter(carDetail.getCarId(), site.getSiteId(), cameraConfig.getCameraId(), threeMinutesAgo);
 
-        carVisitRepository.save(carVisit);
-
+        if (!recentVisitExists) {
+            CarVisit carVisit = new CarVisit();
+            carVisit.setCarId(carDetail.getCarId());
+            carVisit.setTenantId(cameraConfig.getTenantId());
+            carVisit.setSiteId(site.getSiteId());
+            carVisit.setCameraId(cameraConfig.getCameraId());
+            carVisit.setCreatedDate(createdDate);
+            carVisitRepository.save(carVisit);
+        }
         CarResponse carResponse = new CarResponse();
         carResponse.setCameraType(cameraType);
         carResponse.setCarPlateNumber(plateNumber);
