@@ -1,5 +1,7 @@
 package com.drivethru.service.dto;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
+
 import java.util.List;
 
 public class CarDetailResponse {
@@ -9,6 +11,8 @@ public class CarDetailResponse {
     private String carImageUrl;
     private String plateImageUrl;
     private String carColor;
+    @JsonFormat(pattern = "HH:mm:ss")
+    private String createdTime;
 
     private long last30DayCount;
     private long last30To60DayCount;
@@ -18,6 +22,13 @@ public class CarDetailResponse {
     private String last30To60DayColorStatus;
     private String last60To90DayColorStatus;
 
+    public String getCreatedTime() {
+        return createdTime;
+    }
+
+    public void setCreatedTime(String createdTime) {
+        this.createdTime = createdTime;
+    }
 
     public long getLast30DayCount() {
         return last30DayCount;

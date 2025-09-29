@@ -19,5 +19,5 @@ public interface CarDetailService {
 
     OrderCarStatus updateStatus(UpdateStatusRequest updateStatusRequest);
 
-    List<CameraResponseDTO> latestInfo(String SiteId);
+    List<CameraResponseDTO> latestInfo(Integer SiteId);
 }

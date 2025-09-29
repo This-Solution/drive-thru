@@ -21,10 +21,6 @@ public class WebSocketEventListener {
     @Autowired
     UserDetailRepository userDetailRepository;
 
-    @Autowired
-    SimpMessageSendingOperations messagingTemplate;
-
-
     @EventListener
     public void handleWebSocketConnectListener(SessionConnectEvent event) {
         StompHeaderAccessor accessor = StompHeaderAccessor.wrap(event.getMessage());
@@ -43,8 +39,6 @@ public class WebSocketEventListener {
 
                 int userId = clientData.get("userId").asInt();
 
-                System.out.println("Extracted userId: " + userId);
-
                 Optional<UserDetail> detail = userDetailRepository.findById(userId);
                 detail.get().setSessionId(sessionId);
                 userDetailRepository.save(detail.get());
@@ -55,7 +49,6 @@ public class WebSocketEventListener {
         } else {
             System.out.println("client-id header is missing.");
         }
-
 
     }
 

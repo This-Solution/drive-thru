@@ -16,6 +16,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -64,8 +65,10 @@ public class CarDetailsServiceImpl implements CarDetailService {
         String plateNumber;
         String siteName;
         String cameraName;
+        Double imageConfidence;
         String carImageBase64;
         String plateImageBase64;
+        String timestamp;
 
         try {
             Map<String, Object> car = (Map<String, Object>) carDetailJson.get("car");
@@ -78,7 +81,8 @@ public class CarDetailsServiceImpl implements CarDetailService {
             plateNumber = (String) carDetailJson.get("plate_number");
             siteName = (String) carDetailJson.get("static_detail_1");
             cameraName = (String) carDetailJson.get("static_detail_2");
-
+            imageConfidence = (Double) carDetailJson.get("confidence");
+            timestamp = carDetailJson.get("timestamp").toString();
             carImageBase64 = (String) carDetailJson.get("car_image_base64");
             plateImageBase64 = (String) carDetailJson.get("plate_image_base64");
 
@@ -109,7 +113,10 @@ public class CarDetailsServiceImpl implements CarDetailService {
             carDetail.setCarType(carType);
             carDetail.setCarColor(carColor);
             carDetail.setCarPlateNumber(plateNumber);
-            carDetail.setCreatedDate(LocalDateTime.now());
+            carDetail.setConfidence(String.valueOf(imageConfidence));
+            OffsetDateTime time = OffsetDateTime.parse(timestamp);
+            LocalDateTime createdDateUtc = time.toLocalDateTime();
+            carDetail.setCreatedDate(createdDateUtc);
 
             try {
                 Path tempDir = Files.createTempDirectory("car-images");
@@ -145,8 +152,8 @@ public class CarDetailsServiceImpl implements CarDetailService {
         carResponse.setCarPlateNumber(plateNumber);
         carResponse.setCameraName(cameraConfig.getCameraName());
 
+        simpMessagingTemplate.convertAndSend("/topic/send", carResponse);
         for (UserDetail user : userDetails) {
-            simpMessagingTemplate.convertAndSend("/topic/send", carResponse);
         }
     }
 
@@ -165,7 +172,6 @@ public class CarDetailsServiceImpl implements CarDetailService {
         }
     }
 
-
     @Override
     public CarDetailResponse getCarDetail(CarDetailRequest carDetailRequest) {
         Optional<CarDetail> carDetails = carDetailRepository.findByCarPlateNumber(carDetailRequest.getCarPlateNumber());
@@ -181,6 +187,7 @@ public class CarDetailsServiceImpl implements CarDetailService {
         carDetailResponse.setCarPlateNumber(carDetail.getCarPlateNumber());
         carDetailResponse.setCarColor(carDetail.getCarColor());
         carDetailResponse.setCarType(carDetail.getCarType());
+        carDetailResponse.setCreatedTime(carDetail.getCreatedDate().format(DateTimeFormatter.ofPattern("HH:mm:ss")));
         carDetailResponse.setCarImageUrl(azureFileUploaderService.generateBlobUrl(carDetail.getCarImageUrl()));
         carDetailResponse.setPlateImageUrl(azureFileUploaderService.generateBlobUrl(carDetail.getPlateImageUrl()));
 
@@ -255,7 +262,7 @@ public class CarDetailsServiceImpl implements CarDetailService {
 
     @Override
     public List<CurrentOrderItemResponse> getCurrentOrderDetails(CarDetailRequest carDetailRequest) {
-        OrderDetail orderDetail = orderDetailRepository.findFirstByTenantIdAndCarPlateNumberOrderByCreatedDateDesc(carDetailRequest.getTenantId(), carDetailRequest.getCarPlateNumber()).orElseThrow(() -> new CustomException(CustomErrorHolder.ORDER_NOT_FOUND));
+        OrderDetail orderDetail = orderDetailRepository.findFirstByTenantIdAndCarPlateNumberAndOrderStatusOrderByCreatedDateDesc(carDetailRequest.getTenantId(), carDetailRequest.getCarPlateNumber(), String.valueOf(OrderStatus.CREATED)).orElseThrow(() -> new CustomException(CustomErrorHolder.ORDER_NOT_FOUND));
         Double totalPrice = Double.valueOf(orderDetail.getTotalPrice());
         List<OrderItem> orderItems = orderItemRepository.findByOrderId(orderDetail.getOrderId());
         orderDetail.setOrderStatus(String.valueOf(OrderStatus.DELIVERED));
@@ -305,23 +312,22 @@ public class CarDetailsServiceImpl implements CarDetailService {
     }
 
     @Override
-    public List<CameraResponseDTO> latestInfo(String siteId) {
-        int loginSiteId = Integer.parseInt(siteId);
-        Optional<Site> site = siteRepository.findById(loginSiteId);
+    public List<CameraResponseDTO> latestInfo(Integer siteId) {
+        Optional<Site> site = siteRepository.findById(siteId);
         int reloadTime = site.get().getReloadTime();
-        List<CameraConfig> cameraConfigList = cameraConfigRepository.findAllBySiteIdAndIsActiveTrue(loginSiteId);
+        List<CameraConfig> cameraConfigList = cameraConfigRepository.findAllBySiteIdAndIsActiveTrue(siteId);
         if (cameraConfigList == null) {
             throw new CustomException(CustomErrorHolder.CAMERA_CONFIG_NOT_FOUND);
         }
         List<CameraResponseDTO> cameraResponseList = new ArrayList<>();
 
         for (CameraConfig config : cameraConfigList) {
-//            LocalDateTime startOfDay = LocalDate.now().atStartOfDay().minusSeconds(reloadTime);
-            LocalDateTime startOfDay = LocalDate.now().atStartOfDay();
+            LocalDateTime startOfDay = LocalDate.now().atStartOfDay().minusSeconds(reloadTime);
+//            LocalDateTime startOfDay = LocalDate.now().atStartOfDay();
             CarVisit carVisit = carVisitRepository.findFirstByCameraIdAndCreatedDateAfterOrderByCreatedDateDesc(config.getCameraId(), startOfDay);
 
             if (carVisit == null) {
-                throw new CustomException(CustomErrorHolder.CAR_VISIT_NOT_FOUND);
+                continue;
             }
             Optional<CarDetail> carDetails = carDetailRepository.findById(carVisit.getCarId());
             if (!carDetails.isPresent()) {
