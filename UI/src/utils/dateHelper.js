@@ -88,8 +88,8 @@ const getMinutesFromTime = (time) => {
   return dayjs(time).diff(dayjs(time).startOf('day'), 'minute');
 };
 
-function convertTimeZone(value, timeZone) {
-  return dayjs.utc(value).tz(timeZone).format('hh:mm');
+function convertTimeZone(value) {
+  return dayjs(value).format('HH:mm:ss');
 };
 
 function formatTimeOnly(value, timeZone = 'Australia/Melbourne') {

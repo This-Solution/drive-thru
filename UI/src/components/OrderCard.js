@@ -26,6 +26,7 @@ import enums from 'utils/enums';
 import OrderItemCard from './cards/OrderItemCard';
 import MainCard from './MainCard';
 import utils from 'utils/utils';
+import dateHelper from 'utils/dateHelper';
 
 const ShowCarDetails = ({ carDetails }) => {
 
@@ -135,7 +136,7 @@ const ShowCarDetails = ({ carDetails }) => {
                     In Time
                   </Typography>
                   <Typography variant='h6' color='textSecondary'>
-                    {carDetails.createdTime}
+                    {dateHelper.convertTimeZone(carDetails.createdTime)}
                   </Typography>
                 </Stack>
               </Stack>
