@@ -330,11 +330,11 @@ async function getSiteHoursAsync(siteId) {
   return await axios(config);
 }
 
-async function getOrdersAsync(date, openingTime, closingTime) {
+async function getOrdersAsync(date, openingTime, closingTime, itemName = '') {
   const config = {
     method: 'get',
     url: `/car`,
-    params: { date: date, openingTime: openingTime, closingTime: closingTime }
+    params: { date: date, openingTime: openingTime, closingTime: closingTime, itemName: itemName }
   };
   return await axios(config);
 }

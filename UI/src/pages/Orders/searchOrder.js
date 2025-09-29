@@ -41,7 +41,6 @@ const SearchOrder = () => {
   const [openIndex, setOpenIndex] = useState(null);
   const [commentDialogOpen, setCommentDialogOpen] = useState(false);
   const [selectedOrder, setSelectedOrder] = useState(null);
-  const [globalFilter, setGlobalFilter] = useState();
 
   const orderSchema = Yup.object().shape({
     date: Yup.date().nullable().required('Date is required.').typeError('Invalid date format.'),
@@ -61,9 +60,12 @@ const SearchOrder = () => {
       const { data } = await apiService.getOrdersAsync(
         dateHelper.formatDate(values.date),
         dateHelper.convertTimeZone(values.openingTime),
-        dateHelper.convertTimeZone(values.closingTime)
+        dateHelper.convertTimeZone(values.closingTime),
+        search
       );
-      setOrders(data);
+      if (data) {
+        setOrders(data);
+      }
       setSubmitting(false);
     }
   });
@@ -98,7 +100,7 @@ const SearchOrder = () => {
     setOpenIndex(openIndex === index ? null : index);
   };
 
-  const groupedOrders = Object.values(
+  const groupedOrders = orders && Object.values(
     orders.reduce((acc, item) => {
       if (!acc[item.orderId]) {
         acc[item.orderId] = {
@@ -192,13 +194,15 @@ const SearchOrder = () => {
                         </Grid>
 
                         <Grid item md={3}>
-                          {/* <GlobalFilter
-                            preGlobalFilteredRows={sites}
-                            globalFilter={globalFilter}
-                            setGlobalFilter={setGlobalFilter}
-                            size='large'
-                            sx={{ width: '100%' }}
-                          /> */}
+                          <TextField
+                            label="Search Orders"
+                            variant="outlined"
+                            fullWidth
+                            size="medium"
+                            autoComplete="off"
+                            value={search}
+                            onChange={handleSearchChange}
+                          />
                         </Grid>
 
                         <Grid item md={2}>
