@@ -16,7 +16,7 @@ import {
   TableCell,
   TableContainer,
   TableHead,
-  TableRow,
+  TableRow
 } from '@mui/material';
 import { UpOutlined, DownOutlined } from '@ant-design/icons';
 import CommentIcon from '@mui/icons-material/Comment';
@@ -30,6 +30,7 @@ import apiService from 'service/ApiService';
 import dateHelper from 'utils/dateHelper';
 import CommentDialog from './commentdialog';
 import utils from 'utils/utils';
+import { GlobalFilter } from 'components/@extended/Table/ReactTableFilter';
 
 const SearchOrder = () => {
   const theme = useTheme();
@@ -40,27 +41,19 @@ const SearchOrder = () => {
   const [openIndex, setOpenIndex] = useState(null);
   const [commentDialogOpen, setCommentDialogOpen] = useState(false);
   const [selectedOrder, setSelectedOrder] = useState(null);
+  const [globalFilter, setGlobalFilter] = useState();
 
   const orderSchema = Yup.object().shape({
-    date: Yup.date()
-      .nullable()
-      .required('Date is required')
-      .typeError('Invalid date format'),
-    openingTime: Yup.date()
-      .nullable()
-      .required('Opening time is required')
-      .typeError('Invalid time format'),
-    closingTime: Yup.date()
-      .nullable()
-      .required('Closing time is required')
-      .typeError('Invalid time format'),
+    date: Yup.date().nullable().required('Date is required.').typeError('Invalid date format.'),
+    openingTime: Yup.date().nullable().required('Opening time is required.').typeError('Invalid time format.'),
+    closingTime: Yup.date().nullable().required('Closing time is required.').typeError('Invalid time format.')
   });
 
   const formik = useFormik({
     initialValues: {
       openingTime: '',
       closingTime: '',
-      date: '',
+      date: ''
     },
     validationSchema: orderSchema,
     onSubmit: async (values, { setSubmitting, setErrors }) => {
@@ -72,7 +65,7 @@ const SearchOrder = () => {
       );
       setOrders(data);
       setSubmitting(false);
-    },
+    }
   });
 
   const handleSearchChange = (event) => {
@@ -114,13 +107,13 @@ const SearchOrder = () => {
           carPlateNumber: item.carPlateNumber,
           createdDate: item.createdDate,
           orderId: item.orderId,
-          items: [],
+          items: []
         };
       }
       acc[item.orderId].items.push({
         name: item.name,
         quantity: item.quantity,
-        price: item.price,
+        price: item.price
       });
       return acc;
     }, {})
@@ -147,43 +140,21 @@ const SearchOrder = () => {
             <ScrollX>
               <Stack spacing={3}>
                 <FormikProvider value={formik}>
-                  <Form
-                    autoComplete='off'
-                    noValidate
-                    onSubmit={formik.handleSubmit}
-                  >
+                  <Form autoComplete='off' noValidate onSubmit={formik.handleSubmit}>
                     <Stack spacing={3}>
-                      <Stack
-                        direction={matchDownMD ? 'column' : 'row'}
-                        alignItems='center'
-                        spacing={2}
-                        sx={{ py: 3, px: 3 }}
-                      >
+                      <Stack direction={matchDownMD ? 'column' : 'row'} alignItems='center' spacing={2} sx={{ py: 3, px: 3 }}>
                         <Grid item md={3}>
                           <DatePicker
                             id='date'
                             name='date'
                             value={formik.values.date}
                             label='Date'
-                            onChange={(value) =>
-                              formik.setFieldValue('date', value)
-                            }
+                            onChange={(value) => formik.setFieldValue('date', value)}
                             renderInput={(params) => (
-                              <TextField
-                                fullWidth
-                                {...params}
-                                error={Boolean(
-                                  formik.touched.date && formik.errors.date
-                                )}
-                              />
+                              <TextField fullWidth {...params} error={Boolean(formik.touched.date && formik.errors.date)} />
                             )}
                           />
-                          <FormHelperText
-                            error={Boolean(
-                              formik.touched.date && formik.errors.date
-                            )}
-                            sx={{ marginLeft: 0 }}
-                          >
+                          <FormHelperText error={Boolean(formik.touched.date && formik.errors.date)} sx={{ marginLeft: 0 }}>
                             {formik.touched.date && formik.errors.date}
                           </FormHelperText>
                         </Grid>
@@ -196,24 +167,11 @@ const SearchOrder = () => {
                             value={formik.values.openingTime}
                             onChange={handleTimeChange('openingTime')}
                             renderInput={(params) => (
-                              <TextField
-                                {...params}
-                                fullWidth
-                                error={Boolean(
-                                  formik.touched.openingTime &&
-                                    formik.errors.openingTime
-                                )}
-                              />
+                              <TextField {...params} fullWidth error={Boolean(formik.touched.openingTime && formik.errors.openingTime)} />
                             )}
                           />
-                          <FormHelperText
-                            error={Boolean(
-                              formik.touched.openingTime &&
-                                formik.errors.openingTime
-                            )}
-                          >
-                            {formik.touched.openingTime &&
-                              formik.errors.openingTime}
+                          <FormHelperText error={Boolean(formik.touched.openingTime && formik.errors.openingTime)}>
+                            {formik.touched.openingTime && formik.errors.openingTime}
                           </FormHelperText>
                         </Grid>
 
@@ -225,38 +183,23 @@ const SearchOrder = () => {
                             value={formik.values.closingTime}
                             onChange={handleTimeChange('closingTime')}
                             renderInput={(params) => (
-                              <TextField
-                                {...params}
-                                fullWidth
-                                error={Boolean(
-                                  formik.touched.closingTime &&
-                                    formik.errors.closingTime
-                                )}
-                              />
+                              <TextField {...params} fullWidth error={Boolean(formik.touched.closingTime && formik.errors.closingTime)} />
                             )}
                           />
-                          <FormHelperText
-                            error={Boolean(
-                              formik.touched.closingTime &&
-                                formik.errors.closingTime
-                            )}
-                          >
-                            {formik.touched.closingTime &&
-                              formik.errors.closingTime}
+                          <FormHelperText error={Boolean(formik.touched.closingTime && formik.errors.closingTime)}>
+                            {formik.touched.closingTime && formik.errors.closingTime}
                           </FormHelperText>
                         </Grid>
 
-                        {/* <Grid item md={3}>
-                                                    <TextField
-                                                        label="Search Orders"
-                                                        variant="outlined"
-                                                        fullWidth
-                                                        size="medium"
-                                                        autoComplete="off"
-                                                        value={search}
-                                                        onChange={handleSearchChange}
-                                                    />
-                                                </Grid> */}
+                        <Grid item md={3}>
+                          <GlobalFilter
+                            preGlobalFilteredRows={sites}
+                            globalFilter={globalFilter}
+                            setGlobalFilter={setGlobalFilter}
+                            size='large'
+                            sx={{ width: '100%' }}
+                          />
+                        </Grid>
 
                         <Grid item md={2}>
                           <Button type='submit' variant='contained' fullWidth>
@@ -291,21 +234,12 @@ const SearchOrder = () => {
                       <TableBody>
                         <TableRow hover>
                           <TableCell>
-                            <IconButton
-                              size='small'
-                              onClick={() => handleToggle(index)}
-                            >
-                              {openIndex === index ? (
-                                <UpOutlined />
-                              ) : (
-                                <DownOutlined />
-                              )}
+                            <IconButton size='small' onClick={() => handleToggle(index)}>
+                              {openIndex === index ? <UpOutlined /> : <DownOutlined />}
                             </IconButton>
                           </TableCell>
 
-                          <TableCell>
-                            {dateHelper.formatDate(order.createdDate)}
-                          </TableCell>
+                          <TableCell>{dateHelper.formatDate(order.createdDate)}</TableCell>
                           <TableCell>{order.carPlateNumber}</TableCell>
                           <TableCell>{order.carColor}</TableCell>
                           {/* <TableCell>{order.totalAmount ? order.totalAmount : 0}</TableCell> */}
@@ -317,45 +251,28 @@ const SearchOrder = () => {
                                 handleCommentClick(order);
                               }}
                             >
-                              <CommentIcon
-                                sx={{ color: theme.palette.primary.main }}
-                              />
+                              <CommentIcon sx={{ color: theme.palette.primary.main }} />
                             </IconButton>
                           </TableCell>
                         </TableRow>
                         <TableRow>
-                          <TableCell
-                            style={{ paddingBottom: 0, paddingTop: 0 }}
-                            colSpan={5}
-                          >
-                            <Collapse
-                              in={openIndex === index}
-                              timeout='auto'
-                              unmountOnExit
-                            >
+                          <TableCell style={{ paddingBottom: 0, paddingTop: 0 }} colSpan={5}>
+                            <Collapse in={openIndex === index} timeout='auto' unmountOnExit>
                               <Box sx={{ margin: 2 }}>
                                 <Table size='small'>
                                   <TableHead>
                                     <TableRow>
                                       <TableCell>Item Name</TableCell>
-                                      <TableCell align='center'>
-                                        Quantity
-                                      </TableCell>
-                                      <TableCell align='center'>
-                                        Price ($)
-                                      </TableCell>
+                                      <TableCell align='center'>Quantity</TableCell>
+                                      <TableCell align='center'>Price ($)</TableCell>
                                     </TableRow>
                                   </TableHead>
                                   <TableBody>
                                     {order.items.map((item, i) => (
                                       <TableRow key={i}>
                                         <TableCell>{item.name}</TableCell>
-                                        <TableCell align='center'>
-                                          {item.quantity}
-                                        </TableCell>
-                                        <TableCell align='center'>
-                                          {utils.formatCurrency(item.price)}
-                                        </TableCell>
+                                        <TableCell align='center'>{item.quantity}</TableCell>
+                                        <TableCell align='center'>{utils.formatCurrency(item.price)}</TableCell>
                                       </TableRow>
                                     ))}
                                   </TableBody>
@@ -373,12 +290,7 @@ const SearchOrder = () => {
         </Grid>
       </Grid>
       {commentDialogOpen && selectedOrder ? (
-        <CommentDialog
-          open={commentDialogOpen}
-          onSave={handleDialogSave}
-          onCancel={handleDialogCancel}
-          selectedOrder={selectedOrder}
-        />
+        <CommentDialog open={commentDialogOpen} onSave={handleDialogSave} onCancel={handleDialogCancel} selectedOrder={selectedOrder} />
       ) : null}
     </>
   );

@@ -18,11 +18,12 @@ import utils from 'utils/utils';
 import { setCameraConfig, setLastCars, setLatest, setSites, setTenant } from 'store/reducers/lookup';
 import { openSnackbar } from 'store/reducers/snackbar';
 import useConfig from 'hooks/useConfig';
+import { isEmpty } from 'lodash';
 
 
 const App = () => {
   const dispatch = useDispatch();
-  const { isLoading } = useSelector((state) => state.auth);
+  const { user, isLoading } = useSelector((state) => state.auth);
   const [isTokenChecked, setIsTokenChecked] = useState(isLoading);
 
   const { onChangePresetColor } = useConfig();
@@ -30,14 +31,20 @@ const App = () => {
   useEffect(() => {
     getTentant();
     getSites();
-    getLastCarInfo()
     bindInitData(false);
     window.addEventListener('message', handleMessage);
     return () => window.removeEventListener('message', handleMessage);
   }, []);
 
-  const getLastCarInfo = async () => {
-    const { data } = await ApiService.getLastCarAsync();
+
+  useEffect(() => {
+    if (!isEmpty(user)) {
+      getLastCarInfo(user.siteId)
+    }
+  }, [user])
+
+  const getLastCarInfo = async (siteId) => {
+    const { data } = await ApiService.getLastCarAsync(siteId);
     if (data) {
       dispatch(setLastCars(data))
     }
@@ -101,6 +108,7 @@ const App = () => {
       // dispatch(setFlavour({ flavour: JSON.parse(flavour) }));
       dispatch(setAuthDetail({ user: currentTokenUser, token }));
       getCameraInfo(currentTokenUser.siteId)
+      // getLastCarInfo(currentTokenUser.siteId)
       setIsTokenChecked(false);
     } else {
       setIsTokenChecked(false);

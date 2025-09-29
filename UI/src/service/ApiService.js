@@ -220,10 +220,10 @@ async function getCameraConfigAsync(siteId) {
   return await axios(config);
 }
 
-async function getLastCarAsync() {
+async function getLastCarAsync(siteId) {
   const config = {
     method: 'get',
-    url: '/car/latest'
+    url: `/car/latest/${siteId}`
   }
   return await axios(config);
 }
