@@ -183,7 +183,7 @@ public class CarDetailsServiceImpl implements CarDetailService {
         carResponse.setCameraName(cameraConfig.getCameraName());
 
         for (UserDetail user : userDetails) {
-            simpMessagingTemplate.convertAndSend("/topic/send/" + siteId, carResponse);
+            simpMessagingTemplate.convertAndSend("/topic/send/" + user.getSiteId(), carResponse);
         }
 
     }
