@@ -73,13 +73,11 @@ public class CarDetailController {
         return new ResponseEntity<>(responseObject, HttpStatus.OK);
     }
 
-    @GetMapping("/latest")
-    public ResponseEntity<ResponseObject<List<CameraResponseDTO>>> getLatestCameraInfo(HttpServletRequest httpServletRequest){
-        String authHeader = httpServletRequest.getHeader(HttpHeaders.AUTHORIZATION);
-        String token = jwtHelper.cleanToken(authHeader);
-        String id = jwtHelper.extractSiteId(token);
+    @GetMapping("/latest/{siteId}")
+    public ResponseEntity<ResponseObject<List<CameraResponseDTO>>> getLatestCameraInfo(@PathVariable Integer siteId){
         ResponseObject<List<CameraResponseDTO>> responseObject = new ResponseObject<>();
-        List<CameraResponseDTO> cameraResponseList = carDetailService.latestInfo(id);
+        System.out.println(siteId);
+        List<CameraResponseDTO> cameraResponseList = carDetailService.latestInfo(siteId);
         responseObject.setData(cameraResponseList);
         return new ResponseEntity<>(responseObject, HttpStatus.OK);
     }

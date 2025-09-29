@@ -22,8 +22,18 @@ public class CarDetail {
     private String plateImageUrl;
     @Column(name = "CarImageUrl")
     private String carImageUrl;
+    @Column(name = "Confidence")
+    private String confidence;
     @Column(name = "CreatedDate")
     private LocalDateTime createdDate;
+
+    public String getConfidence() {
+        return confidence;
+    }
+
+    public void setConfidence(String confidence) {
+        this.confidence = confidence;
+    }
 
     public Integer getCarId() {
         return carId;
