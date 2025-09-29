@@ -182,9 +182,10 @@ public class CarDetailsServiceImpl implements CarDetailService {
         carResponse.setCarPlateNumber(plateNumber);
         carResponse.setCameraName(cameraConfig.getCameraName());
 
-        simpMessagingTemplate.convertAndSend("/topic/send", carResponse);
         for (UserDetail user : userDetails) {
+            simpMessagingTemplate.convertAndSend("/topic/send/" + siteId, carResponse);
         }
+
     }
 
     private Path saveBase64Image(String base64Image, String fileName, Path directory) {
@@ -217,12 +218,12 @@ public class CarDetailsServiceImpl implements CarDetailService {
         carDetailResponse.setCarPlateNumber(carDetail.getCarPlateNumber());
         carDetailResponse.setCarColor(carDetail.getCarColor());
         carDetailResponse.setCarType(carDetail.getCarType());
-        carDetailResponse.setCreatedTime(carDetail.getCreatedDate().format(DateTimeFormatter.ofPattern("HH:mm:ss")));
         carDetailResponse.setCarImageUrl(azureFileUploaderService.generateBlobUrl(carDetail.getCarImageUrl()));
         carDetailResponse.setPlateImageUrl(azureFileUploaderService.generateBlobUrl(carDetail.getPlateImageUrl()));
 
         CarVisit latestVisit = carVisitRepository.findFirstByCarIdAndTenantIdOrderByCreatedDateDesc(carDetail.getCarId(), carDetailRequest.getTenantId());
         Optional<CameraConfig> cameraConfig = cameraConfigRepository.findById(latestVisit.getCameraId());
+        carDetailResponse.setCreatedTime(latestVisit.getCreatedDate());
 
         String cameraType = cameraConfig.map(CameraConfig::getCameraType).orElse("");
 
