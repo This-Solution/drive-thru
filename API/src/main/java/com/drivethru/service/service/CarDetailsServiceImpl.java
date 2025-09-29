@@ -67,7 +67,6 @@ public class CarDetailsServiceImpl implements CarDetailService {
         Double imageConfidence;
         String carImageBase64;
         String plateImageBase64;
-        LocalDateTime timestamp;
 
         try {
             Map<String, Object> car = (Map<String, Object>) carDetailJson.get("car");
@@ -81,7 +80,6 @@ public class CarDetailsServiceImpl implements CarDetailService {
             siteName = (String) carDetailJson.get("static_detail_1");
             cameraName = (String) carDetailJson.get("static_detail_2");
             imageConfidence = (Double) carDetailJson.get("confidence");
-            timestamp = (LocalDateTime) carDetailJson.get("timestamp");
             carImageBase64 = (String) carDetailJson.get("car_image_base64");
             plateImageBase64 = (String) carDetailJson.get("plate_image_base64");
 
@@ -113,7 +111,7 @@ public class CarDetailsServiceImpl implements CarDetailService {
             carDetail.setCarColor(carColor);
             carDetail.setCarPlateNumber(plateNumber);
             carDetail.setConfidence(String.valueOf(imageConfidence));
-            carDetail.setCreatedDate(timestamp);
+            carDetail.setCreatedDate(LocalDateTime.now());
 
             try {
                 Path tempDir = Files.createTempDirectory("car-images");
