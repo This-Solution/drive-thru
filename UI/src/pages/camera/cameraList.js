@@ -291,7 +291,7 @@ const CameraList = () => {
                             startIcon={<PlusCircleOutlined />}
                             onClick={handleAddClick}
                           >
-                            Add Tenant
+                            Add Camera
                           </FlavourButton>
                         )}
                         {/* <FlavourButton fullWidth size='large' variant="outlined" startIcon={<SettingOutlined />} onClick={() => navigate('/operating-hours')}>

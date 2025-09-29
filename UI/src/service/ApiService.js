@@ -228,6 +228,42 @@ async function getLastCarAsync(siteId) {
   return await axios(config);
 }
 
+
+//#start- camera ========camera======
+
+
+async function getAllCameraConfigAsync() {
+  const config = {
+    method: 'get',
+    url: '/cameraConfig'
+  }
+
+  return await axios(config);
+}
+
+async function getSitesByTenantIdAsync(tenantId) {
+  const config = {
+    method: 'get',
+    url: `/site/${tenantId}`
+  }
+
+  return await axios(config);
+}
+
+
+async function saveCameraAsync(payload) {
+  const config = {
+    method: 'post',
+    url: '/cameraConfig',
+    data: payload
+  };
+
+  return await axios(config);
+}
+
+
+
+
 // #start-site ======== site =========
 
 async function getSitesAsync() {
@@ -395,6 +431,9 @@ export default {
   getLastCarAsync,
 
   getOrdersAsync,
-  saveOrderComment
+  saveOrderComment,
+  saveCameraAsync,
+  getAllCameraConfigAsync,
+  getSitesByTenantIdAsync
 
 };
