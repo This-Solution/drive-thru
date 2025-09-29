@@ -2,6 +2,8 @@ package com.drivethru.service.repository;
 
 import com.drivethru.service.entity.CarVisit;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.time.LocalDateTime;
@@ -19,4 +21,8 @@ public interface CarVisitRepository extends JpaRepository<CarVisit, Integer> {
     CarVisit findFirstByCameraIdAndCreatedDateAfterOrderByCreatedDateDesc(Integer cameraId, LocalDateTime createdDate);
 
     List<CarVisit> findByCarId(Integer carId);
+
+    @Query("SELECT c FROM CarVisit c WHERE c.carId = :carId AND c.createdDate > :cutoffTime")
+    List<CarVisit> findRecentVisit(@Param("carId") Integer carId, @Param("cutoffTime") LocalDateTime cutoffTime);
+
 }
