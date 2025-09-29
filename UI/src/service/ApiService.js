@@ -9,7 +9,7 @@ async function loginAsync(payload) {
   const config = {
     method: 'post',
     url: '/auth/login',
-    data: payload
+    data: payload,
   };
   return await axios(config);
 }
@@ -18,7 +18,7 @@ async function addAdminAsync(payload) {
   const config = {
     method: 'post',
     url: 'admin/user',
-    data: payload
+    data: payload,
   };
   return await axios(config);
 }
@@ -27,7 +27,7 @@ async function updateAdminAsync(payload) {
   const config = {
     method: 'put',
     url: 'admin/user',
-    data: payload
+    data: payload,
   };
   return await axios(config);
 }
@@ -35,7 +35,7 @@ async function updateAdminAsync(payload) {
 async function getRoleListAsync() {
   const config = {
     method: 'get',
-    url: 'role'
+    url: 'role',
   };
   return await axios(config);
 }
@@ -44,7 +44,7 @@ async function getUserListAsync(payload) {
   const config = {
     method: 'get',
     url: 'admin/user-list',
-    data: payload
+    data: payload,
   };
   return await axios(config);
 }
@@ -52,7 +52,7 @@ async function getUserListAsync(payload) {
 async function deleteAdminAsync(systemUserId) {
   const config = {
     method: 'delete',
-    url: `admin/user/${systemUserId}`
+    url: `admin/user/${systemUserId}`,
   };
   return await axios(config);
 }
@@ -61,7 +61,7 @@ async function updateSyncAsync(payload) {
   const config = {
     method: 'put',
     url: '/admin/sync',
-    data: payload
+    data: payload,
   };
   return await axios(config);
 }
@@ -69,7 +69,7 @@ async function updateSyncAsync(payload) {
 async function getSyncDataAsync() {
   const config = {
     method: 'get',
-    url: '/admin/syncData'
+    url: '/admin/syncData',
   };
   return await axios(config);
 }
@@ -77,7 +77,7 @@ async function getSyncDataAsync() {
 async function getUpdatedItemsAsync() {
   const config = {
     method: 'get',
-    url: `${syncUrl}/admin/updated/items`
+    url: `${syncUrl}/admin/updated/items`,
   };
   return await axios(config);
 }
@@ -86,7 +86,7 @@ async function updatedCategoriesAsync(subMenuIds) {
   const config = {
     method: 'post',
     url: `${syncUrl}/admin/sync/categories`,
-    data: { subMenuIds }
+    data: { subMenuIds },
   };
   return await axios(config);
 }
@@ -95,7 +95,7 @@ async function updatedMenuItemsAsync(posItemIds) {
   const config = {
     method: 'post',
     url: `${syncUrl}/admin/sync/menuItems`,
-    data: { posItemIds }
+    data: { posItemIds },
   };
   return await axios(config);
 }
@@ -104,7 +104,7 @@ async function updatedCombosAsync(menuItemIds) {
   const config = {
     method: 'post',
     url: `${syncUrl}/admin/sync/combo`,
-    data: { menuItemIds }
+    data: { menuItemIds },
   };
   return await axios(config);
 }
@@ -113,7 +113,7 @@ async function updatedModifiersAsync(posItemIds) {
   const config = {
     method: 'post',
     url: `${syncUrl}/admin/sync/modifiers`,
-    data: { posItemIds }
+    data: { posItemIds },
   };
   return await axios(config);
 }
@@ -122,7 +122,7 @@ async function sendAuthenticationMailAsync(systemUserId) {
   const config = {
     method: 'post',
     url: '/admin/send-mail',
-    data: { systemUserId }
+    data: { systemUserId },
   };
   return await axios(config);
 }
@@ -131,7 +131,7 @@ async function resetAdminPasswordAsync(payload) {
   const config = {
     method: 'post',
     url: '/admin/reset/admin/password',
-    data: payload
+    data: payload,
   };
   return await axios(config);
 }
@@ -140,7 +140,7 @@ async function resetPasswordAsync(payload) {
   const config = {
     method: 'post',
     url: '/admin/reset/password',
-    data: payload
+    data: payload,
   };
   return await axios(config);
 }
@@ -149,73 +149,64 @@ async function renewSessionAsync(payload) {
   const config = {
     method: 'post',
     url: '/admin/renew',
-    data: payload
+    data: payload,
   };
   return await axios(config);
 }
 // #endregion ======== auth =========
 
-
 //#start - tenant ====================
-
 
 async function getTenantsAsync() {
   const config = {
     method: 'get',
-    url: '/tenant'
+    url: '/tenant',
   };
-
   return await axios(config);
 }
-
 
 async function saveTenantsAsync(payload) {
   const config = {
     method: 'post',
     url: '/tenant',
-    data: payload
+    data: payload,
   };
-
   return await axios(config);
 }
-
 
 async function getCarDetailsAsync(payload) {
   const config = {
     method: 'post',
     url: '/car/getCarDetail',
-    data: payload
-  }
-  return await axios(config)
+    data: payload,
+  };
+  return await axios(config);
 }
-
 
 async function getCurrentOrderAsync(payload) {
   const config = {
     method: 'post',
     url: '/car/getCurrentOrderDetail',
-    data: payload
-  }
-  return await axios(config)
+    data: payload,
+  };
+  return await axios(config);
 }
-
 
 async function getLastAndMostPurchaseOrderAsync(payload) {
   const config = {
     method: 'post',
     url: '/car/getLastAndMostPurchaseOrderDetails',
-    data: payload
-  }
+    data: payload,
+  };
 
   return await axios(config);
 }
 
-
 async function getCameraConfigAsync(siteId) {
   const config = {
     method: 'post',
-    url: `/cameraConfig/${siteId}`
-  }
+    url: `/cameraConfig/${siteId}`,
+  };
 
   return await axios(config);
 }
@@ -223,53 +214,64 @@ async function getCameraConfigAsync(siteId) {
 async function getLastCarAsync(siteId) {
   const config = {
     method: 'get',
-    url: `/car/latest/${siteId}`
-  }
+    url: `/car/latest/${siteId}`,
+  };
   return await axios(config);
 }
 
-
 //#start- camera ========camera======
 
-
-async function getAllCameraConfigAsync() {
+async function getCameraListAsync() {
   const config = {
     method: 'get',
-    url: '/cameraConfig'
-  }
-
+    url: '/cameraConfig',
+  };
   return await axios(config);
 }
 
 async function getSitesByTenantIdAsync(tenantId) {
   const config = {
     method: 'get',
-    url: `/site/${tenantId}`
-  }
-
-  return await axios(config);
-}
-
-
-async function saveCameraAsync(payload) {
-  const config = {
-    method: 'post',
-    url: '/cameraConfig',
-    data: payload
+    url: `/site/${tenantId}`,
   };
 
   return await axios(config);
 }
 
+async function saveCameraAsync(payload) {
+  const config = {
+    method: 'post',
+    url: '/cameraConfig',
+    data: payload,
+  };
 
+  return await axios(config);
+}
 
+async function updateCameraAsync(cameraId, payload) {
+  const config = {
+    method: 'put',
+    url: `/cameraConfig/${cameraId}`,
+    data: payload,
+  };
+  return await axios(config);
+}
+
+async function deleteCameraAsync(cameraId) {
+  const config = {
+    method: 'delete',
+    url: `/cameraConfig/${cameraId}`,
+  };
+
+  return await axios(config);
+}
 
 // #start-site ======== site =========
 
 async function getSitesAsync() {
   const config = {
     method: 'get',
-    url: '/site'
+    url: '/site',
   };
   return await axios(config);
 }
@@ -277,7 +279,7 @@ async function getSitesAsync() {
 async function getSitesOptionsAsync() {
   const config = {
     method: 'get',
-    url: '/sites'
+    url: '/sites',
   };
   return await axios(config);
 }
@@ -285,7 +287,7 @@ async function getSitesOptionsAsync() {
 async function getSiteListAsync() {
   const config = {
     method: 'get',
-    url: '/admin/user-site'
+    url: '/admin/user-site',
   };
   return await axios(config);
 }
@@ -293,7 +295,7 @@ async function getSiteListAsync() {
 async function getReportListAsync() {
   const config = {
     method: 'get',
-    url: '/lookup/reports'
+    url: '/lookup/reports',
   };
   return await axios(config);
 }
@@ -301,7 +303,7 @@ async function getReportListAsync() {
 async function getAnalyticsChartsAsync() {
   const config = {
     method: 'get',
-    url: '/lookup/charts'
+    url: '/lookup/charts',
   };
   return await axios(config);
 }
@@ -309,7 +311,7 @@ async function getAnalyticsChartsAsync() {
 async function getSitesByIdAsync(systemUserId) {
   const config = {
     method: 'get',
-    url: `/admin/user-sites/${systemUserId}`
+    url: `/admin/user-sites/${systemUserId}`,
   };
   return await axios(config);
 }
@@ -318,7 +320,7 @@ async function setSiteEnabledStatusAsync(siteId, isEnabled) {
   const config = {
     method: 'put',
     url: `/site/updateEnabled/${siteId}/${isEnabled}`,
-    data: { isEnabled }
+    data: { isEnabled },
   };
   return await axios(config);
 }
@@ -327,7 +329,7 @@ async function updateSiteAsync(siteId, payload) {
   const config = {
     method: 'put',
     url: `/site/${siteId}`,
-    data: payload
+    data: payload,
   };
   return await axios(config);
 }
@@ -336,7 +338,7 @@ async function addSiteAsync(payload) {
   const config = {
     method: 'post',
     url: `/site`,
-    data: payload
+    data: payload,
   };
   return await axios(config);
 }
@@ -344,7 +346,7 @@ async function addSiteAsync(payload) {
 async function getSiteDetailsAsync(siteId) {
   const config = {
     method: 'get',
-    url: `/site/${siteId}`
+    url: `/site/${siteId}`,
   };
   return await axios(config);
 }
@@ -353,7 +355,7 @@ async function updateSiteTimeAsync(siteId, payload) {
   const config = {
     method: 'put',
     url: `/site/${siteId}`,
-    data: payload
+    data: payload,
   };
   return await axios(config);
 }
@@ -361,7 +363,7 @@ async function updateSiteTimeAsync(siteId, payload) {
 async function getSiteHoursAsync(siteId) {
   const config = {
     method: 'get',
-    url: `/site/hours/${siteId}`
+    url: `/site/hours/${siteId}`,
   };
   return await axios(config);
 }
@@ -370,7 +372,12 @@ async function getOrdersAsync(date, openingTime, closingTime, itemName = '') {
   const config = {
     method: 'get',
     url: `/car`,
-    params: { date: date, openingTime: openingTime, closingTime: closingTime, itemName: itemName }
+    params: {
+      date: date,
+      openingTime: openingTime,
+      closingTime: closingTime,
+      itemName: itemName,
+    },
   };
   return await axios(config);
 }
@@ -379,11 +386,10 @@ async function saveOrderComment(payload) {
   const config = {
     method: 'post',
     url: `/car/updateStatus`,
-    data: payload
+    data: payload,
   };
   return await axios(config);
 }
-
 
 export default {
   // auth
@@ -417,7 +423,6 @@ export default {
   updateSiteTimeAsync,
   getSiteHoursAsync,
 
-
   getReportListAsync,
   getAnalyticsChartsAsync,
   //Devices
@@ -433,7 +438,8 @@ export default {
   getOrdersAsync,
   saveOrderComment,
   saveCameraAsync,
-  getAllCameraConfigAsync,
-  getSitesByTenantIdAsync
-
+  getCameraListAsync,
+  getSitesByTenantIdAsync,
+  updateCameraAsync,
+  deleteCameraAsync,
 };

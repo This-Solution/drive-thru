@@ -1,6 +1,6 @@
 import { PlusCircleOutlined } from '@ant-design/icons';
 import { useTheme } from '@emotion/react';
-import { EditTwoTone } from '@mui/icons-material';
+import { DeleteOutline, EditTwoTone } from '@mui/icons-material';
 import {
   Button,
   Grid,
@@ -8,7 +8,7 @@ import {
   Stack,
   Tooltip,
   Typography,
-  useMediaQuery
+  useMediaQuery,
 } from '@mui/material';
 import CjDialog from 'components/@extended/Dialog';
 import CjReactTable from 'components/@extended/Table/ReactTable';
@@ -32,25 +32,23 @@ const CameraList = () => {
   const matchDownMD = useMediaQuery(theme.breakpoints.down('md'));
   const appName = process.env.REACT_APP_NAME;
 
-  const [sites, setSites] = useState([]);
+  const [cameraList, setCameraList] = useState([]);
   const [isLoading, setLoading] = useState(true);
   const [globalFilter, setGlobalFilter] = useState();
   const [isConfirmDialogOpen, setConfirmDialogOpen] = useState(false);
   const [isEditDialogOpen, setEditDialogOpen] = useState(false);
-  const [isVerifyDialogOpen, setVerifyDialogOpen] = useState(false);
-  const [siteHoursDialog, setSiteHoursDialog] = useState(false);
-  const [siteDetails, setSiteDetails] = useState();
+  const [cameraDetails, setCameraDetails] = useState();
   const [enabled, setEnabled] = useState(true);
   const { user } = useSelector((state) => state.auth);
-  const { flavour } = useSelector((state) => state.auth);
 
   useEffect(() => {
-    getSiteList();
+    getCameraList();
   }, []);
 
-  const getSiteList = async () => {
-    const { data } = await ApiService.getSitesAsync();
-    setSites(data);
+  const getCameraList = async () => {
+    const { data } = await ApiService.getCameraListAsync();
+    console.log(data);
+    setCameraList(data);
     setLoading(false);
   };
 
@@ -77,7 +75,7 @@ const CameraList = () => {
             <Typography variant='subtitle1'>{original.tenantName}</Typography>
             // </Link>
           );
-        }
+        },
       },
       {
         Header: 'Site Name',
@@ -90,43 +88,21 @@ const CameraList = () => {
             <Typography variant='subtitle1'>{original.siteName}</Typography>
             // </Link>
           );
-        }
+        },
       },
       {
-        Header: 'Address',
-        accessor: 'addressLine1',
-
-        Cell: ({ row }) => {
-          const { values } = row;
-          return (
-            <Stack direction='row' spacing={1.5}>
-              <Stack spacing={0}>
-                {/* eslint-disable-next-line */}
-                <Typography variant="subtitle1">{values.addressLine1}</Typography>
-                <Typography variant='caption' color='textSecondary'>
-                  { }
-                  {values.city}, {values.state}
-                </Typography>
-              </Stack>
-            </Stack>
-          );
-        }
-      },
-      {
-        Header: 'City',
+        Header: 'camera Name',
         canSort: true,
-        accessor: 'city'
+        accessor: 'cameraName',
       },
       {
-        Header: 'State',
+        Header: 'camera Type',
         canSort: true,
-        accessor: 'state'
+        accessor: 'cameraType',
       },
       {
-        accessor: 'updatedDate'
-      },
-      {
-        accessor: 'markupPercent'
+        Header: 'Reload Time(s)',
+        accessor: 'reloadTime',
       },
       {
         Header: 'Last Updated by',
@@ -139,15 +115,19 @@ const CameraList = () => {
             <Stack direction='row' spacing={1.5} alignItems='center'>
               <Stack spacing={0}>
                 {/* eslint-disable-next-line */}
-                <Typography variant="subtitle1">{values.updateByName || '-'}</Typography>
+                <Typography variant='subtitle1'>
+                  {values.updateByName || '-'}
+                </Typography>
                 <Typography variant='caption' color='textSecondary'>
-                  { }
-                  {values.updatedDate ? dateHelper.getFormatDate(values.updatedDate) : '-'}
+                  {}
+                  {values.updatedDate
+                    ? dateHelper.getFormatDate(values.updatedDate)
+                    : '-'}
                 </Typography>
               </Stack>
             </Stack>
           );
-        }
+        },
       },
       // {
       //   Header: 'Enabled',
@@ -162,73 +142,83 @@ const CameraList = () => {
         minWidth: 108,
         disableSortBy: true,
         Cell: ({ row }) => {
-          const { original } = row;
           return (
             <>
               <Tooltip title='Edit'>
-                <IconButton variant='contained' color='primary' onClick={() => handleEditClick(row.original)}>
+                <IconButton
+                  variant='contained'
+                  color='primary'
+                  onClick={() => handleEditClick(row.original)}
+                >
                   <EditTwoTone />
                 </IconButton>
               </Tooltip>
-              {/* <Tooltip title='Site Hour'>
-                <IconButton variant='contained' color='primary' onClick={() => handleSiteHours(row.original)}>
-                  <AccessTimeOutlined />
+              <Tooltip title='Delete'>
+                <IconButton
+                  variant='contained'
+                  color='primary'
+                  onClick={() => handleDeleteDialog(row.original)}
+                >
+                  <DeleteOutline />
                 </IconButton>
               </Tooltip>
-              {user.role === enums.userRole.SuperAdmin ? (
-                <Tooltip title='Verify'>
-                  <IconButton variant='contained' color='primary' onClick={() => handleVerifyDelivery(row.original)}>
-                    <SettingOutlined />
-                  </IconButton>
-                </Tooltip>
-              ) : null}
-              <Tooltip title='KDS'>
-                <IconButton variant='contained' color='primary' onClick={() => navigate('/kds-configure', { state: { siteId: original.siteId, siteName: original.siteName } })}>
-                  <Monitor />
-                </IconButton>
-              </Tooltip > */}
             </>
           );
-        }
-      }
+        },
+      },
     ],
     [theme]
   );
 
-  const handleSwitchChange = (event, row) => {
-    setSiteDetails(row);
+  const handleDeleteDialog = (row) => {
+    setCameraDetails(row);
     setConfirmDialogOpen(true);
   };
 
-  const onConfirmSwitchChange = async () => {
-    await ApiService.setSiteEnabledStatusAsync(siteDetails.siteId, !siteDetails.isEnabled);
-    setConfirmDialogOpen(false);
-    const site = [...sites];
-    const siteIndex = findIndex(site, ['siteId', siteDetails.siteId]);
-    site[siteIndex].isEnabled = !siteDetails.isEnabled;
-    setSites(site);
-    setSiteDetails(null);
-  };
+  // const onConfirmSwitchChange = async () => {
+  //   await ApiService.setSiteEnabledStatusAsync(
+  //     cameraDetails.siteId,
+  //     !cameraDetails.isEnabled
+  //   );
+  //   setConfirmDialogOpen(false);
+  //   const site = [...cameraList];
+  //   const siteIndex = findIndex(site, ['siteId', cameraDetails.siteId]);
+  //   site[siteIndex].isEnabled = !cameraDetails.isEnabled;
+  //   setCameraList(site);
+  //   setCameraDetails(null);
+  // };
 
   const handleEditClick = (row) => {
-    setSiteDetails(row);
+    setCameraDetails(row);
     setEditDialogOpen(true);
   };
 
   const handleAddClick = () => {
-    setSiteDetails(null);
+    setCameraDetails(null);
     setEditDialogOpen(true);
   };
 
   const onSave = async (updateSite) => {
-    const siteIndex = sites.findIndex((item) => item.siteId === updateSite.siteId);
-    const updatedSites = [...sites];
+    const siteIndex = cameraList.findIndex(
+      (item) => item.siteId === updateSite.siteId
+    );
+    const updatedSites = [...cameraList];
     updateSite.updatedBy = user.name;
     updateSite.updatedDate = new Date();
     updatedSites[siteIndex] = updateSite;
     setSites(updatedSites);
     setEditDialogOpen(false);
     getSiteList();
+  };
+
+  const handleDelete = async () => {
+    const { data } = await ApiService.deleteCameraAsync(cameraDetails.cameraId);
+    if (data) {
+      const updatedCamera = cameraDetails.filter(
+        (cam) => cam.cameraId !== cameraDetails.cameraId
+      );
+      setCameraDetails(updatedCamera);
+    }
   };
 
   const onCloseDialog = () => {
@@ -241,11 +231,15 @@ const CameraList = () => {
         <Loader />
       ) : (
         <Grid container rowSpacing={3} columnSpacing={3}>
-          <Grid item xs={12} >
+          <Grid item xs={12}>
             <Stack direction={'row'} justifyContent={'space-between'}>
-              <Stack><Typography variant='h2'>Manage Camera</Typography></Stack>
+              <Stack>
+                <Typography variant='h2'>Manage Camera</Typography>
+              </Stack>
               <Stack direction={'row'} justifyContent={'end'}>
-                <Button variant='contained' onClick={() => navigate(-1)}>Back</Button>
+                <Button variant='contained' onClick={() => navigate(-1)}>
+                  Back
+                </Button>
               </Stack>
             </Stack>
           </Grid>
@@ -264,7 +258,7 @@ const CameraList = () => {
                       <Stack direction='row' alignItems='center' spacing={1}>
                         <Grid item xs={6}>
                           <GlobalFilter
-                            preGlobalFilteredRows={sites}
+                            preGlobalFilteredRows={cameraList}
                             globalFilter={globalFilter}
                             setGlobalFilter={setGlobalFilter}
                             size='large'
@@ -282,7 +276,12 @@ const CameraList = () => {
                       </Stack>
                     </Grid>
                     <Grid item xs={3}>
-                      <Stack alignItems='center' justifyContent='center' spacing={2} direction={'row'}>
+                      <Stack
+                        alignItems='center'
+                        justifyContent='center'
+                        spacing={2}
+                        direction={'row'}
+                      >
                         {appName === constants.appName && (
                           <FlavourButton
                             fullWidth
@@ -304,18 +303,22 @@ const CameraList = () => {
                 {isConfirmDialogOpen ? (
                   <CjDialog
                     onCancel={onCloseDialog}
-                    confirmHandle={onConfirmSwitchChange}
+                    confirmHandle={handleDelete}
                     isDialogOpen={isConfirmDialogOpen}
-                    title={`Change Status ${siteDetails.siteName}`}
-                    Content={`${siteDetails.isEnabled ? 'Are you sure you want to disable' : 'Are you sure you want to enable'} ${siteDetails.siteName
-                      }?`}
+                    title={`Delete ${cameraDetails.cameraName}`}
+                    Content={`Are you sure you want to delete ${cameraDetails.cameraName}?`}
                   />
                 ) : null}
                 <CjReactTable
                   isLoading={isLoading}
                   columns={columns}
-                  hiddenColumns={['city', 'state', 'updatedDate', 'markupPercent']}
-                  data={sites}
+                  hiddenColumns={[
+                    'city',
+                    'state',
+                    'updatedDate',
+                    'markupPercent',
+                  ]}
+                  data={cameraList}
                   globalFilter={globalFilter}
                 />
               </ScrollX>
@@ -324,7 +327,12 @@ const CameraList = () => {
         </Grid>
       )}
       {isEditDialogOpen ? (
-        <AddEditCamera isOpen={isEditDialogOpen} handleClose={() => setEditDialogOpen(false)} siteDetails={siteDetails} onSave={onSave} />
+        <AddEditCamera
+          isOpen={isEditDialogOpen}
+          handleClose={() => setEditDialogOpen(false)}
+          cameraDetails={cameraDetails}
+          onSave={onSave}
+        />
       ) : null}
     </>
   );
