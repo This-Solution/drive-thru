@@ -192,13 +192,13 @@ const SearchOrder = () => {
                         </Grid>
 
                         <Grid item md={3}>
-                          <GlobalFilter
+                          {/* <GlobalFilter
                             preGlobalFilteredRows={sites}
                             globalFilter={globalFilter}
                             setGlobalFilter={setGlobalFilter}
                             size='large'
                             sx={{ width: '100%' }}
-                          />
+                          /> */}
                         </Grid>
 
                         <Grid item md={2}>
