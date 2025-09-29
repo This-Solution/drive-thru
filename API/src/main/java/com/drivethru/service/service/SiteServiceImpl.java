@@ -142,4 +142,13 @@ public class SiteServiceImpl implements SiteService {
             return siteResponse;
         }).collect(Collectors.toList());
     }
+
+    @Override
+    public List<Site> getAllSitesByTenantId(Integer tenantId) {
+        List<Site> sites = siteRepository.findByTenantIdAndIsActiveTrue(tenantId);
+        if (sites == null) {
+            throw new CustomException(CustomErrorHolder.SITE_NOT_FOUND);
+        }
+        return sites;
+    }
 }

@@ -5,6 +5,7 @@ import com.drivethru.service.configuration.JwtHelper;
 import com.drivethru.service.constant.RouteConstant;
 import com.drivethru.service.dto.SiteRequest;
 import com.drivethru.service.dto.SiteResponse;
+import com.drivethru.service.entity.Site;
 import com.drivethru.service.service.SiteService;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -65,4 +66,13 @@ public class SiteController {
         responseObject.setData(sites);
         return new ResponseEntity<>(responseObject, HttpStatus.OK);
     }
+
+    @GetMapping("/{TenantId}")
+    public ResponseEntity<ResponseObject<List<Site>>> getAllSitesByTenantId(@PathVariable Integer TenantId) {
+        ResponseObject<List<Site>> responseObject = new ResponseObject<>();
+        List<Site> sites = siteService.getAllSitesByTenantId(TenantId);
+        responseObject.setData(sites);
+        return new ResponseEntity<>(responseObject, HttpStatus.OK);
+    }
+
 }

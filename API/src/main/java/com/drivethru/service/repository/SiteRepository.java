@@ -13,4 +13,6 @@ public interface SiteRepository extends JpaRepository<Site, Integer> {
     Site findBySiteName(String siteName);
 
     Site findBySiteIdAndIsActiveTrue(Integer SiteId);
+
+    List<Site> findByTenantIdAndIsActiveTrue(Integer TenantId);
 }

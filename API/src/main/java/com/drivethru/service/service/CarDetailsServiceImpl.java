@@ -236,11 +236,11 @@ public class CarDetailsServiceImpl implements CarDetailService {
         long count30to60 = 0, red30to60 = 0, green30to60 = 0;
         long count60to90 = 0, red60to90 = 0, green60to90 = 0;
 
-        for (CarVisit visit : carVisits) {
-            LocalDateTime createdDate = visit.getCreatedDate();
+        List<OrderCarStatus> statusList = orderCarStatusRepository.findByCarId(carDetail.getCarId());
+        for (OrderCarStatus orderCarStatus : statusList) {
+            LocalDateTime createdDate = orderCarStatus.getCreatedDate();
 
-            List<OrderCarStatus> statusList = orderCarStatusRepository.findByCarId(carDetail.getCarId());
-            String status = statusList.stream().findFirst().map(OrderCarStatus::getStatus).orElse(null);
+            String status = orderCarStatus.getStatus();
 
             boolean isRed = CarColorStatus.RED.name().equalsIgnoreCase(status);
             boolean isGreen = CarColorStatus.GREEN.name().equalsIgnoreCase(status);
@@ -353,8 +353,8 @@ public class CarDetailsServiceImpl implements CarDetailService {
         List<CameraResponseDTO> cameraResponseList = new ArrayList<>();
 
         for (CameraConfig config : cameraConfigList) {
-            LocalDateTime startOfDay = LocalDate.now().atStartOfDay().minusSeconds(reloadTime);
-//            LocalDateTime startOfDay = LocalDate.now().atStartOfDay();
+            LocalDateTime startOfDay = LocalDateTime.now().minusSeconds(reloadTime);
+
             CarVisit carVisit = carVisitRepository.findFirstByCameraIdAndCreatedDateAfterOrderByCreatedDateDesc(config.getCameraId(), startOfDay);
 
             if (carVisit == null) {

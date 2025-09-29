@@ -18,14 +18,11 @@ public class AzureBlobStorageConfig {
 
     @Bean
     public BlobServiceClient blobServiceClient() {
-        return new BlobServiceClientBuilder()
-                .connectionString(connectionString)
-                .buildClient();
+        return new BlobServiceClientBuilder().connectionString(connectionString).buildClient();
     }
 
     @Bean
     public BlobContainerClient blobContainerClient() {
-        return blobServiceClient()
-                .getBlobContainerClient(containerName);
+        return blobServiceClient().getBlobContainerClient(containerName);
     }
 }
