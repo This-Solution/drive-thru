@@ -22,6 +22,12 @@ public class OrderDetailController {
 
     @PostMapping(RouteConstant.ORDER_WEBHOOK)
     public ResponseEntity<ResponseObject<OrderDetail>> handleWebhook(@RequestBody WebhookOrderRequest webhookOrderRequest) {
+        System.out.println("Received Webhook:\n"
+                + "Order XML: " + webhookOrderRequest.getOrder_xml() + "\n"
+                + "Device: " + webhookOrderRequest.getDevice_name() + "\n"
+                + "Datetime: " + webhookOrderRequest.getDatetime() + "\n"
+                + "Site: " + webhookOrderRequest.getSite_name() + "\n"
+                + "Timestamp: " + webhookOrderRequest.getTimestamp());
         orderDetailService.createdOrder(webhookOrderRequest);
         return new ResponseEntity<>(null, HttpStatus.OK);
     }

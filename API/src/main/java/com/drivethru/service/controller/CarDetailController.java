@@ -36,6 +36,7 @@ public class CarDetailController {
 
     @PostMapping(RouteConstant.CAR_WEBHOOK)
     public ResponseEntity<ResponseObject<CarDetail>> addCarDetail(@RequestBody Map<String, Object> carDetailJson) {
+        System.out.println("[CarDetailController] - Received files:" + carDetailJson);
         carDetailService.addCarDetail(carDetailJson);
         return new ResponseEntity<>(null, HttpStatus.OK);
     }
