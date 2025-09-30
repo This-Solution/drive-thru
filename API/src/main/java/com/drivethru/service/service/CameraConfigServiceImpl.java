@@ -149,7 +149,7 @@ public class CameraConfigServiceImpl implements CameraConfigService {
 
     @Override
     public List<CameraConfigResponse> getAllCameraConfigs() {
-        List<CameraConfig> cameraConfigs = cameraConfigRepository.findAllByIsActiveTrue();
+        List<CameraConfig> cameraConfigs = cameraConfigRepository.findAll();
         return cameraConfigs.stream().map(configs -> {
             CameraConfigResponse cameraConfigResponse = new CameraConfigResponse();
             BeanUtils.copyProperties(configs, cameraConfigResponse);
