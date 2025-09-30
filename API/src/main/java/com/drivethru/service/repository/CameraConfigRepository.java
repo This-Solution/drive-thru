@@ -10,11 +10,11 @@ import java.util.List;
 public interface CameraConfigRepository extends JpaRepository<CameraConfig, Integer> {
     List<CameraConfig> findByTenantId(Integer tenantId);
 
-    CameraConfig findByOrderIpAddress(String orderIpAddress);
+    CameraConfig findByCameraNameAndSiteIdAndIsActiveTrue(String cameraName , Integer siteId);
 
     List<CameraConfig> findAllByIsActiveTrue();
 
-    CameraConfig findBySiteIdAndTenantIdAndCameraName(Integer siteId, Integer tenantId, String cameraName);
+    CameraConfig findBySiteIdAndTenantIdAndCameraNameAndIsActiveTrue(Integer siteId, Integer tenantId, String cameraName);
 
     CameraConfig findByCameraIdAndIsActiveTrue(Integer cameraId);
 

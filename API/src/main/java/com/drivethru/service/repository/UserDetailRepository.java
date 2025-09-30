@@ -14,5 +14,5 @@ public interface UserDetailRepository extends JpaRepository<UserDetail, Integer>
 
     UserDetail findByUserIdAndIsActiveTrue(Integer serId);
 
-    List<UserDetail> findBySiteId(Integer siteId);
+    List<UserDetail> findBySiteIdAndIsActiveTrue(Integer siteId);
 }

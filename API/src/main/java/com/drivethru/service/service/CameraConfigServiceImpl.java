@@ -67,6 +67,7 @@ public class CameraConfigServiceImpl implements CameraConfigService {
         cameraConfig.setCameraType(cameraConfigRequest.getCameraType());
         cameraConfig.setCameraIpAddress(cameraConfigRequest.getCameraIpAddress());
         cameraConfig.setOrderIpAddress(cameraConfigRequest.getOrderIpAddress());
+        cameraConfig.setReloadTime(cameraConfigRequest.getReloadTime());
         cameraConfig.setActive(true);
         cameraConfig.setCreatedBy(detail.getUserId());
         cameraConfig.setCreatedDate(LocalDateTime.now());
@@ -112,6 +113,9 @@ public class CameraConfigServiceImpl implements CameraConfigService {
         if (cameraConfigRequest.getDescription() != null) {
             cameraConfig.setDescription(cameraConfigRequest.getDescription());
         }
+        if(cameraConfigRequest.getReloadTime() != null) {
+            cameraConfig.setReloadTime(cameraConfigRequest.getReloadTime());
+        }
         cameraConfig.setUpdatedBy(detail.getUserId());
         cameraConfig.setUpdatedDate(LocalDateTime.now());
         cameraConfigRepository.save(cameraConfig);
@@ -150,6 +154,7 @@ public class CameraConfigServiceImpl implements CameraConfigService {
         return cameraConfigs.stream().map(configs -> {
             CameraConfigResponse cameraConfigResponse = new CameraConfigResponse();
             BeanUtils.copyProperties(configs, cameraConfigResponse);
+            siteRepository.findById(configs.getSiteId()).ifPresent(site -> cameraConfigResponse.setSiteName(site.getSiteName()));
             tenantRepository.findById(configs.getTenantId()).ifPresent(tenant -> cameraConfigResponse.setTenantName(tenant.getTenantName()));
             userDetailRepository.findById(configs.getCreatedBy()).ifPresent(createdUser -> cameraConfigResponse.setCreateByName(createdUser.getFirstName() + " " + createdUser.getSurName()));
             if (configs.getUpdatedBy() != null) {

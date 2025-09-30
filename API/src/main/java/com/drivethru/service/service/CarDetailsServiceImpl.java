@@ -90,19 +90,19 @@ public class CarDetailsServiceImpl implements CarDetailService {
             throw new CustomException(CustomErrorHolder.FAILED_CONVERT_DATA);
         }
 
-        Site site = siteRepository.findBySiteName(siteName);
+        Site site = siteRepository.findBySiteNameAndIsActiveTrue(siteName);
         if (site == null) {
             throw new CustomException(CustomErrorHolder.SITE_NOT_FOUND);
         }
         Integer siteId = site.getSiteId();
 
-        CameraConfig cameraConfig = cameraConfigRepository.findBySiteIdAndTenantIdAndCameraName(site.getSiteId(), site.getTenantId(), cameraName);
+        CameraConfig cameraConfig = cameraConfigRepository.findBySiteIdAndTenantIdAndCameraNameAndIsActiveTrue(site.getSiteId(), site.getTenantId(), cameraName);
         if (cameraConfig == null) {
             throw new CustomException(CustomErrorHolder.CAMERA_CONFIG_NOT_FOUND);
         }
         String cameraType = cameraConfig.getCameraType();
 
-        List<UserDetail> userDetails = userDetailRepository.findBySiteId(siteId);
+        List<UserDetail> userDetails = userDetailRepository.findBySiteIdAndIsActiveTrue(siteId);
         Optional<CarDetail> existingCar = carDetailRepository.findByCarPlateNumber(plateNumber);
         OffsetDateTime time = OffsetDateTime.parse(timestamp);
         LocalDateTime createdDate = time.toLocalDateTime();
@@ -222,10 +222,13 @@ public class CarDetailsServiceImpl implements CarDetailService {
         carDetailResponse.setPlateImageUrl(azureFileUploaderService.generateBlobUrl(carDetail.getPlateImageUrl()));
 
         CarVisit latestVisit = carVisitRepository.findFirstByCarIdAndTenantIdOrderByCreatedDateDesc(carDetail.getCarId(), carDetailRequest.getTenantId());
-        Optional<CameraConfig> cameraConfig = cameraConfigRepository.findById(latestVisit.getCameraId());
+        CameraConfig cameraConfig = cameraConfigRepository.findByCameraIdAndIsActiveTrue(latestVisit.getCameraId());
+        if (cameraConfig == null) {
+            throw new CustomException(CustomErrorHolder.CAMERA_CONFIG_NOT_FOUND);
+        }
         carDetailResponse.setCreatedTime(latestVisit.getCreatedDate());
 
-        String cameraType = cameraConfig.map(CameraConfig::getCameraType).orElse("");
+        String cameraType = cameraConfig.getCameraType();
 
         LocalDateTime now = LocalDateTime.now();
         LocalDateTime days30 = now.minusDays(30);
@@ -293,7 +296,7 @@ public class CarDetailsServiceImpl implements CarDetailService {
 
     @Override
     public List<CurrentOrderItemResponse> getCurrentOrderDetails(CarDetailRequest carDetailRequest) {
-        OrderDetail orderDetail = orderDetailRepository.findFirstByTenantIdAndCarPlateNumberAndOrderStatusOrderByCreatedDateDesc(carDetailRequest.getTenantId(), carDetailRequest.getCarPlateNumber(), String.valueOf(OrderStatus.CREATED)).orElseThrow(() -> new CustomException(CustomErrorHolder.ORDER_NOT_FOUND));
+        OrderDetail orderDetail = orderDetailRepository.findFirstByTenantIdAndCarPlateNumberOrderByCreatedDateDesc(carDetailRequest.getTenantId(), carDetailRequest.getCarPlateNumber()).orElseThrow(() -> new CustomException(CustomErrorHolder.ORDER_NOT_FOUND));
         Double totalPrice = Double.valueOf(orderDetail.getTotalPrice());
         List<OrderItem> orderItems = orderItemRepository.findByOrderId(orderDetail.getOrderId());
         orderDetail.setOrderStatus(String.valueOf(OrderStatus.DELIVERED));
@@ -344,8 +347,8 @@ public class CarDetailsServiceImpl implements CarDetailService {
 
     @Override
     public List<CameraResponseDTO> latestInfo(Integer siteId) {
-        Optional<Site> site = siteRepository.findById(siteId);
-        int reloadTime = site.get().getReloadTime();
+        Site site = siteRepository.findBySiteIdAndIsActiveTrue(siteId);
+        int reloadTime = site.getReloadTime();
         List<CameraConfig> cameraConfigList = cameraConfigRepository.findAllBySiteIdAndIsActiveTrue(siteId);
         if (cameraConfigList == null) {
             throw new CustomException(CustomErrorHolder.CAMERA_CONFIG_NOT_FOUND);
