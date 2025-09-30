@@ -59,63 +59,69 @@ public class OrderDetailServiceImpl implements OrderDetailService {
     @Override
     @Transactional
     public void createdOrder(WebhookOrderRequest webhookOrderRequest) {
+        Integer totalPrice;
+        Document doc;
         try {
             DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
             DocumentBuilder builder = factory.newDocumentBuilder();
             InputStream xmlStream = new ByteArrayInputStream(webhookOrderRequest.getOrder_xml().getBytes(StandardCharsets.UTF_8));
-            Document doc = builder.parse(xmlStream);
+            doc = builder.parse(xmlStream);
             String totalPriceStr = doc.getElementsByTagName(Constants.TOTAL_PRICE).item(0).getTextContent();
-            Integer totalPrice = (int) Double.parseDouble(totalPriceStr);
-            LocalDateTime dateTime = DateAndTimeHelper.parse(webhookOrderRequest.getDatetime());
-            CameraConfig cameraConfig = cameraConfigRepository.findByOrderIpAddress(webhookOrderRequest.getSource_ip());
-            Site site = siteRepository.findBySiteName(webhookOrderRequest.getSite_name());
-            Tenant tenant = tenantRepository.findById(cameraConfig.getTenantId()).orElseThrow(() -> new CustomException(CustomErrorHolder.TENANT_NOT_FOUND));
-            Optional<CarVisit> carVisit = carVisitRepository.findFirstByTenantIdOrderByCreatedDateDesc(tenant.getTenantId());
-            Optional<CarDetail> carDetail = carDetailRepository.findById(carVisit.get().getCarId());
-
-            OrderDetail orderDetail = new OrderDetail();
-            orderDetail.setTotalPrice(totalPrice);
-            orderDetail.setSourceIp(webhookOrderRequest.getSource_ip());
-            orderDetail.setCreatedDate(dateTime);
-            orderDetail.setTenantId(tenant.getTenantId());
-            orderDetail.setSiteId(cameraConfig.getSiteId());
-            orderDetail.setCarId(carDetail.get().getCarId());
-            orderDetail.setCarPlateNumber(carDetail.get().getCarPlateNumber());
-            orderDetail.setOrderStatus(String.valueOf(OrderStatus.CREATED));
-            orderDetailRepository.save(orderDetail);
-
-            NodeList nameNodes = doc.getElementsByTagName(Constants.NAME);
-            for (int i = 0; i < nameNodes.getLength(); i++) {
-                Node node = nameNodes.item(i);
-                if (node.getNodeType() == Node.ELEMENT_NODE) {
-                    Element nameElement = (Element) node;
-                    String name = nameElement.getTextContent().trim();
-                    String priceStr = nameElement.getAttribute(Constants.PRICE);
-                    String countStr = nameElement.getAttribute(Constants.COUNT);
-                    Double price = priceStr.isEmpty() ? 0.0 : Double.parseDouble(priceStr);
-                    Integer quantity = countStr.isEmpty() ? 1 : Integer.parseInt(countStr);
-
-                    OrderItem orderItem = new OrderItem();
-                    orderItem.setOrderId(orderDetail.getOrderId());
-                    orderItem.setName(name);
-                    orderItem.setPrice(price);
-                    orderItem.setQuantity(quantity);
-                    orderItem.setCreatedDate(LocalDateTime.now());
-                    orderItemRepository.save(orderItem);
-                }
-            }
-
-            OrderCarStatus orderCarStatus = new OrderCarStatus();
-            orderCarStatus.setOrderId(orderDetail.getOrderId());
-            orderCarStatus.setCarId(carDetail.get().getCarId());
-            orderCarStatus.setTenantId(tenant.getTenantId());
-            orderCarStatus.setStatus(String.valueOf(CarColorStatus.GREEN));
-            orderCarStatus.setCreatedDate(LocalDateTime.now());
-            orderCarStatusRepository.save(orderCarStatus);
-
+            totalPrice = (int) Double.parseDouble(totalPriceStr);
         } catch (Exception e) {
             throw new CustomException(CustomErrorHolder.ORDER_NOT_FOUND);
         }
+
+        LocalDateTime dateTime = DateAndTimeHelper.parse(webhookOrderRequest.getDatetime());
+        Site site = siteRepository.findBySiteName(webhookOrderRequest.getSite_name());
+        CameraConfig cameraConfig = cameraConfigRepository.findByCameraNameAndSiteId(webhookOrderRequest.getDevice_name(), site.getSiteId());
+        Tenant tenant = tenantRepository.findById(site.getTenantId()).orElseThrow(() -> new CustomException(CustomErrorHolder.TENANT_NOT_FOUND));
+        CarVisit carVisit = carVisitRepository.findFirstByTenantIdAndSiteIdAndCameraIdOrderByCreatedDateDesc(tenant.getTenantId(), site.getSiteId(), cameraConfig.getCameraId());
+        if (carVisit == null) {
+            throw new CustomException(CustomErrorHolder.CAR_VISIT_NOT_FOUND);
+        }
+        Optional<CarDetail> carDetail = carDetailRepository.findById(carVisit.getCarId());
+
+        OrderDetail orderDetail = new OrderDetail();
+        orderDetail.setTotalPrice(totalPrice);
+        orderDetail.setSourceIp(webhookOrderRequest.getSource_ip());
+        orderDetail.setCreatedDate(dateTime);
+        orderDetail.setTenantId(tenant.getTenantId());
+        orderDetail.setSiteId(cameraConfig.getSiteId());
+        orderDetail.setCarId(carDetail.get().getCarId());
+        orderDetail.setCarPlateNumber(carDetail.get().getCarPlateNumber());
+        orderDetail.setOrderStatus(String.valueOf(OrderStatus.CREATED));
+        orderDetailRepository.save(orderDetail);
+
+        NodeList nameNodes = doc.getElementsByTagName(Constants.NAME);
+        for (int i = 0; i < nameNodes.getLength(); i++) {
+            Node node = nameNodes.item(i);
+            if (node.getNodeType() == Node.ELEMENT_NODE) {
+                Element nameElement = (Element) node;
+                String name = nameElement.getTextContent().trim();
+                String priceStr = nameElement.getAttribute(Constants.PRICE);
+                String countStr = nameElement.getAttribute(Constants.COUNT);
+                Double price = priceStr.isEmpty() ? 0.0 : Double.parseDouble(priceStr);
+                Integer quantity = countStr.isEmpty() ? 1 : Integer.parseInt(countStr);
+
+                OrderItem orderItem = new OrderItem();
+                orderItem.setOrderId(orderDetail.getOrderId());
+                orderItem.setName(name);
+                orderItem.setPrice(price);
+                orderItem.setQuantity(quantity);
+                orderItem.setCreatedDate(LocalDateTime.now());
+                orderItemRepository.save(orderItem);
+            }
+        }
+
+        OrderCarStatus orderCarStatus = new OrderCarStatus();
+        orderCarStatus.setOrderId(orderDetail.getOrderId());
+        orderCarStatus.setCarId(carDetail.get().getCarId());
+        orderCarStatus.setTenantId(tenant.getTenantId());
+        orderCarStatus.setStatus(String.valueOf(CarColorStatus.GREEN));
+        orderCarStatus.setCreatedDate(LocalDateTime.now());
+        orderCarStatusRepository.save(orderCarStatus);
+
     }
 
     @Override
