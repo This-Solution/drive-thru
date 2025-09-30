@@ -23,10 +23,10 @@ async function addAdminAsync(payload) {
   return await axios(config);
 }
 
-async function updateAdminAsync(payload) {
+async function updateAdminAsync(payload, userId) {
   const config = {
     method: 'put',
-    url: 'admin/user',
+    url: `auth/${userId}`,
     data: payload,
   };
   return await axios(config);
@@ -48,10 +48,10 @@ async function getUserListAsync() {
   return await axios(config);
 }
 
-async function deleteAdminAsync(systemUserId) {
+async function deleteAdminAsync(userId) {
   const config = {
     method: 'delete',
-    url: `admin/user/${systemUserId}`,
+    url: `auth/${userId}`,
   };
   return await axios(config);
 }
@@ -315,11 +315,10 @@ async function getSitesByIdAsync(systemUserId) {
   return await axios(config);
 }
 
-async function setSiteEnabledStatusAsync(siteId, isEnabled) {
+async function setSiteEnabledStatusAsync(siteId) {
   const config = {
-    method: 'put',
-    url: `/site/updateEnabled/${siteId}/${isEnabled}`,
-    data: { isEnabled },
+    method: 'delete',
+    url: `/site/${siteId}`,
   };
   return await axios(config);
 }

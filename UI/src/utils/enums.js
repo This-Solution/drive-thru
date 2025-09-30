@@ -61,10 +61,10 @@ const enums = {
   },
 
   AdminRole: {
-    1: 'SUPER_ADMIN',
-    2: 'ADMIN',
-    3: 'ORDER_OPERATOR',
-    4: 'DELIVERY_OPERATOR'
+    1: 'Super Admin',
+    2: 'Admin',
+    3: 'Order Operator',
+    4: 'Delivery Operator'
   },
   carStatus: {
     GREEN: 'GREEN',
@@ -74,10 +74,9 @@ const enums = {
   },
   displayAdminRole: {
     superAdmin: 'Super Admin',
-    brandCMSAdmin: 'CJ Admin',
-    User: 'User',
-    siteManager: 'Site Manager',
-    posEmployee: 'POS Employee',
+    admin: 'Admin',
+    OrderOperator: 'Order Operator',
+    DeliveryOperator: 'Delivery Operator',
   },
   flavour: {
     KFC: 1,

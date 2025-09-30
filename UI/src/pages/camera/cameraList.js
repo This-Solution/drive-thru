@@ -25,6 +25,7 @@ import ApiService from 'service/ApiService';
 import constants from 'utils/constants.js';
 import dateHelper from 'utils/dateHelper.js';
 import AddEditCamera from './addEditCamera';
+import enums from 'utils/enums';
 
 const CameraList = () => {
   const theme = useTheme();
@@ -94,10 +95,22 @@ const CameraList = () => {
         Header: 'camera Type',
         canSort: true,
         accessor: 'cameraType',
+        Cell: ({ row }) => {
+          const { original } = row;
+          return (
+            <Typography >{enums.cameraType[original.cameraType]}</Typography>
+          );
+        },
       },
       {
         Header: 'Reload Time(s)',
         accessor: 'reloadTime',
+        Cell: ({ row }) => {
+          const { original } = row;
+          return (
+            <Typography >{`${original.reloadTime} sec`}</Typography>
+          );
+        },
       },
       {
         Header: 'Last Updated by',
@@ -275,13 +288,12 @@ const CameraList = () => {
                     <Grid item xs={3}>
                       <Stack
                         alignItems='center'
-                        justifyContent='center'
+                        justifyContent='end'
                         spacing={2}
                         direction={'row'}
                       >
                         {appName === constants.appName && (
                           <FlavourButton
-                            fullWidth
                             size='large'
                             variant='contained'
                             startIcon={<PlusCircleOutlined />}

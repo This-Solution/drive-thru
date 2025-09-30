@@ -1,12 +1,12 @@
 import { useEffect, useMemo, useState } from 'react';
 
 // material-ui
-import { Button, FormControl, Grid, InputLabel, MenuItem, Select, Stack, Tooltip, Typography, useMediaQuery } from '@mui/material';
+import { Button, Grid, Stack, Tooltip, Typography, useMediaQuery } from '@mui/material';
 import { useTheme } from '@mui/material/styles';
 
 // third-party
 import { filter } from 'lodash';
-import { useDispatch, useSelector } from 'react-redux';
+import { useDispatch } from 'react-redux';
 
 // project import
 import IconButton from '@mui/material/IconButton';
@@ -19,7 +19,7 @@ import dateHelper from 'utils/dateHelper';
 import AddUser from './addSystemUser';
 
 // assets
-import { Add, DeleteTwoTone, EditTwoTone, ForwardToInboxOutlined, LockTwoTone } from '@mui/icons-material';
+import { Add, DeleteTwoTone, EditTwoTone, LockTwoTone } from '@mui/icons-material';
 import CjDialog from 'components/@extended/Dialog';
 import { openSnackbar } from 'store/reducers/snackbar';
 import ResetAdminPassword from './resetAdminPassword';
@@ -35,11 +35,8 @@ const SystemUserList = () => {
   const [openEditUserDialog, setOpenEditUserDialog] = useState(false);
   const [isOpenConfirmDialog, setOpenConfirmDialog] = useState(false);
   const [openResetPasswordDialog, setOpenResetPasswordDialog] = useState(false);
-  // const [selectedFlavour, setSelectedFlavour] = useState(flavour.flavourId || '');
   const [globalFilter, setGlobalFilter] = useState('');
   const [isLoading, setLoading] = useState(true);
-  // const flavours = useSelector((state) => state.lookup.flavours);
-  const twoFactAuth = process.env.REACT_APP_TWO_FACT_AUTH;
 
   useEffect(() => {
     getUserList();
@@ -52,28 +49,11 @@ const SystemUserList = () => {
   };
 
   const onAddEdit = (data) => {
-    if (selectedUser.systemUserId) {
+    if (selectedUser.userId) {
       // Edit Mode
-      setUsers([data, ...filter(users, (user) => user.systemUserId !== data.systemUserId)]);
+      setUsers([data, ...filter(users, (user) => user.userId !== data.userId)]);
     } else {
       setUsers([data, ...users]);
-    }
-  };
-
-  const sendAuthenticationMail = async (systemUserId) => {
-    const { data } = await ApiService.sendAuthenticationMailAsync(systemUserId);
-    if (data) {
-      dispatch(
-        openSnackbar({
-          open: true,
-          message: data ? 'Authentication mail sent successfully.' : '',
-          variant: 'alert',
-          alert: {
-            color: data ? 'success' : 'error'
-          },
-          close: true
-        })
-      );
     }
   };
 
@@ -105,9 +85,9 @@ const SystemUserList = () => {
 
   const onDeleteAdmin = async () => {
     if (selectedUser) {
-      const { data } = await ApiService.deleteAdminAsync(selectedUser.systemUserId);
+      const { data } = await ApiService.deleteAdminAsync(selectedUser.userId);
       if (data) {
-        setUsers(filter(users, (user) => user.systemUserId !== selectedUser.systemUserId));
+        setUsers(filter(users, (user) => user.userId !== selectedUser.userId));
       }
       dispatch(
         openSnackbar({
@@ -128,7 +108,7 @@ const SystemUserList = () => {
     () => [
       {
         Header: '#',
-        accessor: 'systemUserId'
+        accessor: 'userId'
       },
       {
         Header: 'Users',
@@ -217,20 +197,7 @@ const SystemUserList = () => {
                   <EditTwoTone twoToneColor={theme.palette.primary.main} />
                 </IconButton>
               </Tooltip>
-              {twoFactAuth === 'true' ? (
-                <Tooltip title='Resend authentication mail'>
-                  <IconButton
-                    color='primary'
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      sendAuthenticationMail(original.systemUserId);
-                    }}
-                  >
-                    <ForwardToInboxOutlined twoToneColor={theme.palette.error.main} />
-                  </IconButton>
-                </Tooltip>
-              ) : null}
-              <Tooltip title='Reset Password'>
+              {/* <Tooltip title='Reset Password'>
                 <IconButton
                   color='primary'
                   onClick={(e) => {
@@ -241,7 +208,7 @@ const SystemUserList = () => {
                 >
                   <LockTwoTone twoToneColor={theme.palette.error.main} />
                 </IconButton>
-              </Tooltip>
+              </Tooltip> */}
               <Tooltip title='Delete'>
                 <IconButton
                   color='error'
@@ -285,26 +252,6 @@ const SystemUserList = () => {
                     size='large'
                     sx={{ width: '100%' }}
                   />
-
-                  {/* <FormControl fullWidth>
-                    <Select
-                      id='flavourId'
-                      name='flavourId'
-                      value={selectedFlavour || ''}
-                      onChange={(e) => setSelectedFlavour(e.target.value)}
-                      displayEmpty
-                    >
-                      <MenuItem value="">
-                        <em>Select Flavour</em>
-                      </MenuItem>
-                      {flavours &&
-                        flavours.flavours.map((flavour) => (
-                          <MenuItem key={flavour.flavourId} value={flavour.flavourId}>
-                            {flavour.flavourName}
-                          </MenuItem>
-                        ))}
-                    </Select>
-                  </FormControl> */}
                 </Stack>
               </Grid>
 
@@ -326,7 +273,7 @@ const SystemUserList = () => {
               globalFilter={globalFilter}
               columns={columns}
               data={users}
-              hiddenColumns={['systemUserId', 'email', 'updatedDate']}
+              hiddenColumns={['userId', 'email', 'updatedDate']}
             />
           </ScrollX>
           {openAddUserDialog && <AddUser onCancel={onCloseAddUserDialog} onAddEdit={onAddEdit} onSave={onSave} />}

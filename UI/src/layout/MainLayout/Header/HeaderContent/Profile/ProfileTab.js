@@ -5,7 +5,7 @@ import { useState } from 'react';
 import { List, ListItemButton, ListItemIcon, ListItemText } from '@mui/material';
 
 // assets
-import { EditOutlined, LockOutlined, LogoutOutlined, PartitionOutlined, UsergroupAddOutlined } from '@ant-design/icons';
+import { CameraOutlined, EditOutlined, LockOutlined, LogoutOutlined, PartitionOutlined, SearchOutlined, UsergroupAddOutlined } from '@ant-design/icons';
 import { Apps } from '@mui/icons-material';
 import AddUser from 'pages/admin/addSystemUser';
 import ResetAdminPassword from 'pages/admin/resetAdminPassword';
@@ -56,49 +56,36 @@ const ProfileTab = ({ handleLogout }) => {
   return (
     <List component='nav' sx={{ p: 0, '& .MuiListItemIcon-root': { minWidth: 32 } }}>
       {/* TODO */}
-      {/* {filteredApps && filteredApps.map((app) => (
+      {/* {user && user.roleId === enums.userRole.SuperAdmin && ( */}
+      <ListItemButton
+        selected={selectedIndex === 1}
+        onClick={(e) => {
+          handleListItemClick(e, 1);
+          e.stopPropagation();
+          setOpenEditProfileDialog(true);
+        }}
+      >
+        <ListItemIcon>
+          <EditOutlined />
+        </ListItemIcon>
+        <ListItemText primary='Edit Profile' />
+      </ListItemButton>
+      {user && user.roleId === enums.userRole.SuperAdmin && (
         <ListItemButton
-          key={app.appUrl}
-          selected={selectedIndex === app.appUrl}
+          selected={selectedIndex === 2}
           onClick={(e) => {
-            setSelectedIndex(app.appUrl);
-            handleOrderKeyClick(app.appUrl);
+            handleListItemClick(e, 2);
+            e.stopPropagation();
+            navigate('/admin/users')
+            // setOpenEditProfileDialog(true);
           }}
         >
           <ListItemIcon>
-            <ClusterOutlined />
+            <UsergroupAddOutlined />
           </ListItemIcon>
-          <ListItemText primary={app.appName} />
+          <ListItemText primary='Users' />
         </ListItemButton>
-      ))} */}
-      {/* <ListItemButton
-        selected={selectedIndex === 1}
-        onClick={(e) => {
-          handleListItemClick(e, 1);
-          e.stopPropagation();
-          handleOrderKeyClick();
-        }}
-      >
-        <ListItemIcon>
-          <Apps />
-        </ListItemIcon>
-        <ListItemText primary='Switch To Orderkey HUB' />
-      </ListItemButton> */}
-      {/* {user && user.roleId === enums.userRole.SuperAdmin && ( */}
-      {user && user.roleId === enums.userRole.SuperAdmin && <ListItemButton
-        selected={selectedIndex === 1}
-        onClick={(e) => {
-          handleListItemClick(e, 1);
-          e.stopPropagation();
-          navigate('/admin/camera')
-          // setOpenEditProfileDialog(true);
-        }}
-      >
-        <ListItemIcon>
-          <PartitionOutlined />
-        </ListItemIcon>
-        <ListItemText primary='Cameras' />
-      </ListItemButton>}
+      )}
       {/* {user && user.roleId === enums.userRole.SuperAdmin && <ListItemButton
         selected={selectedIndex === 2}
         onClick={(e) => {
@@ -125,36 +112,20 @@ const ProfileTab = ({ handleLogout }) => {
         </ListItemIcon>
         <ListItemText primary='Sites' />
       </ListItemButton>}
-      {/* )} */}
-      {user && user.roleId === enums.userRole.SuperAdmin && (
-        <ListItemButton
-          selected={selectedIndex === 4}
-          onClick={(e) => {
-            handleListItemClick(e, 4);
-            e.stopPropagation();
-            navigate('/admin/users')
-            // setOpenEditProfileDialog(true);
-          }}
-        >
-          <ListItemIcon>
-            <UsergroupAddOutlined />
-          </ListItemIcon>
-          <ListItemText primary='Users' />
-        </ListItemButton>
-      )}
-      {/* <ListItemButton
-        selected={selectedIndex === 3}
+      {user && user.roleId === enums.userRole.SuperAdmin && <ListItemButton
+        selected={selectedIndex === 4}
         onClick={(e) => {
-          handleListItemClick(e, 1);
+          handleListItemClick(e, 4);
           e.stopPropagation();
-          setOpenEditProfileDialog(true);
+          navigate('/admin/camera')
         }}
       >
         <ListItemIcon>
-          <EditOutlined />
+          <CameraOutlined />
         </ListItemIcon>
-        <ListItemText primary='Edit Profile' />
-      </ListItemButton> */}
+        <ListItemText primary='Cameras' />
+      </ListItemButton>}
+
       {/* <ListItemButton
         selected={selectedIndex === 4}
         onClick={(e) => {
@@ -179,7 +150,7 @@ const ProfileTab = ({ handleLogout }) => {
         }}
       >
         <ListItemIcon>
-          <PartitionOutlined />
+          <SearchOutlined />
         </ListItemIcon>
         <ListItemText primary='Search Orders' />
       </ListItemButton>

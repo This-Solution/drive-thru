@@ -61,7 +61,7 @@ const Profile = () => {
   };
 
   const iconBackColorOpen = theme.palette.mode === 'dark' ? 'grey.200' : 'grey.300';
-  const roleName = enums.AdminRole[user.role];
+  const roleName = enums.AdminRole[user.roleId];
   return (
     <Box sx={{ flexShrink: 0, ml: 0.75 }}>
       <ButtonBase

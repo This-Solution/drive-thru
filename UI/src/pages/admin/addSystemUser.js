@@ -43,10 +43,7 @@ const UserSchema = (user, page, loggedInUserRole) => {
   const shape = {
     firstName: Yup.string().max(50).required('First Name is required.'),
     surName: Yup.string().max(50).required('Surname is required.'),
-    email: Yup.string()
-      .max(100)
-      .required('Email Address is required.')
-      .email('Email address must be a valid email address.'),
+    email: Yup.string().max(100).required('Email Address is required.').email('Email address must be a valid email address.'),
     phone: Yup.string()
       .matches(/^[0-9]{10}$/, 'Phone number must be exactly 10 digits')
       .test('startsWithZero', 'Phone number must start with 0', (value) => {
@@ -58,7 +55,7 @@ const UserSchema = (user, page, loggedInUserRole) => {
       .required('Phone number is required.'),
     roleName: page === 'editProfile' ? Yup.string().notRequired() : Yup.string().required('Role is required.'),
     password: user ? Yup.string().max(100) : Yup.string().max(100).required('Password is required.'),
-    siteId: Yup.number().required('Site is required.'),
+    siteId: Yup.number().required('Site is required.')
 
     // siteId: Yup.array().when(['roleName'], {
     //   is: (roleName) => ['User', 'Admin'].includes(roleName),
@@ -75,13 +72,11 @@ const AddUser = ({ user, onCancel, onSave, page }) => {
   const [isLoading, setLoading] = useState(true);
   const [roles, setRoles] = useState([]);
   const [sites, setSites] = useState([]);
-  const [userSites, setUserSites] = useState([]);
+  // const [userSites, setUserSites] = useState([]);
   const [showPassword, setShowPassword] = useState(false);
 
   const loggedInUser = useSelector((state) => state.auth.user);
   const { tenants } = useSelector((state) => state.lookup);
-
-  const phone = localStorage.getItem('phone');
 
   const handleMouseDownPassword = (event) => {
     event.preventDefault();
@@ -92,21 +87,15 @@ const AddUser = ({ user, onCancel, onSave, page }) => {
     getSites();
   }, []);
 
-  useEffect(() => {
-    if (!page && user) {
-      getSitesById();
-    }
-  }, [user]);
+  // useEffect(() => {
+  //   if (!page && user) {
+  //     getSitesById();
+  //   }
+  // }, [user]);
 
-  useEffect(() => {
-    if (page && phone) {
-      formik.setFieldValue('phone', phone);
-    }
-  }, [phone]);
-
-  useEffect(() => {
-    formik.setFieldValue('siteId', userSites);
-  }, [userSites]);
+  // useEffect(() => {
+  //   formik.setFieldValue('siteId', userSites);
+  // }, [userSites]);
 
   const getSites = async () => {
     const { data } = await ApiService.getSitesAsync();
@@ -118,32 +107,30 @@ const AddUser = ({ user, onCancel, onSave, page }) => {
     const { data } = await ApiService.getRoleListAsync();
     let userRoles;
     if (data) {
-      userRoles = data.filter((role) => role.roleId >= loggedInUser.roleId)
-      console.log(userRoles)
+      userRoles = data.filter((role) => role.roleId >= loggedInUser.roleId);
     }
     setRoles(userRoles);
     setLoading(false);
   };
 
-  const getSitesById = async () => {
-    const { data } = await ApiService.getSitesByIdAsync(user.systemUserId);
-    setUserSites(data);
-  };
+  // const getSitesById = async () => {
+  //   const { data } = await ApiService.getSitesByIdAsync(user.systemUserId);
+  //   setUserSites(data);
+  // };
 
-  const filterSiteOptions = (options, params) => {
-    const filter = createFilterOptions();
-    const filtered = filter(options, params);
-    return [{ siteId: 'selectAll', siteName: 'Select All' }, ...filtered];
-  };
+  // const filterSiteOptions = (options, params) => {
+  //   const filter = createFilterOptions();
+  //   const filtered = filter(options, params);
+  //   return [{ siteId: 'selectAll', siteName: 'Select All' }, ...filtered];
+  // };
 
-  const onSiteAccessChange = (newValue) => {
-    if (newValue && newValue.some((option) => option.siteId === 'selectAll')) {
-      formik.setFieldValue('siteId', formik.values.siteId === sites ? [] : sites);
-    } else {
-      formik.setFieldValue('siteId', newValue);
-    }
-  };
-
+  // const onSiteAccessChange = (newValue) => {
+  //   if (newValue && newValue.some((option) => option.siteId === 'selectAll')) {
+  //     formik.setFieldValue('siteId', formik.values.siteId === sites ? [] : sites);
+  //   } else {
+  //     formik.setFieldValue('siteId', newValue);
+  //   }
+  // };
   const formik = useFormik({
     initialValues: {
       firstName: page ? user.name.split(' ')[0] : user ? user.firstName : '',
@@ -153,14 +140,14 @@ const AddUser = ({ user, onCancel, onSave, page }) => {
       phone: user ? user.phone : '',
       roleName: user ? user.roleName : '',
       siteId: user ? user.siteId : '',
-      tenantId: user ? user.tenantId : '',
+      tenantId: user ? user.tenantId : ''
     },
 
     validationSchema: UserSchema(user, page, loggedInUser.roleId),
 
     onSubmit: async (values, { setSubmitting, setErrors }) => {
       if (user) {
-        await updateUser(values, user.systemUserId, setErrors);
+        await updateUser(values, user.userId, setErrors);
       } else {
         await addUser(values, setErrors);
       }
@@ -182,7 +169,6 @@ const AddUser = ({ user, onCancel, onSave, page }) => {
     }
     payload.siteId = formik.values.siteId ? formik.values.siteId : '';
     delete payload.systemUserId;
-    console.log(payload)
     const { data, error } = await ApiService.addAdminAsync(payload);
     if (data) {
       await onSaveUser();
@@ -194,27 +180,28 @@ const AddUser = ({ user, onCancel, onSave, page }) => {
 
   const updateUser = async (values, systemUserId, setErrors) => {
     const selectedRole = roles.find((role) => role.roleName === values.roleName);
-    values.roleId = page ? user.role : selectedRole.roleId;
-    values.systemUserId = systemUserId;
+    values.roleId = page ? user.roleId : selectedRole.roleId;
+    values.userId = systemUserId;
     const payload = {
       ...values
     };
-    const selectedSites = sites.find((site) => site.siteId === values.siteId);
-    if (selectedSites) {
-      values.siteId = selectedSites.siteId;
-    }
-    if (payload.roleId === enums.userRole.CJAdmin || payload.roleId === enums.userRole.SuperAdmin) {
-      payload.siteId = [];
-    } else {
-      payload.siteId = formik.values.siteId ? formik.values.siteId.map((site) => site.siteId) : [];
-    }
-    if (payload.roleId === enums.userRole.CJAdmin || payload.roleId === enums.userRole.SuperAdmin)
-      delete payload.roleName;
+    // const selectedSites = sites.find((site) => site.siteId === values.siteId);
+    // if (selectedSites) {
+    //   values.siteId = selectedSites.siteId;
+    // }
+    // if (payload.roleId === enums.userRole.CJAdmin || payload.roleId === enums.userRole.SuperAdmin) {
+    //   payload.siteId = [];
+    // } else {
+    //   payload.siteId = formik.values.siteId ? formik.values.siteId.map((site) => site.siteId) : [];
+    // }
+    // if (payload.roleId === enums.userRole.CJAdmin || payload.roleId === enums.userRole.SuperAdmin)
+    // delete payload.roleName;
+
     delete payload.password;
-    if (page) {
-      localStorage.setItem('phone', payload.phone);
-    }
-    const { data, error } = await ApiService.updateAdminAsync(payload);
+    // if (page) {
+    //   localStorage.setItem('phone', payload.phone);
+    // }
+    const { data, error } = await ApiService.updateAdminAsync(payload, user.userId);
     if (data) {
       await onSaveUser();
       onSave(data);
@@ -359,43 +346,9 @@ const AddUser = ({ user, onCancel, onSave, page }) => {
                       </Grid>
                     </>
                   ))}
-
-                {loggedInUser.roleId === 1 && page !== 'editProfile' && (<Grid item xs={12} sm={user ? 12 : 6}>
-                  <Stack spacing={1}>
-                    <InputLabel htmlFor='roleId'>Tenant</InputLabel>
-                    <FormControl sx={{ minWidth: '100%' }}>
-                      <Select
-                        id="tenantId"
-                        name="tenantId"
-                        displayEmpty
-                        value={formik.values.tenantId || ''}
-                        onChange={(event) => {
-                          formik.setFieldValue('tenantId', Number(event.target.value));
-                        }}
-                        error={Boolean(touched.tenantId && errors.tenantId)}
-                      >
-                        <MenuItem value="">
-                          <em>Select Tenant</em>
-                        </MenuItem>
-                        {tenants &&
-                          tenants.map((tenant) => (
-                            <MenuItem key={tenant.tenantId} value={tenant.tenantId}>
-                              {tenant.tenantName}
-                            </MenuItem>
-                          ))}
-                      </Select>
-                      {errors.tenantId && touched.tenantId && (
-                        <FormHelperText error id='tenantId' sx={{ marginLeft: 0 }}>
-                          {errors.tenantId}
-                        </FormHelperText>
-                      )}
-                    </FormControl>
-                  </Stack>
-                </Grid>)}
-
                 {page ? null : (
                   <>
-                    <Grid item xs={12} sm={12}>
+                    <Grid item xs={12} sm={6}>
                       <Stack spacing={1}>
                         <InputLabel htmlFor='roleId'>Role</InputLabel>
                         <FormControl sx={{ minWidth: '100%' }}>
@@ -424,6 +377,41 @@ const AddUser = ({ user, onCancel, onSave, page }) => {
                         </FormControl>
                       </Stack>
                     </Grid>
+
+                    {loggedInUser.roleId === 1 && page !== 'editProfile' && (
+                      <Grid item xs={12} sm={12}>
+                        <Stack spacing={1}>
+                          <InputLabel htmlFor='roleId'>Tenant</InputLabel>
+                          <FormControl sx={{ minWidth: '100%' }}>
+                            <Select
+                              id='tenantId'
+                              name='tenantId'
+                              displayEmpty
+                              value={formik.values.tenantId || ''}
+                              onChange={(event) => {
+                                formik.setFieldValue('tenantId', Number(event.target.value));
+                              }}
+                              error={Boolean(touched.tenantId && errors.tenantId)}
+                            >
+                              <MenuItem value=''>
+                                <em>Select Tenant</em>
+                              </MenuItem>
+                              {tenants &&
+                                tenants.map((tenant) => (
+                                  <MenuItem key={tenant.tenantId} value={tenant.tenantId}>
+                                    {tenant.tenantName}
+                                  </MenuItem>
+                                ))}
+                            </Select>
+                            {errors.tenantId && touched.tenantId && (
+                              <FormHelperText error id='tenantId' sx={{ marginLeft: 0 }}>
+                                {errors.tenantId}
+                              </FormHelperText>
+                            )}
+                          </FormControl>
+                        </Stack>
+                      </Grid>
+                    )}
 
                     <Grid item xs={12} sm={12}>
                       {/* <Stack spacing={1}>
@@ -466,7 +454,7 @@ const AddUser = ({ user, onCancel, onSave, page }) => {
                         <FormHelperText error={Boolean(touched.siteId && errors.siteId)}>{touched.siteId && errors.siteId}</FormHelperText>
                       </Stack> */}
                       <Stack spacing={1}>
-                        <InputLabel sx={{ marginBottom: 0.7 }}>Sites</InputLabel>
+                        <InputLabel sx={{ marginBottom: 0.7 }}>Site</InputLabel>
                         <FormControl fullWidth error={Boolean(formik.touched.siteId && formik.errors.siteId)}>
                           <Select
                             id='siteId'
@@ -477,7 +465,7 @@ const AddUser = ({ user, onCancel, onSave, page }) => {
                           // disabled={!selectedTenant && !cameraDetails}
                           >
                             <MenuItem value='' disabled>
-                              <em>Select a Sites</em>
+                              <em>Select a Site</em>
                             </MenuItem>
                             {sites &&
                               sites.map((site) => (

@@ -280,10 +280,9 @@ const TenantList = () => {
                       </Stack>
                     </Grid>
                     <Grid item xs={3}>
-                      <Stack alignItems='center' justifyContent='center' spacing={2} direction={'row'}>
+                      <Stack alignItems='center' justifyContent='end' spacing={2} direction={'row'}>
                         {appName === constants.appName && (
                           <FlavourButton
-                            fullWidth
                             size='large'
                             variant='contained'
                             startIcon={<PlusCircleOutlined />}

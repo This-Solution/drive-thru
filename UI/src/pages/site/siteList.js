@@ -3,9 +3,13 @@ import { useTheme } from '@emotion/react';
 import { EditTwoTone } from '@mui/icons-material';
 import {
   Button,
+  Checkbox,
+  FormControlLabel,
+  FormGroup,
   Grid,
   IconButton,
   Stack,
+  Switch,
   Tooltip,
   Typography,
   useMediaQuery
@@ -56,15 +60,15 @@ const SiteList = () => {
     setLoading(false);
   };
 
-  // const filteredSites = useMemo(() => {
-  //   let filteredSites;
-  //   if (enabled) {
-  //     filteredSites = sites.filter((item) => item.isEnabled);
-  //   } else {
-  //     filteredSites = sites.filter((item) => !item.isEnabled);
-  //   }
-  //   return filteredSites;
-  // }, [sites, enabled])
+  const filteredSites = useMemo(() => {
+    let filteredSites;
+    if (enabled) {
+      filteredSites = sites.filter((item) => item.active);
+    } else {
+      filteredSites = sites.filter((item) => !item.active);
+    }
+    return filteredSites;
+  }, [sites, enabled])
 
   const columns = useMemo(
     () => [
@@ -151,14 +155,14 @@ const SiteList = () => {
           );
         }
       },
-      // {
-      //   Header: 'Enabled',
-      //   accessor: 'isEnabled',
-      //   Cell: ({ row }) => {
-      //     const { original } = row;
-      //     return <Switch checked={original.isEnabled} onChange={(e) => handleSwitchChange(e, original)} />;
-      //   }
-      // },
+      {
+        Header: 'Enabled',
+        accessor: 'active',
+        Cell: ({ row }) => {
+          const { original } = row;
+          return <Switch checked={original.active} onChange={(e) => handleSwitchChange(e, original)} />;
+        }
+      },
       {
         Header: 'Actions',
         minWidth: 108,
@@ -203,11 +207,11 @@ const SiteList = () => {
   };
 
   const onConfirmSwitchChange = async () => {
-    await ApiService.setSiteEnabledStatusAsync(siteDetails.siteId, !siteDetails.isEnabled);
+    await ApiService.setSiteEnabledStatusAsync(siteDetails.siteId);
     setConfirmDialogOpen(false);
     const site = [...sites];
     const siteIndex = findIndex(site, ['siteId', siteDetails.siteId]);
-    site[siteIndex].isEnabled = !siteDetails.isEnabled;
+    site[siteIndex].active = !siteDetails.active;
     setSites(site);
     setSiteDetails(null);
   };
@@ -283,21 +287,21 @@ const SiteList = () => {
                             sx={{ width: '100%' }}
                           />
                         </Grid>
-                        {/* <Grid item xs={2} pl={2}>
+                        <Grid item xs={2} pl={2}>
                           <FormGroup>
                             <FormControlLabel
                               control={<Checkbox defaultChecked checked={enabled} onChange={(e) => setEnabled(e.target.checked)} />}
                               label='Enabled'
                             />
                           </FormGroup>
-                        </Grid> */}
+                        </Grid>
                       </Stack>
                     </Grid>
                     <Grid item xs={3}>
-                      <Stack alignItems='center' justifyContent='center' spacing={2} direction={'row'}>
+                      <Stack alignItems='center' justifyContent='end' spacing={2} direction={'row'}>
                         {appName === constants.appName && (
                           <FlavourButton
-                            fullWidth
+                            // fullWidth
                             size='large'
                             variant='contained'
                             startIcon={<PlusCircleOutlined />}
@@ -319,7 +323,7 @@ const SiteList = () => {
                     confirmHandle={onConfirmSwitchChange}
                     isDialogOpen={isConfirmDialogOpen}
                     title={`Change Status ${siteDetails.siteName}`}
-                    Content={`${siteDetails.isEnabled ? 'Are you sure you want to disable' : 'Are you sure you want to enable'} ${siteDetails.siteName
+                    Content={`${siteDetails.active ? 'Are you sure you want to disable' : 'Are you sure you want to enable'} ${siteDetails.siteName
                       }?`}
                   />
                 ) : null}
@@ -327,7 +331,7 @@ const SiteList = () => {
                   isLoading={isLoading}
                   columns={columns}
                   hiddenColumns={['city', 'state', 'updatedDate', 'markupPercent']}
-                  data={sites}
+                  data={filteredSites}
                   globalFilter={globalFilter}
                 />
               </ScrollX>
