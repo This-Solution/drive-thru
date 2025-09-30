@@ -22,6 +22,7 @@ import { useSelector } from 'react-redux';
 import ApiService from 'service/ApiService';
 import { dispatch } from 'store';
 import { openSnackbar } from 'store/reducers/snackbar';
+import enums from 'utils/enums';
 import utils from 'utils/utils';
 import * as Yup from 'yup';
 
@@ -197,17 +198,23 @@ const AddEditCamera = ({ isOpen, handleClose, cameraDetails, onSave }) => {
                   <Grid item xs={12} sm={6}>
                     <Stack spacing={1}>
                       <InputLabel sx={{ marginBottom: 0.7 }}>Camera Type</InputLabel>
-                      <FormControl>
-                        <TextField
-                          fullWidth
+                      <FormControl fullWidth error={Boolean(formik.touched.tenantId && formik.errors.tenantId)}>
+                        <Select
                           id='cameraType'
                           name='cameraType'
-                          placeholder='Enter camera Type'
-                          value={formik.values.cameraType || ''}
+                          value={formik.values.cameraType}
                           onChange={formik.handleChange}
-                          inputProps={{ maxLength: 100 }}
-                          error={Boolean(formik.touched.cameraType && formik.errors.cameraType)}
-                        />
+                          displayEmpty
+                        >
+                          <MenuItem value='' disabled>
+                            <em>Select a Type</em>
+                          </MenuItem>
+                          {Object.entries(enums.cameraType).map(([key, value]) => (
+                            <MenuItem key={key} value={key}>
+                              {value}
+                            </MenuItem>
+                          ))}
+                        </Select>
                         <FormHelperText error={Boolean(formik.touched.cameraType && formik.errors.cameraType)} sx={{ marginLeft: 0 }}>
                           {formik.touched.cameraType && formik.errors.cameraType}
                         </FormHelperText>
