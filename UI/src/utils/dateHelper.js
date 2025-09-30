@@ -93,18 +93,7 @@ function convertTimeZone(value, timeZone = 'Australia/Melbourne') {
 };
 
 function getTimeFormat(value) {
-  return dayjs(value).local().format('HH:mm:ss');
-}
-
-function formatTimeOnly(value, timeZone = 'Australia/Melbourne') {
-  // Get today's date in YYYY-MM-DD format
-  const today = dayjs().format('YYYY-MM-DD');
-
-  // Replace default 1970-01-01 with today's date
-  const updatedValue = value.replace('1970-01-01', today);
-
-  // Return formatted time in 12-hour format
-  return dayjs(updatedValue).format('hh:mm A');
+  return dayjs(`${value}Z`).local().format('HH:mm:ss');
 }
 
 
@@ -129,6 +118,5 @@ export default {
   getTimeFromMinutes,
   getMinutesFromTime,
   convertTimeZone,
-  getTimeFormat,
-  formatTimeOnly
+  getTimeFormat
 };
