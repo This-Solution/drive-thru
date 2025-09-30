@@ -58,17 +58,14 @@ const UserSchema = (user, page, loggedInUserRole) => {
       .required('Phone number is required.'),
     roleName: page === 'editProfile' ? Yup.string().notRequired() : Yup.string().required('Role is required.'),
     password: user ? Yup.string().max(100) : Yup.string().max(100).required('Password is required.'),
-    siteId: Yup.array().when(['roleName'], {
-      is: (roleName) => ['User', 'Site Manager'].includes(roleName),
-      then: Yup.array().min(1, 'Atleast select one site.'),
-      otherwise: Yup.array().notRequired()
-    }),
+    siteId: Yup.number().required('Site is required.'),
+
+    // siteId: Yup.array().when(['roleName'], {
+    //   is: (roleName) => ['User', 'Admin'].includes(roleName),
+    //   then: Yup.array().min(1, 'Atleast select one site.'),
+    //   otherwise: Yup.array().notRequired()
+    // }),
   };
-  if (loggedInUserRole === 1) {
-    shape.flavourId = Yup.number()
-      .required('Flavour is required.')
-      .test('notZero', 'Flavour must be selected.', (value) => value !== 0);
-  }
 
   return Yup.object().shape(shape);
 };
@@ -82,9 +79,9 @@ const AddUser = ({ user, onCancel, onSave, page }) => {
   const [showPassword, setShowPassword] = useState(false);
 
   const loggedInUser = useSelector((state) => state.auth.user);
-  const flavours = useSelector((state) => state.lookup.flavours);
+  const { tenants } = useSelector((state) => state.lookup);
+
   const phone = localStorage.getItem('phone');
-  const { flavour } = useSelector((state) => state.auth);
 
   const handleMouseDownPassword = (event) => {
     event.preventDefault();
@@ -112,7 +109,7 @@ const AddUser = ({ user, onCancel, onSave, page }) => {
   }, [userSites]);
 
   const getSites = async () => {
-    const { data } = await ApiService.getSitesOptionsAsync();
+    const { data } = await ApiService.getSitesAsync();
     setSites(data);
     setLoading(false);
   };
@@ -121,7 +118,8 @@ const AddUser = ({ user, onCancel, onSave, page }) => {
     const { data } = await ApiService.getRoleListAsync();
     let userRoles;
     if (data) {
-      userRoles = data.filter((role) => role.roleId >= loggedInUser.role)
+      userRoles = data.filter((role) => role.roleId >= loggedInUser.roleId)
+      console.log(userRoles)
     }
     setRoles(userRoles);
     setLoading(false);
@@ -154,11 +152,11 @@ const AddUser = ({ user, onCancel, onSave, page }) => {
       password: '',
       phone: user ? user.phone : '',
       roleName: user ? user.roleName : '',
-      siteId: sites,
-      flavourId: user ? user.flavourId : '',
+      siteId: user ? user.siteId : '',
+      tenantId: user ? user.tenantId : '',
     },
 
-    validationSchema: UserSchema(user, page, loggedInUser.role),
+    validationSchema: UserSchema(user, page, loggedInUser.roleId),
 
     onSubmit: async (values, { setSubmitting, setErrors }) => {
       if (user) {
@@ -179,11 +177,12 @@ const AddUser = ({ user, onCancel, onSave, page }) => {
     const payload = {
       ...values
     };
-    if (loggedInUser.role !== enums.userRole.SuperAdmin) {
-      payload.flavourId = flavour.flavourId;
+    if (loggedInUser.roleId !== enums.userRole.SuperAdmin) {
+      payload.tenantId = loggedInUser.tenantId;
     }
-    payload.siteId = formik.values.siteId ? formik.values.siteId.map((site) => site.siteId) : [];
+    payload.siteId = formik.values.siteId ? formik.values.siteId : '';
     delete payload.systemUserId;
+    console.log(payload)
     const { data, error } = await ApiService.addAdminAsync(payload);
     if (data) {
       await onSaveUser();
@@ -361,33 +360,33 @@ const AddUser = ({ user, onCancel, onSave, page }) => {
                     </>
                   ))}
 
-                {loggedInUser.role === 1 && page !== 'editProfile' && (<Grid item xs={12} sm={user ? 12 : 6}>
+                {loggedInUser.roleId === 1 && page !== 'editProfile' && (<Grid item xs={12} sm={user ? 12 : 6}>
                   <Stack spacing={1}>
-                    <InputLabel htmlFor='roleId'>Flavour</InputLabel>
+                    <InputLabel htmlFor='roleId'>Tenant</InputLabel>
                     <FormControl sx={{ minWidth: '100%' }}>
                       <Select
-                        id="flavourId"
-                        name="flavourId"
+                        id="tenantId"
+                        name="tenantId"
                         displayEmpty
-                        value={formik.values.flavourId || ''}
+                        value={formik.values.tenantId || ''}
                         onChange={(event) => {
-                          formik.setFieldValue('flavourId', Number(event.target.value));
+                          formik.setFieldValue('tenantId', Number(event.target.value));
                         }}
-                        error={Boolean(touched.flavourId && errors.flavourId)}
+                        error={Boolean(touched.tenantId && errors.tenantId)}
                       >
                         <MenuItem value="">
-                          <em>Select Flavour</em>
+                          <em>Select Tenant</em>
                         </MenuItem>
-                        {flavours &&
-                          flavours.flavours.map((flavour) => (
-                            <MenuItem key={flavour.flavourId} value={flavour.flavourId}>
-                              {flavour.flavourName}
+                        {tenants &&
+                          tenants.map((tenant) => (
+                            <MenuItem key={tenant.tenantId} value={tenant.tenantId}>
+                              {tenant.tenantName}
                             </MenuItem>
                           ))}
                       </Select>
-                      {errors.flavourId && touched.flavourId && (
-                        <FormHelperText error id='flavourId' sx={{ marginLeft: 0 }}>
-                          {errors.flavourId}
+                      {errors.tenantId && touched.tenantId && (
+                        <FormHelperText error id='tenantId' sx={{ marginLeft: 0 }}>
+                          {errors.tenantId}
                         </FormHelperText>
                       )}
                     </FormControl>
@@ -427,7 +426,7 @@ const AddUser = ({ user, onCancel, onSave, page }) => {
                     </Grid>
 
                     <Grid item xs={12} sm={12}>
-                      <Stack spacing={1}>
+                      {/* <Stack spacing={1}>
                         {formik.values.roleName !== enums.displayAdminRole.brandCMSAdmin
                           && formik.values.roleName !== enums.displayAdminRole.superAdmin && (
                             <>
@@ -465,6 +464,32 @@ const AddUser = ({ user, onCancel, onSave, page }) => {
                             </>
                           )}
                         <FormHelperText error={Boolean(touched.siteId && errors.siteId)}>{touched.siteId && errors.siteId}</FormHelperText>
+                      </Stack> */}
+                      <Stack spacing={1}>
+                        <InputLabel sx={{ marginBottom: 0.7 }}>Sites</InputLabel>
+                        <FormControl fullWidth error={Boolean(formik.touched.siteId && formik.errors.siteId)}>
+                          <Select
+                            id='siteId'
+                            name='siteId'
+                            value={formik.values.siteId}
+                            onChange={formik.handleChange}
+                            displayEmpty
+                          // disabled={!selectedTenant && !cameraDetails}
+                          >
+                            <MenuItem value='' disabled>
+                              <em>Select a Sites</em>
+                            </MenuItem>
+                            {sites &&
+                              sites.map((site) => (
+                                <MenuItem key={site.siteId} value={site.siteId}>
+                                  {site.siteName}
+                                </MenuItem>
+                              ))}
+                          </Select>
+                          <FormHelperText error={Boolean(formik.touched.siteId && formik.errors.siteId)} sx={{ marginLeft: 0 }}>
+                            {formik.touched.siteId && formik.errors.siteId}
+                          </FormHelperText>
+                        </FormControl>
                       </Stack>
                     </Grid>
                   </>

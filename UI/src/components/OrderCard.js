@@ -136,7 +136,7 @@ const ShowCarDetails = ({ carDetails }) => {
                     In Time
                   </Typography>
                   <Typography variant='h6' color='textSecondary'>
-                    {dateHelper.convertTimeZone(carDetails.createdTime)}
+                    {dateHelper.getTimeFormate(carDetails.createdTime)}
                   </Typography>
                 </Stack>
               </Stack>
@@ -326,7 +326,19 @@ const OrderAndCarDetails = ({
       {currentOrders && currentOrders.length > 0 && (
         <>
           <Stack p={2}>
-            <Typography variant='h5'>Current Order Being Placed</Typography>
+            <Stack direction={'row'} justifyContent={'space-between'} alignItems={'center'}>
+              <Typography variant='h5'>Current Order Being Placed</Typography>
+              <Chip
+                label={<Typography sx={{ fontSize: 10, lineHeight: 1 }}>{`Total :- ${utils.formatCurrency(currentOrders[0].totalPrice)}`}</Typography>}
+                sx={{
+                  backgroundColor: '#b4d8f0',
+                  borderRadius: '20px',
+                  height: 'auto',
+                  px: 1.5,
+                  py: 0.5
+                }}
+              />
+            </Stack>
           </Stack>
           <Box
             sx={{

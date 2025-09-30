@@ -17,7 +17,7 @@ async function loginAsync(payload) {
 async function addAdminAsync(payload) {
   const config = {
     method: 'post',
-    url: 'admin/user',
+    url: 'auth/addUser',
     data: payload,
   };
   return await axios(config);
@@ -40,11 +40,10 @@ async function getRoleListAsync() {
   return await axios(config);
 }
 
-async function getUserListAsync(payload) {
+async function getUserListAsync() {
   const config = {
     method: 'get',
-    url: 'admin/user-list',
-    data: payload,
+    url: 'auth',
   };
   return await axios(config);
 }

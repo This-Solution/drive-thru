@@ -47,7 +47,6 @@ const CameraList = () => {
 
   const getCameraList = async () => {
     const { data } = await ApiService.getCameraListAsync();
-    console.log(data);
     setCameraList(data);
     setLoading(false);
   };
@@ -68,27 +67,23 @@ const CameraList = () => {
         Header: 'Tenant Name',
         canSort: true,
         accessor: 'tenantName',
-        Cell: ({ row }) => {
-          const { original } = row;
-          return (
-            // <Link to={`/site/info/${original.siteId}`} style={{ textDecoration: 'none' }}>
-            <Typography variant='subtitle1'>{original.tenantName}</Typography>
-            // </Link>
-          );
-        },
+        // Cell: ({ row }) => {
+        //   const { original } = row;
+        //   return (
+        //     <Typography variant='subtitle1'>{original.tenantName}</Typography>
+        //   );
+        // },
       },
       {
         Header: 'Site Name',
         canSort: true,
         accessor: 'siteName',
-        Cell: ({ row }) => {
-          const { original } = row;
-          return (
-            // <Link to={`/site/info/${original.siteId}`} style={{ textDecoration: 'none' }}>
-            <Typography variant='subtitle1'>{original.siteName}</Typography>
-            // </Link>
-          );
-        },
+        // Cell: ({ row }) => {
+        //   const { original } = row;
+        //   return (
+        //     <Typography variant='subtitle1'>{original.siteName}</Typography>
+        //   );
+        // },
       },
       {
         Header: 'camera Name',
@@ -110,18 +105,18 @@ const CameraList = () => {
         accessor: 'updateByName',
 
         Cell: ({ row }) => {
-          const { values } = row;
+          const { original } = row;
           return (
             <Stack direction='row' spacing={1.5} alignItems='center'>
               <Stack spacing={0}>
                 {/* eslint-disable-next-line */}
                 <Typography variant='subtitle1'>
-                  {values.updateByName || '-'}
+                  {original.updateByName || '-'}
                 </Typography>
                 <Typography variant='caption' color='textSecondary'>
-                  {}
-                  {values.updatedDate
-                    ? dateHelper.getFormatDate(values.updatedDate)
+                  { }
+                  {original.updatedDate
+                    ? dateHelper.getFormatDate(original.updatedDate)
                     : '-'}
                 </Typography>
               </Stack>
@@ -156,7 +151,7 @@ const CameraList = () => {
               <Tooltip title='Delete'>
                 <IconButton
                   variant='contained'
-                  color='primary'
+                  color='error'
                   onClick={() => handleDeleteDialog(row.original)}
                 >
                   <DeleteOutline />
@@ -198,27 +193,29 @@ const CameraList = () => {
     setEditDialogOpen(true);
   };
 
-  const onSave = async (updateSite) => {
+  const onSave = async (camera) => {
     const siteIndex = cameraList.findIndex(
-      (item) => item.siteId === updateSite.siteId
+      (item) => item.cameraId === camera.cameraId
     );
-    const updatedSites = [...cameraList];
-    updateSite.updatedBy = user.name;
-    updateSite.updatedDate = new Date();
-    updatedSites[siteIndex] = updateSite;
-    setSites(updatedSites);
+    const updatedList = [...cameraList];
+    camera.updatedBy = user.name;
+    camera.updatedDate = new Date();
+    updatedList[siteIndex] = camera;
+    setCameraList(updatedList);
     setEditDialogOpen(false);
-    getSiteList();
+    getCameraList()
+    // getSiteList();
   };
 
   const handleDelete = async () => {
     const { data } = await ApiService.deleteCameraAsync(cameraDetails.cameraId);
     if (data) {
-      const updatedCamera = cameraDetails.filter(
+      const updatedCamera = cameraList.filter(
         (cam) => cam.cameraId !== cameraDetails.cameraId
       );
-      setCameraDetails(updatedCamera);
+      setCameraList(updatedCamera);
     }
+    onCloseDialog();
   };
 
   const onCloseDialog = () => {
@@ -234,7 +231,7 @@ const CameraList = () => {
           <Grid item xs={12}>
             <Stack direction={'row'} justifyContent={'space-between'}>
               <Stack>
-                <Typography variant='h2'>Manage Camera</Typography>
+                <Typography variant='h2'>Manage Cameras</Typography>
               </Stack>
               <Stack direction={'row'} justifyContent={'end'}>
                 <Button variant='contained' onClick={() => navigate(-1)}>
