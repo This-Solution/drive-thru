@@ -56,9 +56,21 @@ public class OrderDetailServiceImpl implements OrderDetailService {
     @Autowired
     CarVisitRepository carVisitRepository;
 
+    @Autowired
+    OrderLogRepository orderLogRepository;
+
     @Override
     @Transactional
     public void createdOrder(WebhookOrderRequest webhookOrderRequest) {
+        OrderLog log = new OrderLog();
+        log.setOrderData("Received Webhook:\n"
+                + "Order XML: " + webhookOrderRequest.getOrder_xml() + "\n"
+                + "Device: " + webhookOrderRequest.getDevice_name() + "\n"
+                + "Datetime: " + webhookOrderRequest.getDatetime() + "\n"
+                + "Site: " + webhookOrderRequest.getSite_name() + "\n"
+                + "Timestamp: " + webhookOrderRequest.getTimestamp());
+        log.setCreatedDate(LocalDateTime.now());
+        orderLogRepository.save(log);
         Integer totalPrice;
         Document doc;
         try {

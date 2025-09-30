@@ -196,6 +196,7 @@ public class UserDetailServiceImpl implements UserDetailService {
         return userDetails.stream().map(userDetail -> {
             UserDetailResponse userDetailResponse = new UserDetailResponse();
             BeanUtils.copyProperties(userDetail, userDetailResponse);
+            siteRepository.findById(userDetail.getSiteId()).ifPresent(site -> userDetailResponse.setSiteName(site.getSiteName()));
             tenantRepository.findById(userDetail.getTenantId()).ifPresent(tenant -> userDetailResponse.setTenantName(tenant.getTenantName()));
             roleRepository.findById(userDetail.getRoleId()).ifPresent(role -> userDetailResponse.setRoleName(role.getRoleName()));
             userDetailRepository.findById(userDetail.getCreatedBy()).ifPresent(createdUser -> userDetailResponse.setCreatedByName(createdUser.getFirstName() + " " + createdUser.getSurName()));

@@ -9,7 +9,8 @@ import java.util.Optional;
 
 @Repository
 public interface OrderDetailRepository extends JpaRepository<OrderDetail, Integer> {
-    Optional<OrderDetail> findFirstByTenantIdAndCarPlateNumberOrderByCreatedDateDesc(Integer tenantId, String carPlateNumber);
+
+    OrderDetail findFirstByTenantIdAndCarPlateNumberOrderByCreatedDateDesc(Integer tenantId, String carPlateNumber);
 
     Optional<OrderDetail> findFirstByTenantIdAndCarPlateNumberAndOrderStatusOrderByCreatedDateDesc(Integer tenantId, String carPlateNumber, String orderStatus);
 

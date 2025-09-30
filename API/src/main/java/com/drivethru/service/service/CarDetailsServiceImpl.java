@@ -8,6 +8,7 @@ import com.drivethru.service.entity.types.OrderStatus;
 import com.drivethru.service.error.CustomErrorHolder;
 import com.drivethru.service.error.CustomException;
 import com.drivethru.service.repository.*;
+import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
@@ -57,8 +58,17 @@ public class CarDetailsServiceImpl implements CarDetailService {
     @Autowired
     UserDetailRepository userDetailRepository;
 
+    @Autowired
+    CarLogRepository carLogRepository;
+
+    @Transactional
     @Override
     public void addCarDetail(Map<String, Object> carDetailJson) {
+        CarLog log = new CarLog();
+        log.setCarData(carDetailJson.toString());
+        log.setCreatedDate(LocalDateTime.now());
+        carLogRepository.save(log);
+
         String currentDateFolder = LocalDate.now().format(DateTimeFormatter.ofPattern("dd-MM-yyyy"));
         String carType;
         String carColor;
@@ -296,7 +306,10 @@ public class CarDetailsServiceImpl implements CarDetailService {
 
     @Override
     public List<CurrentOrderItemResponse> getCurrentOrderDetails(CarDetailRequest carDetailRequest) {
-        OrderDetail orderDetail = orderDetailRepository.findFirstByTenantIdAndCarPlateNumberOrderByCreatedDateDesc(carDetailRequest.getTenantId(), carDetailRequest.getCarPlateNumber()).orElseThrow(() -> new CustomException(CustomErrorHolder.ORDER_NOT_FOUND));
+        OrderDetail orderDetail = orderDetailRepository.findFirstByTenantIdAndCarPlateNumberOrderByCreatedDateDesc(carDetailRequest.getTenantId(), carDetailRequest.getCarPlateNumber());
+        if(orderDetail==null){
+            throw new CustomException(CustomErrorHolder.ORDER_NOT_FOUND);
+        }
         Double totalPrice = Double.valueOf(orderDetail.getTotalPrice());
         List<OrderItem> orderItems = orderItemRepository.findByOrderId(orderDetail.getOrderId());
         orderDetail.setOrderStatus(String.valueOf(OrderStatus.DELIVERED));
@@ -348,6 +361,10 @@ public class CarDetailsServiceImpl implements CarDetailService {
     @Override
     public List<CameraResponseDTO> latestInfo(Integer siteId) {
         Site site = siteRepository.findBySiteIdAndIsActiveTrue(siteId);
+        if(site == null)
+        {
+            throw new CustomException(CustomErrorHolder.SITE_NOT_FOUND);
+        }
         int reloadTime = site.getReloadTime();
         List<CameraConfig> cameraConfigList = cameraConfigRepository.findAllBySiteIdAndIsActiveTrue(siteId);
         if (cameraConfigList == null) {

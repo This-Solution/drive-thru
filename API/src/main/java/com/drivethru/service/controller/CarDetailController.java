@@ -35,7 +35,7 @@ public class CarDetailController {
     private OrderDetailService orderDetailService;
 
     @PostMapping(RouteConstant.CAR_WEBHOOK)
-    public ResponseEntity<ResponseObject<CarDetail>> carDetail(@RequestBody Map<String, Object> carDetailJson) {
+    public ResponseEntity<ResponseObject<CarDetail>> addCarDetail(@RequestBody Map<String, Object> carDetailJson) {
         System.out.println("[CarDetailController] - Received files:" + carDetailJson);
         carDetailService.addCarDetail(carDetailJson);
         return new ResponseEntity<>(null, HttpStatus.OK);
@@ -50,7 +50,7 @@ public class CarDetailController {
     }
 
     @PostMapping(RouteConstant.GET_CURRENT_ORDER_DETAIL)
-    public ResponseEntity<ResponseObject<List<CurrentOrderItemResponse>>> getCurrentOrderDetail(@RequestBody CarDetailRequest carDetailRequest) {
+    public ResponseEntity<ResponseObject<List<CurrentOrderItemResponse>>> getCurrentOrderDetails(@RequestBody CarDetailRequest carDetailRequest) {
         ResponseObject<List<CurrentOrderItemResponse>> responseObject = new ResponseObject<>();
         List<CurrentOrderItemResponse> currentOrderItemResponse = carDetailService.getCurrentOrderDetails(carDetailRequest);
         responseObject.setData(currentOrderItemResponse);
@@ -76,7 +76,6 @@ public class CarDetailController {
     @GetMapping("/latest/{siteId}")
     public ResponseEntity<ResponseObject<List<CameraResponseDTO>>> getLatestCameraInfo(@PathVariable Integer siteId){
         ResponseObject<List<CameraResponseDTO>> responseObject = new ResponseObject<>();
-        System.out.println(siteId);
         List<CameraResponseDTO> cameraResponseList = carDetailService.latestInfo(siteId);
         responseObject.setData(cameraResponseList);
         return new ResponseEntity<>(responseObject, HttpStatus.OK);

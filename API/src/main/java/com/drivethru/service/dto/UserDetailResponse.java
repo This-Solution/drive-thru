@@ -7,6 +7,8 @@ public class UserDetailResponse {
     private Integer tenantId;
     private String tenantName;
     private Integer roleId;
+    private Integer siteId;
+    private String siteName;
     private String roleName;
     private String firstName;
     private String surName;
@@ -21,6 +23,22 @@ public class UserDetailResponse {
     private Integer updatedBy;
     private String updateByName;
     private LocalDateTime updatedDate;
+
+    public Integer getSiteId() {
+        return siteId;
+    }
+
+    public void setSiteId(Integer siteId) {
+        this.siteId = siteId;
+    }
+
+    public String getSiteName() {
+        return siteName;
+    }
+
+    public void setSiteName(String siteName) {
+        this.siteName = siteName;
+    }
 
     public String getHashKey() {
         return hashKey;
