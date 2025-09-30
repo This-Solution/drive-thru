@@ -64,11 +64,6 @@ public class CarDetailsServiceImpl implements CarDetailService {
     @Transactional
     @Override
     public void addCarDetail(Map<String, Object> carDetailJson) {
-        CarLog log = new CarLog();
-        log.setCarData(carDetailJson.toString());
-        log.setCreatedDate(LocalDateTime.now());
-        carLogRepository.save(log);
-
         String currentDateFolder = LocalDate.now().format(DateTimeFormatter.ofPattern("dd-MM-yyyy"));
         String carType;
         String carColor;
@@ -191,6 +186,11 @@ public class CarDetailsServiceImpl implements CarDetailService {
         carResponse.setCameraType(cameraType);
         carResponse.setCarPlateNumber(plateNumber);
         carResponse.setCameraName(cameraConfig.getCameraName());
+
+        CarLog log = new CarLog();
+        log.setCarData(carDetailJson.toString());
+        log.setCreatedDate(LocalDateTime.now());
+        carLogRepository.save(log);
 
         for (UserDetail user : userDetails) {
             simpMessagingTemplate.convertAndSend("/topic/send/" + user.getSiteId(), carResponse);
