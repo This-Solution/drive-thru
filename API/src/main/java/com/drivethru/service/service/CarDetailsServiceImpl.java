@@ -179,7 +179,7 @@ public class CarDetailsServiceImpl implements CarDetailService {
             carVisit.setTenantId(cameraConfig.getTenantId());
             carVisit.setSiteId(site.getSiteId());
             carVisit.setCameraId(cameraConfig.getCameraId());
-            carVisit.setCreatedDate(createdDate);
+            carVisit.setCreatedDate(LocalDateTime.now());
             carVisitRepository.save(carVisit);
         }
         CarResponse carResponse = new CarResponse();
