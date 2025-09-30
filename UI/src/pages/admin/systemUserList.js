@@ -47,11 +47,7 @@ const SystemUserList = () => {
 
   const getUserList = async () => {
     const { data } = await ApiService.getUserListAsync();
-    let filterUsers = data;
-    // if (selectedFlavour) {
-    //   filterUsers = filterUsers.filter((user) => user.flavourId === selectedFlavour);
-    // }
-    setUsers(filterUsers);
+    setUsers(data);
     setLoading(false);
   };
 
@@ -135,16 +131,16 @@ const SystemUserList = () => {
         accessor: 'systemUserId'
       },
       {
-        Header: 'Customer',
-        accessor: 'name',
+        Header: 'Users',
+        accessor: 'firstName',
         Cell: ({ row }) => {
-          const { values } = row;
+          const { original } = row;
           return (
             <Stack direction='row' spacing={1.5} alignItems='center'>
               <Stack spacing={0}>
-                <Typography variant='subtitle1'>{values.name}</Typography>
+                <Typography variant='subtitle1'>{`${original.firstName} ${original.surName}`}</Typography>
                 <Typography variant='caption' color='textSecondary'>
-                  {values.email}
+                  {original.email}
                 </Typography>
               </Stack>
             </Stack>
@@ -164,6 +160,11 @@ const SystemUserList = () => {
         Header: 'Role',
         accessor: 'roleName'
       },
+      {
+        Header: 'Tenant',
+        canSort: true,
+        accessor: 'tenantName'
+      },
       // {
       //   Header: 'Flavour',
       //   accessor: 'flavourId',
@@ -176,13 +177,13 @@ const SystemUserList = () => {
         Header: 'Last Updated by',
         accessor: 'updatedBy',
         Cell: ({ row }) => {
-          const { values } = row;
+          const { original } = row;
           return (
             <Stack direction='row' spacing={1.5} alignItems='center'>
               <Stack spacing={0}>
-                <Typography variant='subtitle1'>{values.updatedBy || '-'}</Typography>
+                <Typography variant='subtitle1'>{original.updateByName || '-'}</Typography>
                 <Typography variant='caption' color='textSecondary'>
-                  {values.updatedDate ? dateHelper.getFormatDate(values.updatedDate) : '-'}
+                  {original.updatedDate ? dateHelper.getFormatDate(original.updatedDate) : '-'}
                 </Typography>
               </Stack>
             </Stack>
@@ -190,11 +191,11 @@ const SystemUserList = () => {
         }
       },
 
-      {
-        Header: 'Last Login On',
-        accessor: 'lastLoginOn',
-        Cell: ({ value }) => (value ? dateHelper.getFormatDate(value) : '-')
-      },
+      // {
+      //   Header: 'Last Login On',
+      //   accessor: 'lastLoginOn',
+      //   Cell: ({ value }) => (value ? dateHelper.getFormatDate(value) : '-')
+      // },
       {
         Header: 'Actions',
         className: 'left',

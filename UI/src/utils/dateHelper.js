@@ -88,9 +88,13 @@ const getMinutesFromTime = (time) => {
   return dayjs(time).diff(dayjs(time).startOf('day'), 'minute');
 };
 
-function convertTimeZone(value) {
-  return dayjs(value).format('HH:mm:ss');
+function convertTimeZone(value, timeZone = 'Australia/Melbourne') {
+  return dayjs.utc(value).tz(timeZone).format('HH:mm:ss');
 };
+
+function getTimeFormate(value) {
+  return dayjs(value).local().format('HH:mm:ss');
+}
 
 function formatTimeOnly(value, timeZone = 'Australia/Melbourne') {
   // Get today's date in YYYY-MM-DD format
@@ -125,5 +129,6 @@ export default {
   getTimeFromMinutes,
   getMinutesFromTime,
   convertTimeZone,
+  getTimeFormate,
   formatTimeOnly
 };

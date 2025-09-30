@@ -99,27 +99,25 @@ const ProfileTab = ({ handleLogout }) => {
         </ListItemIcon>
         <ListItemText primary='Cameras' />
       </ListItemButton>}
-      {user && user.roleId === enums.userRole.SuperAdmin && <ListItemButton
+      {/* {user && user.roleId === enums.userRole.SuperAdmin && <ListItemButton
         selected={selectedIndex === 2}
         onClick={(e) => {
           handleListItemClick(e, 2);
           e.stopPropagation();
           navigate('/admin/tenants')
-          // setOpenEditProfileDialog(true);
         }}
       >
         <ListItemIcon>
           <PartitionOutlined />
         </ListItemIcon>
         <ListItemText primary='Tenants' />
-      </ListItemButton>}
+      </ListItemButton>} */}
       {user && user.roleId === enums.userRole.SuperAdmin && <ListItemButton
         selected={selectedIndex === 3}
         onClick={(e) => {
           handleListItemClick(e, 3);
           e.stopPropagation();
           navigate('/admin/sites')
-          // setOpenEditProfileDialog(true);
         }}
       >
         <ListItemIcon>
@@ -134,7 +132,7 @@ const ProfileTab = ({ handleLogout }) => {
           onClick={(e) => {
             handleListItemClick(e, 4);
             e.stopPropagation();
-            // navigate('/admin/users')
+            navigate('/admin/users')
             // setOpenEditProfileDialog(true);
           }}
         >

@@ -59,8 +59,8 @@ const SearchOrder = () => {
       setSubmitting(true);
       const { data } = await apiService.getOrdersAsync(
         dateHelper.formatDate(values.date),
-        dateHelper.convertTimeZone(values.openingTime),
-        dateHelper.convertTimeZone(values.closingTime),
+        dateHelper.getTimeFormate(values.openingTime),
+        dateHelper.getTimeFormate(values.closingTime),
         search
       );
       if (data) {
@@ -108,6 +108,7 @@ const SearchOrder = () => {
           carId: item.carId,
           carPlateNumber: item.carPlateNumber,
           createdDate: item.createdDate,
+          totalPrice: item.totalPrice,
           orderId: item.orderId,
           items: []
         };
@@ -230,7 +231,7 @@ const SearchOrder = () => {
                           <TableCell>Order Date</TableCell>
                           <TableCell>Plate Number</TableCell>
                           <TableCell>Car Color</TableCell>
-                          {/* <TableCell>Total</TableCell> */}
+                          <TableCell>Total</TableCell>
                           <TableCell align='right'>Actions</TableCell>
                         </TableRow>
                       </TableHead>
@@ -246,7 +247,7 @@ const SearchOrder = () => {
                           <TableCell>{dateHelper.formatDate(order.createdDate)}</TableCell>
                           <TableCell>{order.carPlateNumber}</TableCell>
                           <TableCell>{order.carColor}</TableCell>
-                          {/* <TableCell>{order.totalAmount ? order.totalAmount : 0}</TableCell> */}
+                          <TableCell>{order.totalPrice ? utils.formatCurrency(order.totalPrice) : 0}</TableCell>
                           <TableCell align='right'>
                             <IconButton
                               size='small'
