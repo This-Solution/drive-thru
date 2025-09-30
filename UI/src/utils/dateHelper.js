@@ -92,7 +92,7 @@ function convertTimeZone(value, timeZone = 'Australia/Melbourne') {
   return dayjs.utc(value).tz(timeZone).format('HH:mm:ss');
 };
 
-function getTimeFormate(value) {
+function getTimeFormat(value) {
   return dayjs(value).local().format('HH:mm:ss');
 }
 
@@ -129,6 +129,6 @@ export default {
   getTimeFromMinutes,
   getMinutesFromTime,
   convertTimeZone,
-  getTimeFormate,
+  getTimeFormat,
   formatTimeOnly
 };

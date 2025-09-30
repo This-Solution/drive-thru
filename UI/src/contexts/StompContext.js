@@ -18,7 +18,7 @@ export const StompProvider = ({ children }) => {
 
   useEffect(() => {
     if (client && user) {
-      client.subscribe(`/topic/send/${user.siteId}`, handleMessage);
+      client.subscribe(`/topic/send/${user.userId}`, handleMessage);
     }
   }, [client]);
 

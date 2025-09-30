@@ -136,7 +136,7 @@ const ShowCarDetails = ({ carDetails }) => {
                     In Time
                   </Typography>
                   <Typography variant='h6' color='textSecondary'>
-                    {dateHelper.getTimeFormate(carDetails.createdTime)}
+                    {dateHelper.getTimeFormat(carDetails.createdTime)}
                   </Typography>
                 </Stack>
               </Stack>

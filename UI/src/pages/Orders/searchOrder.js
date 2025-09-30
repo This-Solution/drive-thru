@@ -59,8 +59,8 @@ const SearchOrder = () => {
       setSubmitting(true);
       const { data } = await apiService.getOrdersAsync(
         dateHelper.formatDate(values.date),
-        dateHelper.getTimeFormate(values.openingTime),
-        dateHelper.getTimeFormate(values.closingTime),
+        dateHelper.getTimeFormat(values.openingTime),
+        dateHelper.getTimeFormat(values.closingTime),
         search
       );
       if (data) {

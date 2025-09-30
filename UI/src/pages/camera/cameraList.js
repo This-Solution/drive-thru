@@ -3,6 +3,9 @@ import { useTheme } from '@emotion/react';
 import { DeleteOutline, EditTwoTone } from '@mui/icons-material';
 import {
   Button,
+  Checkbox,
+  FormControlLabel,
+  FormGroup,
   Grid,
   IconButton,
   Stack,
@@ -52,15 +55,15 @@ const CameraList = () => {
     setLoading(false);
   };
 
-  // const filteredSites = useMemo(() => {
-  //   let filteredSites;
-  //   if (enabled) {
-  //     filteredSites = sites.filter((item) => item.isEnabled);
-  //   } else {
-  //     filteredSites = sites.filter((item) => !item.isEnabled);
-  //   }
-  //   return filteredSites;
-  // }, [sites, enabled])
+  const filterCameras = useMemo(() => {
+    let filterCameras;
+    if (enabled) {
+      filterCameras = cameraList.filter((item) => item.active);
+    } else {
+      filterCameras = cameraList.filter((item) => !item.active);
+    }
+    return filterCameras;
+  }, [cameraList, enabled])
 
   const columns = useMemo(
     () => [
@@ -139,10 +142,10 @@ const CameraList = () => {
       },
       // {
       //   Header: 'Enabled',
-      //   accessor: 'isEnabled',
+      //   accessor: 'active',
       //   Cell: ({ row }) => {
       //     const { original } = row;
-      //     return <Switch checked={original.isEnabled} onChange={(e) => handleSwitchChange(e, original)} />;
+      //     return <Switch checked={original.active} onChange={(e) => handleSwitchChange(e, original)} />;
       //   }
       // },
       {
@@ -186,12 +189,12 @@ const CameraList = () => {
   // const onConfirmSwitchChange = async () => {
   //   await ApiService.setSiteEnabledStatusAsync(
   //     cameraDetails.siteId,
-  //     !cameraDetails.isEnabled
+  //     !cameraDetails.active
   //   );
   //   setConfirmDialogOpen(false);
   //   const site = [...cameraList];
   //   const siteIndex = findIndex(site, ['siteId', cameraDetails.siteId]);
-  //   site[siteIndex].isEnabled = !cameraDetails.isEnabled;
+  //   site[siteIndex].active = !cameraDetails.active;
   //   setCameraList(site);
   //   setCameraDetails(null);
   // };
@@ -275,14 +278,14 @@ const CameraList = () => {
                             sx={{ width: '100%' }}
                           />
                         </Grid>
-                        {/* <Grid item xs={2} pl={2}>
+                        <Grid item xs={2} pl={2}>
                           <FormGroup>
                             <FormControlLabel
                               control={<Checkbox defaultChecked checked={enabled} onChange={(e) => setEnabled(e.target.checked)} />}
-                              label='Enabled'
+                              label='Active'
                             />
                           </FormGroup>
-                        </Grid> */}
+                        </Grid>
                       </Stack>
                     </Grid>
                     <Grid item xs={3}>
@@ -327,7 +330,7 @@ const CameraList = () => {
                     'updatedDate',
                     'markupPercent',
                   ]}
-                  data={cameraList}
+                  data={filterCameras}
                   globalFilter={globalFilter}
                 />
               </ScrollX>
