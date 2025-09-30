@@ -10,6 +10,10 @@ import java.util.List;
 public interface UserDetailRepository extends JpaRepository<UserDetail, Integer> {
     UserDetail findByEmailAndIsActive(String email, boolean isActive);
 
+    UserDetail findByEmailAndIsActiveTrue(String email);
+
+    UserDetail findByPhoneAndIsActiveTrue(String phone);
+
     List<UserDetail> findAllByIsActiveTrue();
 
     UserDetail findByUserIdAndIsActiveTrue(Integer serId);

@@ -14,7 +14,6 @@ import org.springframework.stereotype.Service;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Objects;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -56,7 +55,7 @@ public class CameraConfigServiceImpl implements CameraConfigService {
         int loginUserId = Integer.parseInt(loginId);
         UserDetail detail = userDetailRepository.findByUserIdAndIsActiveTrue(loginUserId);
         Role role = roleRepository.findById(detail.getRoleId()).orElseThrow(() -> new CustomException(CustomErrorHolder.ROLE_NOT_FOUND));
-        if (!Objects.equals(role.getRoleName(), RoleName.SUPER_ADMIN.toString())) {
+        if (!Objects.equals(role.getRoleName(), RoleName.SUPER_ADMIN.getDescription())) {
             throw new CustomException(CustomErrorHolder.ONLY_SUPER_ADMIN_CAN_ACCESS);
         }
         CameraConfig cameraConfig = new CameraConfig();
@@ -88,7 +87,7 @@ public class CameraConfigServiceImpl implements CameraConfigService {
         int loginUserId = Integer.parseInt(loginId);
         UserDetail detail = userDetailRepository.findByUserIdAndIsActiveTrue(loginUserId);
         Role role = roleRepository.findById(detail.getRoleId()).orElseThrow(() -> new CustomException(CustomErrorHolder.ROLE_NOT_FOUND));
-        if (!Objects.equals(role.getRoleName(), RoleName.SUPER_ADMIN.toString())) {
+        if (!Objects.equals(role.getRoleName(), RoleName.SUPER_ADMIN.getDescription())) {
             throw new CustomException(CustomErrorHolder.ONLY_SUPER_ADMIN_CAN_ACCESS);
         }
         CameraConfig cameraConfig = cameraConfigRepository.findById(cameraConfigId).orElseThrow(() -> new CustomException(CustomErrorHolder.CAMERA_CONFIG_NOT_FOUND));
@@ -137,7 +136,7 @@ public class CameraConfigServiceImpl implements CameraConfigService {
         int loginUserId = Integer.parseInt(loginId);
         UserDetail detail = userDetailRepository.findByUserIdAndIsActiveTrue(loginUserId);
         Role role = roleRepository.findById(detail.getRoleId()).orElseThrow(() -> new CustomException(CustomErrorHolder.ROLE_NOT_FOUND));
-        if (!Objects.equals(role.getRoleName(), RoleName.SUPER_ADMIN.toString())) {
+        if (!Objects.equals(role.getRoleName(), RoleName.SUPER_ADMIN.getDescription())) {
             throw new CustomException(CustomErrorHolder.ONLY_SUPER_ADMIN_CAN_ACCESS);
         }
         CameraConfig cameraConfig = cameraConfigRepository.findByCameraIdAndIsActiveTrue(cameraConfigId);

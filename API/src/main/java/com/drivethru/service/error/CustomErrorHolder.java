@@ -19,5 +19,7 @@ public class CustomErrorHolder {
     public static final CustomError ONLY_SUPER_ADMIN_CAN_ACCESS = new CustomError("ERROR", "Super Admin Access Required", "Only Super Admin can perform this action.");
     public static final CustomError EMAIL_INCORRECT = new CustomError("ERROR", "Invalid Email", "The email address entered is invalid.");
     public static final CustomError CAR_VISIT_NOT_FOUND = new CustomError("ERROR", "CarVisit Not Found", "The specified car visit was not found.");
+    public static final CustomError EMAIL_ALREADY_EXISTS  = new CustomError("ERROR","Email already exists","Email already exists");
+    public static final CustomError PHONE_NUMBER_ALREADY_EXISTS  = new CustomError("ERROR","Phone number already exists","Phone number already exists");
 
 }

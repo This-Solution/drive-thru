@@ -72,6 +72,7 @@ public class UserDetailServiceImpl implements UserDetailService {
         loginResponse.setSiteId(userDetail.getSiteId());
         loginResponse.setSiteName(site.get().getSiteName());
         loginResponse.setSessionId(userDetail.getSessionId());
+        loginResponse.setEmail(userDetail.getEmail());
         String sessionToken = jwtHelper.generateToken(userDetail);
         LoginTokenResponse loginTokenResponse = new LoginTokenResponse();
         loginTokenResponse.setUser(loginResponse);
@@ -86,8 +87,16 @@ public class UserDetailServiceImpl implements UserDetailService {
             int loginUserId = Integer.parseInt(loginId);
             UserDetail detail = userDetailRepository.findByUserIdAndIsActiveTrue(loginUserId);
             Role role = roleRepository.findById(detail.getRoleId()).orElseThrow(() -> new CustomException(CustomErrorHolder.ROLE_NOT_FOUND));
-            if (!Objects.equals(role.getRoleName(), RoleName.SUPER_ADMIN.toString())) {
+            if (!Objects.equals(role.getRoleName(), RoleName.SUPER_ADMIN.getDescription())) {
                 throw new CustomException(CustomErrorHolder.ONLY_SUPER_ADMIN_CAN_ACCESS);
+            }
+            UserDetail existingUserByEmail = userDetailRepository.findByEmailAndIsActiveTrue(userDetailRequest.getEmail());
+            if (existingUserByEmail != null) {
+                throw new CustomException(CustomErrorHolder.EMAIL_ALREADY_EXISTS);
+            }
+            UserDetail existingUserByPhone = userDetailRepository.findByPhoneAndIsActiveTrue(userDetailRequest.getPhone());
+            if (existingUserByPhone != null) {
+                throw new CustomException(CustomErrorHolder.PHONE_NUMBER_ALREADY_EXISTS);
             }
             String hashKey = cryptoHelper.getHashKey();
             String encryptedPassword = cryptoHelper.encryptPassword(userDetailRequest.getPassword(), hashKey);
@@ -126,7 +135,7 @@ public class UserDetailServiceImpl implements UserDetailService {
             int loginUserId = Integer.parseInt(loginId);
             UserDetail detail = userDetailRepository.findByUserIdAndIsActiveTrue(loginUserId);
             Role role = roleRepository.findById(detail.getRoleId()).orElseThrow(() -> new CustomException(CustomErrorHolder.ROLE_NOT_FOUND));
-            if (!Objects.equals(role.getRoleName(), RoleName.SUPER_ADMIN.toString())) {
+            if (!Objects.equals(role.getRoleName(), RoleName.SUPER_ADMIN.getDescription())) {
                 throw new CustomException(CustomErrorHolder.ONLY_SUPER_ADMIN_CAN_ACCESS);
             }
             UserDetail userDetail = userDetailRepository.findById(userId).orElseThrow(() -> new CustomException(CustomErrorHolder.USER_NOT_FOUND));
@@ -179,7 +188,7 @@ public class UserDetailServiceImpl implements UserDetailService {
         int loginUserId = Integer.parseInt(loginId);
         UserDetail detail = userDetailRepository.findByUserIdAndIsActiveTrue(loginUserId);
         Role role = roleRepository.findById(detail.getRoleId()).orElseThrow(() -> new CustomException(CustomErrorHolder.ROLE_NOT_FOUND));
-        if (!Objects.equals(role.getRoleName(), RoleName.SUPER_ADMIN.toString())) {
+        if (!Objects.equals(role.getRoleName(), RoleName.SUPER_ADMIN.getDescription())) {
             throw new CustomException(CustomErrorHolder.ONLY_SUPER_ADMIN_CAN_ACCESS);
         }
         UserDetail userDetail = userDetailRepository.findByUserIdAndIsActiveTrue(userId);

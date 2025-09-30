@@ -51,7 +51,7 @@ public class TenantServiceImpl implements TenantService {
         int loginUserId = Integer.parseInt(loginId);
         UserDetail detail = userDetailRepository.findByUserIdAndIsActiveTrue(loginUserId);
         Role role = roleRepository.findById(detail.getRoleId()).orElseThrow(() -> new CustomException(CustomErrorHolder.ROLE_NOT_FOUND));
-        if (!Objects.equals(role.getRoleName(), RoleName.SUPER_ADMIN.toString())) {
+        if (!Objects.equals(role.getRoleName(), RoleName.SUPER_ADMIN.getDescription())) {
             throw new CustomException(CustomErrorHolder.ONLY_SUPER_ADMIN_CAN_ACCESS);
         }
         Tenant tenant = new Tenant();
@@ -73,7 +73,7 @@ public class TenantServiceImpl implements TenantService {
         int loginUserId = Integer.parseInt(loginId);
         UserDetail detail = userDetailRepository.findByUserIdAndIsActiveTrue(loginUserId);
         Role role = roleRepository.findById(detail.getRoleId()).orElseThrow(() -> new CustomException(CustomErrorHolder.ROLE_NOT_FOUND));
-        if (!Objects.equals(role.getRoleName(), RoleName.SUPER_ADMIN.toString())) {
+        if (!Objects.equals(role.getRoleName(), RoleName.SUPER_ADMIN.getDescription())) {
             throw new CustomException(CustomErrorHolder.ONLY_SUPER_ADMIN_CAN_ACCESS);
         }
         Tenant tenant = tenantRepository.findById(tenantId).orElseThrow(() -> new CustomException(CustomErrorHolder.TENANT_NOT_FOUND));
@@ -100,7 +100,7 @@ public class TenantServiceImpl implements TenantService {
         int loginUserId = Integer.parseInt(loginId);
         UserDetail detail = userDetailRepository.findByUserIdAndIsActiveTrue(loginUserId);
         Role role = roleRepository.findById(detail.getRoleId()).orElseThrow(() -> new CustomException(CustomErrorHolder.ROLE_NOT_FOUND));
-        if (!Objects.equals(role.getRoleName(), RoleName.SUPER_ADMIN.toString())) {
+        if (!Objects.equals(role.getRoleName(), RoleName.SUPER_ADMIN.getDescription())) {
             throw new CustomException(CustomErrorHolder.ONLY_SUPER_ADMIN_CAN_ACCESS);
         }
         Tenant tenant = tenantRepository.findById(tenantId).orElseThrow(() -> new CustomException(CustomErrorHolder.TENANT_NOT_FOUND));

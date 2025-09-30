@@ -44,7 +44,7 @@ public class SiteServiceImpl implements SiteService {
         int loginUserId = Integer.parseInt(loginId);
         UserDetail detail = userDetailRepository.findByUserIdAndIsActiveTrue(loginUserId);
         Role role = roleRepository.findById(detail.getRoleId()).orElseThrow(() -> new CustomException(CustomErrorHolder.ROLE_NOT_FOUND));
-        if (!Objects.equals(role.getRoleName(), RoleName.SUPER_ADMIN.toString())) {
+        if (!Objects.equals(role.getRoleName(), RoleName.SUPER_ADMIN.getDescription())) {
             throw new CustomException(CustomErrorHolder.ONLY_SUPER_ADMIN_CAN_ACCESS);
         }
         Site site = new Site();
@@ -73,7 +73,7 @@ public class SiteServiceImpl implements SiteService {
         int loginUserId = Integer.parseInt(loginId);
         UserDetail detail = userDetailRepository.findByUserIdAndIsActiveTrue(loginUserId);
         Role role = roleRepository.findById(detail.getRoleId()).orElseThrow(() -> new CustomException(CustomErrorHolder.ROLE_NOT_FOUND));
-        if (!Objects.equals(role.getRoleName(), RoleName.SUPER_ADMIN.toString())) {
+        if (!Objects.equals(role.getRoleName(), RoleName.SUPER_ADMIN.getDescription())) {
             throw new CustomException(CustomErrorHolder.ONLY_SUPER_ADMIN_CAN_ACCESS);
         }
         Site site = siteRepository.findById(siteId).orElseThrow(() -> new CustomException(CustomErrorHolder.SITE_NOT_FOUND));
@@ -117,7 +117,7 @@ public class SiteServiceImpl implements SiteService {
         int loginUserId = Integer.parseInt(loginId);
         UserDetail detail = userDetailRepository.findByUserIdAndIsActiveTrue(loginUserId);
         Role role = roleRepository.findById(detail.getRoleId()).orElseThrow(() -> new CustomException(CustomErrorHolder.ROLE_NOT_FOUND));
-        if (!Objects.equals(role.getRoleName(), RoleName.SUPER_ADMIN.toString())) {
+        if (!Objects.equals(role.getRoleName(), RoleName.SUPER_ADMIN.getDescription())) {
             throw new CustomException(CustomErrorHolder.ONLY_SUPER_ADMIN_CAN_ACCESS);
         }
         Site site = siteRepository.findById(siteId).orElseThrow(() -> new CustomException(CustomErrorHolder.SITE_NOT_FOUND));

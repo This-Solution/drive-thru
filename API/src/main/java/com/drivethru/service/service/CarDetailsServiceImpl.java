@@ -193,7 +193,7 @@ public class CarDetailsServiceImpl implements CarDetailService {
         carLogRepository.save(log);
 
         for (UserDetail user : userDetails) {
-            simpMessagingTemplate.convertAndSend("/topic/send/" + user.getSiteId(), carResponse);
+            simpMessagingTemplate.convertAndSend("/topic/send/" + user.getUserId(), carResponse);
         }
 
     }
