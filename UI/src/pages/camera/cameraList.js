@@ -224,13 +224,12 @@ const CameraList = () => {
   };
 
   const handleDelete = async () => {
-    const { data } = await ApiService.deleteCameraAsync(cameraDetails.cameraId);
-    if (data) {
-      const updatedCamera = cameraList.filter(
-        (cam) => cam.cameraId !== cameraDetails.cameraId
-      );
-      setCameraList(updatedCamera);
-    }
+    await ApiService.deleteCameraAsync(cameraDetails.cameraId);
+    const cameras = [...cameraList];
+    const siteIndex = findIndex(cameras, ['cameraId', cameraDetails.cameraId]);
+    cameras[siteIndex].active = !cameraDetails.active;
+    setCameraDetails(null);
+    setCameraList(cameras);
     onCloseDialog();
   };
 

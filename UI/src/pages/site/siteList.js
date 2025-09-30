@@ -246,11 +246,6 @@ const SiteList = () => {
     setConfirmDialogOpen(false);
   };
 
-  const handleVerifyDelivery = async (row) => {
-    setSiteDetails(row);
-    setVerifyDialogOpen(true);
-  };
-
   return (
     <>
       {isLoading ? (
