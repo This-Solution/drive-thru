@@ -10,9 +10,9 @@ import java.util.Optional;
 
 @Repository
 public interface CarVisitRepository extends JpaRepository<CarVisit, Integer> {
-    CarVisit findFirstByCarIdAndTenantIdOrderByCreatedDateDesc(Integer carId, Integer tenantId);
+    CarVisit findFirstByCarIdAndTenantIdOrderByCreatedDateDesc(Integer carId, Integer TenantId);
 
-    CarVisit findFirstByTenantIdAndSiteIdAndCameraIdOrderByCreatedDateDesc(Integer tenantId, Integer siteId, Integer cameraId);
+    Optional<CarVisit> findFirstByTenantIdOrderByCreatedDateDesc(Integer tenantId);
 
     CarVisit findFirstByCameraIdAndCreatedDateAfterOrderByCreatedDateDesc(Integer cameraId, LocalDateTime createdDate);
 
