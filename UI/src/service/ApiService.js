@@ -220,10 +220,10 @@ async function getLastCarAsync(siteId) {
 
 //#start- camera ========camera======
 
-async function getCameraListAsync() {
+async function getCameraListAsync(isActive = true) {
   const config = {
     method: 'get',
-    url: '/cameraConfig',
+    url: `/cameraConfig/${isActive}`,
   };
   return await axios(config);
 }
@@ -270,7 +270,15 @@ async function deleteCameraAsync(cameraId) {
 async function getSitesAsync() {
   const config = {
     method: 'get',
-    url: '/site',
+    url: `/site`,
+  };
+  return await axios(config);
+}
+
+async function getAllSitesAsync(isActive = true) {
+  const config = {
+    method: 'get',
+    url: `site/getAllSitesByStatus/${isActive}`,
   };
   return await axios(config);
 }
@@ -440,4 +448,5 @@ export default {
   getSitesByTenantIdAsync,
   updateCameraAsync,
   deleteCameraAsync,
+  getAllSitesAsync
 };
