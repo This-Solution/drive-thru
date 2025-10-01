@@ -163,12 +163,16 @@ public class UserDetailServiceImpl implements UserDetailService {
             if (userDetailRequest.getTenantId() != null) {
                 userDetail.setTenantId(userDetailRequest.getTenantId());
             }
+            if (userDetailRequest.getSiteId() != null) {
+                userDetail.setSiteId(userDetailRequest.getSiteId());
+            }
             userDetail.setUpdatedBy(detail.getUserId());
             userDetail.setUpdatedDate(LocalDateTime.now());
             userDetailRepository.save(userDetail);
 
             UserDetailResponse userDetailResponse = new UserDetailResponse();
             BeanUtils.copyProperties(userDetail, userDetailResponse);
+            Site site = siteRepository.findBySiteIdAndIsActiveTrue(userDetail.getSiteId());
             Tenant tenant = tenantRepository.findByTenantIdAndIsActiveTrue(userDetail.getTenantId());
             Optional<Role> roles = roleRepository.findById(userDetail.getRoleId());
             UserDetail createdUserDetail = userDetailRepository.findByUserIdAndIsActiveTrue(userDetail.getCreatedBy());
