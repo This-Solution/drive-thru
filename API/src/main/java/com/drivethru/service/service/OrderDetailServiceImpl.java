@@ -75,7 +75,6 @@ public class OrderDetailServiceImpl implements OrderDetailService {
             throw new CustomException(CustomErrorHolder.ORDER_NOT_FOUND);
         }
 
-        LocalDateTime dateTime = DateAndTimeHelper.parse(webhookOrderRequest.getDatetime());
         Site site = siteRepository.findBySiteNameAndIsActiveTrue(webhookOrderRequest.getSite_name());
         CameraConfig cameraConfig = cameraConfigRepository.findByCameraNameAndSiteIdAndIsActiveTrue(webhookOrderRequest.getDevice_name(), site.getSiteId());
         Tenant tenant = tenantRepository.findById(site.getTenantId()).orElseThrow(() -> new CustomException(CustomErrorHolder.TENANT_NOT_FOUND));
@@ -88,7 +87,7 @@ public class OrderDetailServiceImpl implements OrderDetailService {
         OrderDetail orderDetail = new OrderDetail();
         orderDetail.setTotalPrice(totalPrice);
         orderDetail.setSourceIp(webhookOrderRequest.getSource_ip());
-        orderDetail.setCreatedDate(dateTime);
+        orderDetail.setCreatedDate(LocalDateTime.now());
         orderDetail.setTenantId(tenant.getTenantId());
         orderDetail.setSiteId(cameraConfig.getSiteId());
         orderDetail.setCarId(carDetail.get().getCarId());
