@@ -16,11 +16,11 @@ export const StompProvider = ({ children }) => {
   const { user } = useSelector((state) => state.auth);
   const clientRef = useRef(null);
 
-  useEffect(() => {
-    if (client && user) {
-      client.subscribe(`/topic/send/${user.userId}`, handleMessage);
-    }
-  }, [client]);
+  // useEffect(() => {
+  //   if (client && user) {
+  //     console.log('subscribe is called')
+  //   }
+  // }, [client]);
 
   const handleMessage = (message) => {
     if (!message.body) return;
@@ -57,6 +57,8 @@ export const StompProvider = ({ children }) => {
 
       onConnect: (frame) => {
         console.log('Connected to WebSocket server!');
+        client.subscribe(`/topic/send/${user.userId}`, handleMessage);
+
         setClient(client);
       },
 
