@@ -12,7 +12,7 @@ public interface CameraConfigRepository extends JpaRepository<CameraConfig, Inte
 
     CameraConfig findByCameraNameAndSiteIdAndIsActiveTrue(String cameraName , Integer siteId);
 
-    List<CameraConfig> findAllByIsActiveTrue();
+    List<CameraConfig> findByIsActive(boolean isActive);
 
     CameraConfig findBySiteIdAndTenantIdAndCameraNameAndIsActiveTrue(Integer siteId, Integer tenantId, String cameraName);
 

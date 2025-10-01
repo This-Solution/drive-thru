@@ -55,6 +55,7 @@ public class SiteServiceImpl implements SiteService {
         site.setCity(siteRequest.getCity());
         site.setState(siteRequest.getState());
         site.setPostal(siteRequest.getPostal());
+        site.setReloadTime(siteRequest.getReloadTime());
         site.setActive(true);
         site.setCreatedBy(detail.getUserId());
         site.setCreatedDate(LocalDateTime.now());
@@ -98,6 +99,9 @@ public class SiteServiceImpl implements SiteService {
         if (siteRequest.getPostal() != null) {
             site.setPostal(siteRequest.getPostal());
         }
+        if (siteRequest.getReloadTime() != null) {
+            site.setReloadTime(siteRequest.getReloadTime());
+        }
         site.setUpdatedBy(detail.getUserId());
         site.setUpdatedDate(LocalDateTime.now());
         siteRepository.save(site);
@@ -130,7 +134,7 @@ public class SiteServiceImpl implements SiteService {
 
     @Override
     public List<SiteResponse> getAllSites() {
-        List<Site> sites = siteRepository.findAllByIsActiveTrue();
+        List<Site> sites = siteRepository.findAll();
         return sites.stream().map(site -> {
             SiteResponse siteResponse = new SiteResponse();
             BeanUtils.copyProperties(site, siteResponse);
@@ -151,4 +155,20 @@ public class SiteServiceImpl implements SiteService {
         }
         return sites;
     }
+
+    @Override
+    public List<SiteResponse> getAllSitesByStatus(boolean isActive) {
+        List<Site> sites = siteRepository.findByIsActive(isActive);
+        return sites.stream().map(site -> {
+            SiteResponse siteResponse = new SiteResponse();
+            BeanUtils.copyProperties(site, siteResponse);
+            tenantRepository.findById(site.getTenantId()).ifPresent(tenant -> siteResponse.setTenantName(tenant.getTenantName()));
+            userDetailRepository.findById(site.getCreatedBy()).ifPresent(createdUser -> siteResponse.setCreatedByName(createdUser.getFirstName() + " " + createdUser.getSurName()));
+            if (site.getUpdatedBy() != null) {
+                userDetailRepository.findById(site.getUpdatedBy()).ifPresent(updatedUser -> siteResponse.setUpdateByName(updatedUser.getFirstName() + " " + updatedUser.getSurName()));
+            }
+            return siteResponse;
+        }).collect(Collectors.toList());
+    }
+
 }

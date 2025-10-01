@@ -75,4 +75,13 @@ public class SiteController {
         return new ResponseEntity<>(responseObject, HttpStatus.OK);
     }
 
+    @GetMapping("getAllSitesByStatus/{isActive}")
+    public ResponseEntity<ResponseObject<List<SiteResponse>>> getAllSitesByStatus(@PathVariable String isActive) {
+        ResponseObject<List<SiteResponse>> responseObject = new ResponseObject<>();
+        List<SiteResponse> sites = siteService.getAllSitesByStatus(Boolean.parseBoolean(isActive));
+        responseObject.setData(sites);
+        return new ResponseEntity<>(responseObject, HttpStatus.OK);
+    }
+
+
 }

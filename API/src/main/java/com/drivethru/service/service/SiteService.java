@@ -18,4 +18,6 @@ public interface SiteService {
     List<SiteResponse> getAllSites();
 
     List<Site> getAllSitesByTenantId(Integer tenantId);
+
+    List<SiteResponse> getAllSitesByStatus(boolean isActive);
 }

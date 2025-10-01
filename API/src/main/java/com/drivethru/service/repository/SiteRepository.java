@@ -8,7 +8,7 @@ import java.util.List;
 
 @Repository
 public interface SiteRepository extends JpaRepository<Site, Integer> {
-    List<Site> findAllByIsActiveTrue();
+    List<Site> findByIsActive(Boolean isActive);
 
     Site findBySiteNameAndIsActiveTrue(String siteName);
 

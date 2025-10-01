@@ -8,6 +8,15 @@ public class SiteRequest {
     private String city;
     private String state;
     private String postal;
+    private Integer reloadTime;
+
+    public Integer getReloadTime() {
+        return reloadTime;
+    }
+
+    public void setReloadTime(Integer reloadTime) {
+        this.reloadTime = reloadTime;
+    }
 
     public Integer getTenantId() {
         return tenantId;

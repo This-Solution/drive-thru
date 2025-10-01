@@ -21,6 +21,14 @@ public class SiteResponse {
     private LocalDateTime updatedDate;
     private Integer reloadTime;
 
+    public Integer getReloadTime() {
+        return reloadTime;
+    }
+
+    public void setReloadTime(Integer reloadTime) {
+        this.reloadTime = reloadTime;
+    }
+
     public Integer getSiteId() {
         return siteId;
     }

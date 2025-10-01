@@ -66,10 +66,10 @@ public class CameraConfigController {
         return new ResponseEntity<>(responseObject, HttpStatus.OK);
     }
 
-    @GetMapping
-    public ResponseEntity<ResponseObject<List<CameraConfigResponse>>> getAllCameraConfigs() {
+    @GetMapping("/{isActive}")
+    public ResponseEntity<ResponseObject<List<CameraConfigResponse>>> getAllCameraConfigs(@PathVariable String isActive) {
         ResponseObject<List<CameraConfigResponse>> responseObject = new ResponseObject<>();
-        List<CameraConfigResponse> cameraConfigs = cameraConfigService.getAllCameraConfigs();
+        List<CameraConfigResponse> cameraConfigs = cameraConfigService.getAllCameraConfigs(Boolean.parseBoolean(isActive));
         responseObject.setData(cameraConfigs);
         return new ResponseEntity<>(responseObject, HttpStatus.OK);
     }

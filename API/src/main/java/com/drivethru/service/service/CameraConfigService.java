@@ -16,5 +16,5 @@ public interface CameraConfigService {
 
     boolean deleteCameraConfig(Integer cameraConfigId, String loginId);
 
-    List<CameraConfigResponse> getAllCameraConfigs();
+    List<CameraConfigResponse> getAllCameraConfigs(boolean isActive);
 }
