@@ -1,18 +1,7 @@
 import { PlusCircleOutlined } from '@ant-design/icons';
 import { useTheme } from '@emotion/react';
 import { DeleteOutline, EditTwoTone } from '@mui/icons-material';
-import {
-  Button,
-  Checkbox,
-  FormControlLabel,
-  FormGroup,
-  Grid,
-  IconButton,
-  Stack,
-  Tooltip,
-  Typography,
-  useMediaQuery,
-} from '@mui/material';
+import { Button, Checkbox, FormControlLabel, FormGroup, Grid, IconButton, Stack, Tooltip, Typography, useMediaQuery } from '@mui/material';
 import CjDialog from 'components/@extended/Dialog';
 import CjReactTable from 'components/@extended/Table/ReactTable';
 import { GlobalFilter } from 'components/@extended/Table/ReactTableFilter';
@@ -63,14 +52,14 @@ const CameraList = () => {
       filterCameras = cameraList.filter((item) => !item.active);
     }
     return filterCameras;
-  }, [cameraList, enabled])
+  }, [cameraList, enabled]);
 
   const columns = useMemo(
     () => [
       {
         Header: 'Tenant Name',
         canSort: true,
-        accessor: 'tenantName',
+        accessor: 'tenantName'
         // Cell: ({ row }) => {
         //   const { original } = row;
         //   return (
@@ -81,7 +70,7 @@ const CameraList = () => {
       {
         Header: 'Site Name',
         canSort: true,
-        accessor: 'siteName',
+        accessor: 'siteName'
         // Cell: ({ row }) => {
         //   const { original } = row;
         //   return (
@@ -92,7 +81,7 @@ const CameraList = () => {
       {
         Header: 'camera Name',
         canSort: true,
-        accessor: 'cameraName',
+        accessor: 'cameraName'
       },
       {
         Header: 'camera Type',
@@ -100,20 +89,16 @@ const CameraList = () => {
         accessor: 'cameraType',
         Cell: ({ row }) => {
           const { original } = row;
-          return (
-            <Typography >{enums.cameraType[original.cameraType]}</Typography>
-          );
-        },
+          return <Typography>{enums.cameraType[original.cameraType]}</Typography>;
+        }
       },
       {
         Header: 'Reload Time(s)',
         accessor: 'reloadTime',
         Cell: ({ row }) => {
           const { original } = row;
-          return (
-            <Typography >{`${original.reloadTime} sec`}</Typography>
-          );
-        },
+          return <Typography>{`${original.reloadTime} sec`}</Typography>;
+        }
       },
       {
         Header: 'Last Updated by',
@@ -131,14 +116,12 @@ const CameraList = () => {
                 </Typography>
                 <Typography variant='caption' color='textSecondary'>
                   { }
-                  {original.updatedDate
-                    ? dateHelper.getFormatDate(original.updatedDate)
-                    : '-'}
+                  {original.updatedDate ? dateHelper.getFormatDate(original.updatedDate) : '-'}
                 </Typography>
               </Stack>
             </Stack>
           );
-        },
+        }
       },
       // {
       //   Header: 'Enabled',
@@ -155,28 +138,25 @@ const CameraList = () => {
         Cell: ({ row }) => {
           return (
             <>
-              <Tooltip title='Edit'>
-                <IconButton
-                  variant='contained'
-                  color='primary'
-                  onClick={() => handleEditClick(row.original)}
-                >
-                  <EditTwoTone />
-                </IconButton>
-              </Tooltip>
-              <Tooltip title='Delete'>
-                <IconButton
-                  variant='contained'
-                  color='error'
-                  onClick={() => handleDeleteDialog(row.original)}
-                >
-                  <DeleteOutline />
-                </IconButton>
-              </Tooltip>
+              {' '}
+              {row.original.active && (
+                <>
+                  <Tooltip title='Edit'>
+                    <IconButton variant='contained' color='primary' onClick={() => handleEditClick(row.original)}>
+                      <EditTwoTone />
+                    </IconButton>
+                  </Tooltip>
+                  <Tooltip title='Delete'>
+                    <IconButton variant='contained' color='error' onClick={() => handleDeleteDialog(row.original)}>
+                      <DeleteOutline />
+                    </IconButton>
+                  </Tooltip>
+                </>
+              )}
             </>
           );
-        },
-      },
+        }
+      }
     ],
     [theme]
   );
@@ -210,16 +190,14 @@ const CameraList = () => {
   };
 
   const onSave = async (camera) => {
-    const siteIndex = cameraList.findIndex(
-      (item) => item.cameraId === camera.cameraId
-    );
+    const siteIndex = cameraList.findIndex((item) => item.cameraId === camera.cameraId);
     const updatedList = [...cameraList];
     camera.updatedBy = user.name;
     camera.updatedDate = new Date();
     updatedList[siteIndex] = camera;
     setCameraList(updatedList);
     setEditDialogOpen(false);
-    getCameraList()
+    getCameraList();
     // getSiteList();
   };
 
@@ -288,19 +266,9 @@ const CameraList = () => {
                       </Stack>
                     </Grid>
                     <Grid item xs={3}>
-                      <Stack
-                        alignItems='center'
-                        justifyContent='end'
-                        spacing={2}
-                        direction={'row'}
-                      >
+                      <Stack alignItems='center' justifyContent='end' spacing={2} direction={'row'}>
                         {appName === constants.appName && (
-                          <FlavourButton
-                            size='large'
-                            variant='contained'
-                            startIcon={<PlusCircleOutlined />}
-                            onClick={handleAddClick}
-                          >
+                          <FlavourButton size='large' variant='contained' startIcon={<PlusCircleOutlined />} onClick={handleAddClick}>
                             Add Camera
                           </FlavourButton>
                         )}
@@ -323,12 +291,7 @@ const CameraList = () => {
                 <CjReactTable
                   isLoading={isLoading}
                   columns={columns}
-                  hiddenColumns={[
-                    'city',
-                    'state',
-                    'updatedDate',
-                    'markupPercent',
-                  ]}
+                  hiddenColumns={['city', 'state', 'updatedDate', 'markupPercent']}
                   data={filterCameras}
                   globalFilter={globalFilter}
                 />

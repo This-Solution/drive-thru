@@ -8,7 +8,7 @@ const OrderManage = () => {
   return (
     <>
       <Grid container display={'flex'} direction={'row'} spacing={2}>
-        {cameraConfig && cameraConfig.length > 0 ? (
+        {cameraConfig ? (
           cameraConfig.map((camera, index) => {
             return (
               <Grid item xs={12} md={12 / cameraConfig.length} key={camera.cameraName}>

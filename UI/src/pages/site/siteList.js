@@ -1,6 +1,6 @@
 import { PlusCircleOutlined } from '@ant-design/icons';
 import { useTheme } from '@emotion/react';
-import { EditTwoTone } from '@mui/icons-material';
+import { DeleteOutline, EditTwoTone } from '@mui/icons-material';
 import {
   Button,
   Checkbox,
@@ -29,7 +29,6 @@ import ApiService from 'service/ApiService';
 import constants from 'utils/constants.js';
 import dateHelper from 'utils/dateHelper.js';
 import EditSite from './editSite.js';
-import SiteHours from './siteHours.js';
 import Verify from './verify.js';
 
 const SiteList = () => {
@@ -43,12 +42,9 @@ const SiteList = () => {
   const [globalFilter, setGlobalFilter] = useState();
   const [isConfirmDialogOpen, setConfirmDialogOpen] = useState(false);
   const [isEditDialogOpen, setEditDialogOpen] = useState(false);
-  const [isVerifyDialogOpen, setVerifyDialogOpen] = useState(false);
-  const [siteHoursDialog, setSiteHoursDialog] = useState(false);
   const [siteDetails, setSiteDetails] = useState();
   const [enabled, setEnabled] = useState(true);
   const { user } = useSelector((state) => state.auth);
-  const { flavour } = useSelector((state) => state.auth);
 
   useEffect(() => {
     getSiteList();
@@ -155,14 +151,14 @@ const SiteList = () => {
           );
         }
       },
-      {
-        Header: 'Enabled',
-        accessor: 'active',
-        Cell: ({ row }) => {
-          const { original } = row;
-          return <Switch checked={original.active} onChange={(e) => handleSwitchChange(e, original)} />;
-        }
-      },
+      // {
+      //   Header: 'Enabled',
+      //   accessor: 'active',
+      //   Cell: ({ row }) => {
+      //     const { original } = row;
+      //     return <Switch checked={original.active} onChange={(e) => handleSwitchChange(e, original)} />;
+      //   }
+      // },
       {
         Header: 'Actions',
         minWidth: 108,
@@ -171,29 +167,25 @@ const SiteList = () => {
           const { original } = row;
           return (
             <>
-              <Tooltip title='Edit'>
-                <IconButton variant='contained' color='primary' onClick={() => handleEditClick(row.original)}>
-                  <EditTwoTone />
-                </IconButton>
-              </Tooltip>
-              {/* <Tooltip title='Site Hour'>
-                <IconButton variant='contained' color='primary' onClick={() => handleSiteHours(row.original)}>
-                  <AccessTimeOutlined />
-                </IconButton>
-              </Tooltip>
-              {user.role === enums.userRole.SuperAdmin ? (
-                <Tooltip title='Verify'>
-                  <IconButton variant='contained' color='primary' onClick={() => handleVerifyDelivery(row.original)}>
-                    <SettingOutlined />
+              {original.active && <>
+                <Tooltip title='Edit'>
+                  <IconButton variant='contained' color='primary' onClick={() => handleEditClick(row.original)}>
+                    <EditTwoTone />
                   </IconButton>
                 </Tooltip>
-              ) : null}
-              <Tooltip title='KDS'>
-                <IconButton variant='contained' color='primary' onClick={() => navigate('/kds-configure', { state: { siteId: original.siteId, siteName: original.siteName } })}>
-                  <Monitor />
-                </IconButton>
-              </Tooltip > */}
+                <Tooltip title='Delete'>
+                  <IconButton
+                    variant='contained'
+                    color='error'
+                    onClick={() => handleSwitchChange(row.original)}
+                  >
+                    <DeleteOutline />
+                  </IconButton>
+                </Tooltip>
+              </>
+              }
             </>
+
           );
         }
       }
@@ -224,11 +216,6 @@ const SiteList = () => {
   const handleAddClick = () => {
     setSiteDetails(null);
     setEditDialogOpen(true);
-  };
-
-  const handleSiteHours = (row) => {
-    setSiteDetails(row);
-    setSiteHoursDialog(true);
   };
 
   const onSave = async (updateSite) => {
@@ -286,7 +273,7 @@ const SiteList = () => {
                           <FormGroup>
                             <FormControlLabel
                               control={<Checkbox defaultChecked checked={enabled} onChange={(e) => setEnabled(e.target.checked)} />}
-                              label='Enabled'
+                              label='Active'
                             />
                           </FormGroup>
                         </Grid>
@@ -334,14 +321,8 @@ const SiteList = () => {
           </Grid>
         </Grid>
       )}
-      {siteHoursDialog ? (
-        <SiteHours isOpen={siteHoursDialog} handleClose={() => setSiteHoursDialog(false)} siteDetails={siteDetails} />
-      ) : null}
       {isEditDialogOpen ? (
         <EditSite isOpen={isEditDialogOpen} handleClose={() => setEditDialogOpen(false)} siteDetails={siteDetails} onSave={onSave} />
-      ) : null}
-      {isVerifyDialogOpen ? (
-        <Verify isOpen={isVerifyDialogOpen} handleClose={() => setVerifyDialogOpen(false)} siteDetails={siteDetails} />
       ) : null}
     </>
   );
