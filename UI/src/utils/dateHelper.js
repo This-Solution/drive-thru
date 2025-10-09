@@ -81,7 +81,7 @@ function dateFromDay(year, day) {
 }
 
 const getTimeFromMinutes = (minutes) => {
-  return dayjs().startOf('day').add(minutes, 'minute').toDate();
+  return dayjs().add(minutes, 'minute').toDate();
 };
 
 const getMinutesFromTime = (time) => {
