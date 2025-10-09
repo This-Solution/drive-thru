@@ -9,6 +9,7 @@ import com.drivethru.service.error.CustomErrorHolder;
 import com.drivethru.service.error.CustomException;
 import com.drivethru.service.repository.*;
 import jakarta.transaction.Transactional;
+import org.apache.commons.text.similarity.LevenshteinDistance;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
@@ -107,10 +108,12 @@ public class CarDetailsServiceImpl implements CarDetailService {
         }
         String cameraType = cameraConfig.getCameraType();
 
+        String matchingPlate = getRecentlySeenPlate(plateNumber);
+
+
         List<UserDetail> userDetails = userDetailRepository.findBySiteIdAndIsActiveTrue(siteId);
-        Optional<CarDetail> existingCar = carDetailRepository.findByCarPlateNumber(plateNumber);
-        OffsetDateTime time = OffsetDateTime.parse(timestamp);
-        LocalDateTime createdDate = time.toLocalDateTime();
+        Optional<CarDetail> existingCar = carDetailRepository.findByCarPlateNumber(matchingPlate);
+
         CarDetail carDetail;
 
         if (existingCar.isPresent()) {
@@ -120,7 +123,7 @@ public class CarDetailsServiceImpl implements CarDetailService {
                 carDetail.setCarType(carType);
                 carDetail.setCarColor(carColor);
                 carDetail.setConfidence(String.valueOf(imageConfidence));
-                carDetail.setCreatedDate(createdDate);
+                carDetail.setCreatedDate(LocalDateTime.now());
 
                 try {
                     Path tempDir = Files.createTempDirectory("car-images");
@@ -148,7 +151,7 @@ public class CarDetailsServiceImpl implements CarDetailService {
             carDetail.setCarColor(carColor);
             carDetail.setCarPlateNumber(plateNumber);
             carDetail.setConfidence(String.valueOf(imageConfidence));
-            carDetail.setCreatedDate(createdDate);
+            carDetail.setCreatedDate(LocalDateTime.now());
 
             try {
                 Path tempDir = Files.createTempDirectory("car-images");
@@ -184,7 +187,7 @@ public class CarDetailsServiceImpl implements CarDetailService {
         }
         CarResponse carResponse = new CarResponse();
         carResponse.setCameraType(cameraType);
-        carResponse.setCarPlateNumber(plateNumber);
+        carResponse.setCarPlateNumber(matchingPlate);
         carResponse.setCameraName(cameraConfig.getCameraName());
 
         CarLog log = new CarLog();
@@ -197,6 +200,24 @@ public class CarDetailsServiceImpl implements CarDetailService {
         }
 
     }
+
+    public String getRecentlySeenPlate(String plateNumber) {
+        LocalDateTime thirtyMinutesAgo = LocalDateTime.now().minusMinutes(60);
+
+        List<CarDetail> recentCars = carDetailRepository.findAllByCreatedDateAfter(thirtyMinutesAgo);
+
+        LevenshteinDistance levenshtein = new LevenshteinDistance();
+
+        for (CarDetail car : recentCars) {
+            int distance = levenshtein.apply(car.getCarPlateNumber(), plateNumber);
+            if (distance <= 2) {
+                System.out.println("Fuzzy match found: Input Plate = " + plateNumber + ", Existing Plate = " + car.getCarPlateNumber());
+                return car.getCarPlateNumber();
+            }
+        }
+        return null;
+    }
+
 
     private Path saveBase64Image(String base64Image, String fileName, Path directory) {
         try {
@@ -307,7 +328,7 @@ public class CarDetailsServiceImpl implements CarDetailService {
     @Override
     public List<CurrentOrderItemResponse> getCurrentOrderDetails(CarDetailRequest carDetailRequest) {
         OrderDetail orderDetail = orderDetailRepository.findFirstByTenantIdAndCarPlateNumberOrderByCreatedDateDesc(carDetailRequest.getTenantId(), carDetailRequest.getCarPlateNumber());
-        if(orderDetail==null){
+        if (orderDetail == null) {
             throw new CustomException(CustomErrorHolder.ORDER_NOT_FOUND);
         }
         Double totalPrice = Double.valueOf(orderDetail.getTotalPrice());
@@ -361,8 +382,7 @@ public class CarDetailsServiceImpl implements CarDetailService {
     @Override
     public List<CameraResponseDTO> latestInfo(Integer siteId) {
         Site site = siteRepository.findBySiteIdAndIsActiveTrue(siteId);
-        if(site == null)
-        {
+        if (site == null) {
             throw new CustomException(CustomErrorHolder.SITE_NOT_FOUND);
         }
         int reloadTime = site.getReloadTime();

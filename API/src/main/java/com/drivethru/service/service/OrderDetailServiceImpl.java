@@ -62,7 +62,7 @@ public class OrderDetailServiceImpl implements OrderDetailService {
     @Override
     @Transactional
     public void createdOrder(WebhookOrderRequest webhookOrderRequest) {
-        Integer totalPrice;
+        Double totalPrice;
         Document doc;
         try {
             DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
@@ -70,7 +70,7 @@ public class OrderDetailServiceImpl implements OrderDetailService {
             InputStream xmlStream = new ByteArrayInputStream(webhookOrderRequest.getOrder_xml().getBytes(StandardCharsets.UTF_8));
             doc = builder.parse(xmlStream);
             String totalPriceStr = doc.getElementsByTagName(Constants.TOTAL_PRICE).item(0).getTextContent();
-            totalPrice = (int) Double.parseDouble(totalPriceStr);
+            totalPrice = Double.parseDouble(totalPriceStr);
         } catch (Exception e) {
             throw new CustomException(CustomErrorHolder.ORDER_NOT_FOUND);
         }

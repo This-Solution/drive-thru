@@ -21,7 +21,7 @@ public class OrderDetail {
     @Column(name = "CarPlateNumber")
     private String carPlateNumber;
     @Column(name = "TotalPrice")
-    private Integer totalPrice;
+    private Double totalPrice;
     @Column(name = "OrderStatus")
     private String orderStatus;
     @Column(name = "SourceIp")
@@ -69,11 +69,11 @@ public class OrderDetail {
         this.carPlateNumber = carPlateNumber;
     }
 
-    public Integer getTotalPrice() {
+    public Double getTotalPrice() {
         return totalPrice;
     }
 
-    public void setTotalPrice(Integer totalPrice) {
+    public void setTotalPrice(Double totalPrice) {
         this.totalPrice = totalPrice;
     }
 
