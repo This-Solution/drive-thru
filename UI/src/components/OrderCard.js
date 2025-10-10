@@ -27,44 +27,49 @@ import OrderItemCard from './cards/OrderItemCard';
 import MainCard from './MainCard';
 import utils from 'utils/utils';
 import dateHelper from 'utils/dateHelper';
+import { useTheme } from '@emotion/react';
 
 const ShowCarDetails = ({ carDetails }) => {
+  const theme = useTheme();
 
   return (
     <>
-      <MainCard content={false} border={false}>
-        <Box
+      <MainCard content={false} border={false} borderRadius={false}>
+        <Stack
           sx={{
-            width: {
-              xs: '50%',
-              md: '60%'
-            },
-            m: 'auto',
-            position: 'relative'
+            px: 4,
+            py: 2,
+            position: 'relative',
+            background: enums.carBgColor[carDetails.last30DayColorStatus]
           }}
         >
           <ImageList variant='standard' cols={1} gap={2}>
-            <ImageListItem>
-              <img src={carDetails.carImageUrl} alt={'car'} loading='lazy' style={{ width: '100%', height: 'auto', display: 'block' }} />
+            <ImageListItem sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+              <img src={carDetails.carImageUrl} alt={'car'} loading='lazy' style={{ width: '80%', height: 'auto', display: 'block' }} />
             </ImageListItem>
-            <ImageListItem>
+            <ImageListItem sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
               <img
                 src={carDetails.plateImageUrl}
                 alt={'car plate'}
                 loading='lazy'
-                style={{ width: '100%', height: 'auto', display: 'block' }}
+                style={{ width: '80%', height: 'auto', display: 'block' }}
               />
             </ImageListItem>
           </ImageList>
-        </Box>
+        </Stack>
         <Divider />
-        <CardContent sx={{ px: 0, py: 1 }}>
-          <Grid container spacing={1}>
+        <CardContent sx={{ px: 0, py: 0 }}>
+          <Grid container>
             <Grid item xs={12}>
-              <Stack direction={'row'} justifyContent={'space-between'} px={2}>
+              <Stack
+                direction={'row'}
+                justifyContent={'space-between'}
+                px={2}
+                py={1}
+                sx={{ backgroundColor: enums.carBgColor[carDetails.last30DayColorStatus] }}
+              >
                 <Stack>
                   <Typography
-                    component={Link}
                     color='textPrimary'
                     variant='body1'
                     sx={{
@@ -77,13 +82,12 @@ const ShowCarDetails = ({ carDetails }) => {
                   >
                     Plate Number
                   </Typography>
-                  <Typography variant='h6' color='textSecondary'>
+                  <Typography variant='h6' color={theme.palette.secondary.darker}>
                     {carDetails.carPlateNumber}
                   </Typography>
                 </Stack>
                 <Stack>
                   <Typography
-                    component={Link}
                     color='textPrimary'
                     variant='body1'
                     sx={{
@@ -96,13 +100,12 @@ const ShowCarDetails = ({ carDetails }) => {
                   >
                     Type
                   </Typography>
-                  <Typography variant='h6' color='textSecondary'>
+                  <Typography variant='h6' color={theme.palette.secondary.darker}>
                     {carDetails.carType}
                   </Typography>
                 </Stack>
                 <Stack>
                   <Typography
-                    component={Link}
                     // to={`/apps/e-commerce/product-details/${id}`}
                     color='textPrimary'
                     variant='body1'
@@ -116,13 +119,12 @@ const ShowCarDetails = ({ carDetails }) => {
                   >
                     Color
                   </Typography>
-                  <Typography variant='h6' color='textSecondary'>
+                  <Typography variant='h6' color={theme.palette.secondary.darker}>
                     {carDetails.carColor}
                   </Typography>
                 </Stack>
                 <Stack>
                   <Typography
-                    component={Link}
                     color='textPrimary'
                     variant='body1'
                     sx={{
@@ -135,7 +137,7 @@ const ShowCarDetails = ({ carDetails }) => {
                   >
                     In Time
                   </Typography>
-                  <Typography variant='h6' color='textSecondary'>
+                  <Typography variant='h6' color={theme.palette.secondary.darker}>
                     {dateHelper.getTimeFormat(carDetails.createdTime)}
                   </Typography>
                 </Stack>
@@ -145,7 +147,7 @@ const ShowCarDetails = ({ carDetails }) => {
               <Divider />
             </Grid>
             <Grid item xs={12}>
-              <Stack spacing={1} px={2} pt={1}>
+              <Stack spacing={1} px={2} pt={2}>
                 <Stack direction={'row'} alignItems={'center'} justifyContent={'space-between'}>
                   <Stack direction={'row'} spacing={2}>
                     <Avatar
@@ -329,7 +331,11 @@ const OrderAndCarDetails = ({
             <Stack direction={'row'} justifyContent={'space-between'} alignItems={'center'}>
               <Typography variant='h5'>Current Order Being Placed</Typography>
               <Chip
-                label={<Typography sx={{ fontSize: 10, lineHeight: 1 }}>{`Total :- ${utils.formatCurrency(currentOrders[0].totalPrice)}`}</Typography>}
+                label={
+                  <Typography
+                    sx={{ fontSize: 10, lineHeight: 1 }}
+                  >{`Total :- ${utils.formatCurrency(currentOrders[0].totalPrice)}`}</Typography>
+                }
                 sx={{
                   backgroundColor: '#b4d8f0',
                   borderRadius: '20px',
@@ -533,7 +539,12 @@ const DeliveryCameraView = ({ cameraInfo, cameraReload }) => {
 
 const OrderCard = ({ cameraConfig = {} }) => {
   return (
-    <MainCard content={false} sx={{ minHeight: '90vh' }}>
+    <MainCard
+      content={false}
+      sx={{
+        minHeight: '90vh'
+      }}
+    >
       <Stack direction={'row'} justifyContent={'space-between'} p={2}>
         <Stack>
           <Typography variant='h5'>{`${cameraConfig.cameraName} (${enums.cameraType[cameraConfig.cameraType]})`}</Typography>

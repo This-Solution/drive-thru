@@ -72,6 +72,11 @@ const enums = {
     PINK: 'PINK'
     // WHITE: '#d9dadb'
   },
+  carBgColor: {
+    GREEN: '#cfebce',
+    RED: '#f5b5bd',
+    PINK: '#faebed'
+  },
   displayAdminRole: {
     superAdmin: 'Super Admin',
     admin: 'Admin',

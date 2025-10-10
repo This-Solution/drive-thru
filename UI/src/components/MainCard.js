@@ -21,6 +21,7 @@ const MainCard = forwardRef(
       children,
       subheader,
       content = true,
+      borderRadius = true,
       contentSX = {},
       darkTitle,
       divider = true,
@@ -45,7 +46,7 @@ const MainCard = forwardRef(
         sx={{
           position: 'relative',
           border: border ? '1px solid' : 'none',
-          borderRadius: 2,
+          borderRadius: borderRadius ? 2 : 0,
           borderColor: theme.palette.mode === 'dark' ? theme.palette.divider : theme.palette.grey.A800,
           boxShadow: boxShadow && (!border || theme.palette.mode === 'dark') ? shadow || theme.customShadows.z1 : 'inherit',
           ':hover': {
