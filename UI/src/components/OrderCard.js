@@ -28,9 +28,17 @@ import MainCard from './MainCard';
 import utils from 'utils/utils';
 import dateHelper from 'utils/dateHelper';
 import { useTheme } from '@emotion/react';
+import ViewCarDetail from 'pages/Orders/viewCarDetail';
 
 const ShowCarDetails = ({ carDetails }) => {
   const theme = useTheme();
+  const [openCarDetailDialog, setOpenCarDetailDialog] = useState(false);
+
+  const handleClick = (e) => {
+    if (e.detail === 3) {
+      setOpenCarDetailDialog(true)
+    }
+  }
 
   return (
     <>
@@ -40,11 +48,11 @@ const ShowCarDetails = ({ carDetails }) => {
             px: 4,
             py: 2,
             position: 'relative',
-            background: enums.carBgColor[carDetails.last30DayColorStatus]
+            background: carDetails.last30DayCount > 0 ? enums.carBgColor[carDetails.last30DayColorStatus] : '#D6E4FF'
           }}
         >
-          <ImageList variant='standard' cols={1} gap={2}>
-            <ImageListItem sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+          <ImageList variant='standard' cols={1} gap={2} onClick={(e) => handleClick(e)}>
+            <ImageListItem sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }} >
               <img src={carDetails.carImageUrl} alt={'car'} loading='lazy' style={{ width: '80%', height: 'auto', display: 'block' }} />
             </ImageListItem>
             <ImageListItem sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
@@ -66,7 +74,7 @@ const ShowCarDetails = ({ carDetails }) => {
                 justifyContent={'space-between'}
                 px={2}
                 py={1}
-                sx={{ backgroundColor: enums.carBgColor[carDetails.last30DayColorStatus] }}
+                sx={{ backgroundColor: carDetails.last30DayCount > 0 ? enums.carBgColor[carDetails.last30DayColorStatus] : '#D6E4FF' }}
               >
                 <Stack>
                   <Typography
@@ -203,6 +211,7 @@ const ShowCarDetails = ({ carDetails }) => {
             </Grid>
           </Grid>
         </CardContent>
+        {openCarDetailDialog && <ViewCarDetail onCancel={() => setOpenCarDetailDialog(false)} carPlateNumber={carDetails.carPlateNumber} />}
       </MainCard>
     </>
   );

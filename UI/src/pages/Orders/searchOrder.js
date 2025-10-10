@@ -52,15 +52,14 @@ const SearchOrder = () => {
   });
 
   useEffect(() => {
-    console.log(formik.values);
     getOrderDetails(formik.values);
   }, []);
 
   const getOrderDetails = async (payload) => {
     const { data } = await apiService.getOrdersAsync(
       dateHelper.formatDate(payload.date),
-      dateHelper.getTimeFormat(payload.openingTime),
-      dateHelper.getTimeFormat(payload.closingTime),
+      dateHelper.getTimeFormatForSearch(payload.openingTime),
+      dateHelper.getTimeFormatForSearch(payload.closingTime),
       search
     );
     if (data) {
@@ -71,7 +70,7 @@ const SearchOrder = () => {
 
   const formik = useFormik({
     initialValues: {
-      openingTime: dayjs(new Date()),
+      openingTime: dateHelper.getTimeFromMinutes(0),
       closingTime: dateHelper.getTimeFromMinutes(30),
       date: dateHelper.formatDate(new Date())
     },
@@ -239,91 +238,91 @@ const SearchOrder = () => {
           </MainCard>
 
           <Grid container spacing={2} p={2}>
-            {groupedOrders &&
+            {isLoading ? (
+              <TableContainer>
+                <Table size='small'>
+                  <TableBody>
+                    <TableRow>
+                      <TableCell sx={{ textAlign: 'center', height: '200px' }} colSpan={6}>
+                        <CircularProgress />
+                      </TableCell>
+                    </TableRow>
+                  </TableBody>
+                </Table>
+              </TableContainer>
+            ) :
+              groupedOrders &&
               groupedOrders.map((order, index) => (
                 <Grid item md={12} key={order.orderId}>
-                  {isLoading ? (
-                    <TableContainer>
-                      <Table size='small'>
-                        <TableBody>
-                          <TableRow>
-                            <TableCell sx={{ textAlign: 'center', height: '200px' }} colSpan={columns.length}>
-                              <CircularProgress />
-                            </TableCell>
-                          </TableRow>
-                        </TableBody>
-                      </Table>
-                    </TableContainer>
-                  ) : (
-                    <TableContainer>
-                      <Table size='small'>
-                        <TableHead>
-                          <TableRow sx={{ backgroundColor: '#f5f5f5' }}>
-                            <TableCell />
-                            <TableCell>Order Date</TableCell>
-                            <TableCell>Plate Number</TableCell>
-                            <TableCell>Car Color</TableCell>
-                            <TableCell>Total</TableCell>
-                            <TableCell align='right'>Actions</TableCell>
-                          </TableRow>
-                        </TableHead>
+                  <TableContainer>
+                    <Table size='small'>
+                      <TableHead>
+                        <TableRow sx={{ backgroundColor: '#f5f5f5' }}>
+                          <TableCell />
+                          <TableCell>Order Date</TableCell>
+                          <TableCell>Plate Number</TableCell>
+                          <TableCell>Car Color</TableCell>
+                          <TableCell>Total</TableCell>
+                          <TableCell align='right'>Actions</TableCell>
+                        </TableRow>
+                      </TableHead>
 
-                        <TableBody>
-                          <TableRow hover>
-                            <TableCell>
-                              <IconButton size='small' onClick={() => handleToggle(index)}>
-                                {openIndex === index ? <UpOutlined /> : <DownOutlined />}
-                              </IconButton>
-                            </TableCell>
+                      <TableBody>
+                        <TableRow hover>
+                          <TableCell>
+                            <IconButton size='small' onClick={() => handleToggle(index)}>
+                              {openIndex === index ? <UpOutlined /> : <DownOutlined />}
+                            </IconButton>
+                          </TableCell>
 
-                            <TableCell>{dateHelper.formatDate(order.createdDate)}</TableCell>
-                            <TableCell>{order.carPlateNumber}</TableCell>
-                            <TableCell>{order.carColor}</TableCell>
-                            <TableCell>{order.totalPrice ? utils.formatCurrency(order.totalPrice) : 0}</TableCell>
-                            <TableCell align='right'>
-                              <IconButton
-                                size='small'
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  handleCommentClick(order);
-                                }}
-                              >
-                                <CommentIcon sx={{ color: theme.palette.primary.main }} />
-                              </IconButton>
-                            </TableCell>
-                          </TableRow>
-                          <TableRow>
-                            <TableCell style={{ paddingBottom: 0, paddingTop: 0 }} colSpan={5}>
-                              <Collapse in={openIndex === index} timeout='auto' unmountOnExit>
-                                <Box sx={{ margin: 2 }}>
-                                  <Table size='small'>
-                                    <TableHead>
-                                      <TableRow>
-                                        <TableCell>Item Name</TableCell>
-                                        <TableCell align='center'>Quantity</TableCell>
-                                        <TableCell align='center'>Price ($)</TableCell>
+                          <TableCell>{dateHelper.formatDate(order.createdDate)}</TableCell>
+                          <TableCell>{order.carPlateNumber}</TableCell>
+                          <TableCell>{order.carColor}</TableCell>
+                          <TableCell>{order.totalPrice ? utils.formatCurrency(order.totalPrice) : 0}</TableCell>
+                          <TableCell align='right'>
+                            <IconButton
+                              size='small'
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleCommentClick(order);
+                              }}
+                            >
+                              <CommentIcon sx={{ color: theme.palette.primary.main }} />
+                            </IconButton>
+                          </TableCell>
+                        </TableRow>
+                        <TableRow>
+                          <TableCell style={{ paddingBottom: 0, paddingTop: 0 }} colSpan={5}>
+                            <Collapse in={openIndex === index} timeout='auto' unmountOnExit>
+                              <Box sx={{ margin: 2 }}>
+                                <Table size='small'>
+                                  <TableHead>
+                                    <TableRow>
+                                      <TableCell>Item Name</TableCell>
+                                      <TableCell align='center'>Quantity</TableCell>
+                                      <TableCell align='center'>Price ($)</TableCell>
+                                    </TableRow>
+                                  </TableHead>
+                                  <TableBody>
+                                    {order.items.map((item, i) => (
+                                      <TableRow key={i}>
+                                        <TableCell>{item.name}</TableCell>
+                                        <TableCell align='center'>{item.quantity}</TableCell>
+                                        <TableCell align='center'>{utils.formatCurrency(item.price)}</TableCell>
                                       </TableRow>
-                                    </TableHead>
-                                    <TableBody>
-                                      {order.items.map((item, i) => (
-                                        <TableRow key={i}>
-                                          <TableCell>{item.name}</TableCell>
-                                          <TableCell align='center'>{item.quantity}</TableCell>
-                                          <TableCell align='center'>{utils.formatCurrency(item.price)}</TableCell>
-                                        </TableRow>
-                                      ))}
-                                    </TableBody>
-                                  </Table>
-                                </Box>
-                              </Collapse>
-                            </TableCell>
-                          </TableRow>
-                        </TableBody>
-                      </Table>
-                    </TableContainer>
-                  )}
+                                    ))}
+                                  </TableBody>
+                                </Table>
+                              </Box>
+                            </Collapse>
+                          </TableCell>
+                        </TableRow>
+                      </TableBody>
+                    </Table>
+                  </TableContainer>
                 </Grid>
-              ))}
+              ))
+            }
           </Grid>
         </Grid>
       </Grid>

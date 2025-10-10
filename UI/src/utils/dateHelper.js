@@ -81,7 +81,7 @@ function dateFromDay(year, day) {
 }
 
 const getTimeFromMinutes = (minutes) => {
-  return dayjs().add(minutes, 'minute').toDate();
+  return dayjs(new Date()).add(minutes, 'minute').local().toDate();
 };
 
 const getMinutesFromTime = (time) => {
@@ -91,6 +91,10 @@ const getMinutesFromTime = (time) => {
 function convertTimeZone(value, timeZone = 'Australia/Melbourne') {
   return dayjs.utc(value).tz(timeZone).format('HH:mm:ss');
 };
+
+function getTimeFormatForSearch(value) {
+  return dayjs(value).local().format('HH:mm:ss');
+}
 
 function getTimeFormat(value) {
   return dayjs(`${value}Z`).local().format('HH:mm:ss');
@@ -118,5 +122,6 @@ export default {
   getTimeFromMinutes,
   getMinutesFromTime,
   convertTimeZone,
-  getTimeFormat
+  getTimeFormat,
+  getTimeFormatForSearch
 };

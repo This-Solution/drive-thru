@@ -397,6 +397,15 @@ async function saveOrderComment(payload) {
   return await axios(config);
 }
 
+async function getCarDetailAsync(payload) {
+  const config = {
+    method: 'post',
+    url: '/CarLog',
+    data: payload
+  }
+  return await axios(config)
+}
+
 export default {
   // auth
   loginAsync,
@@ -448,5 +457,6 @@ export default {
   getSitesByTenantIdAsync,
   updateCameraAsync,
   deleteCameraAsync,
-  getAllSitesAsync
+  getAllSitesAsync,
+  getCarDetailAsync
 };
