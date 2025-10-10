@@ -18,8 +18,9 @@ public class CustomErrorHolder {
     public static final CustomError ADD_USER_FAILED = new CustomError("ERROR", "Failed to Add User", "Failed to add new user.");
     public static final CustomError ONLY_SUPER_ADMIN_CAN_ACCESS = new CustomError("ERROR", "Super Admin Access Required", "Only Super Admin can perform this action.");
     public static final CustomError EMAIL_INCORRECT = new CustomError("ERROR", "Invalid Email", "The email address entered is invalid.");
-    public static final CustomError CAR_VISIT_NOT_FOUND = new CustomError("ERROR", "CarVisit Not Found", "The specified car visit was not found.");
-    public static final CustomError EMAIL_ALREADY_EXISTS  = new CustomError("ERROR","Email already exists","Email already exists");
-    public static final CustomError PHONE_NUMBER_ALREADY_EXISTS  = new CustomError("ERROR","Phone number already exists","Phone number already exists");
+    public static final CustomError CAR_VISIT_NOT_FOUND = new CustomError("ERROR", "CarVisit Not Found", "Car visit not found.");
+    public static final CustomError EMAIL_ALREADY_EXISTS = new CustomError("ERROR", "Email already exists", "Email already exists");
+    public static final CustomError PHONE_NUMBER_ALREADY_EXISTS = new CustomError("ERROR", "Phone number already exists", "Phone number already exists");
+    public static final CustomError CAR_LOG_NOT_FOUND = new CustomError("ERROR", "CarLog Not Found", "Car Log not found.");
 
 }

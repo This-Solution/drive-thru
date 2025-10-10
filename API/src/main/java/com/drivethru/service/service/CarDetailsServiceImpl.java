@@ -18,7 +18,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.OffsetDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -176,8 +175,8 @@ public class CarDetailsServiceImpl implements CarDetailService {
         LocalDateTime threeMinutesAgo = LocalDateTime.now().minusMinutes(3);
         boolean recentVisitExists = carVisitRepository.existsByCarIdAndSiteIdAndCameraIdAndCreatedDateAfter(carDetail.getCarId(), site.getSiteId(), cameraConfig.getCameraId(), threeMinutesAgo);
 
+        CarVisit carVisit = new CarVisit();
         if (!recentVisitExists) {
-            CarVisit carVisit = new CarVisit();
             carVisit.setCarId(carDetail.getCarId());
             carVisit.setTenantId(cameraConfig.getTenantId());
             carVisit.setSiteId(site.getSiteId());
@@ -191,8 +190,9 @@ public class CarDetailsServiceImpl implements CarDetailService {
         carResponse.setCameraName(cameraConfig.getCameraName());
 
         CarLog log = new CarLog();
-        log.setCarData(carDetailJson.toString());
+        log.setCarData(carDetailJson);
         log.setCreatedDate(LocalDateTime.now());
+        log.setCarVisitId(carVisit.getCarVisitId());
         carLogRepository.save(log);
 
         for (UserDetail user : userDetails) {

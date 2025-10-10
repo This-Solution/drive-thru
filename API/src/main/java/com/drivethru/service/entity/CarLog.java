@@ -1,8 +1,11 @@
 package com.drivethru.service.entity;
 
 import jakarta.persistence.*;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
 
 import java.time.LocalDateTime;
+import java.util.Map;
 
 @Entity
 @Table(name = "CarLog", schema = "Vehicle")
@@ -12,9 +15,20 @@ public class CarLog {
     @Column(name = "CarLogId")
     private Integer carLogId;
     @Column(name = "CarData")
-    private String carData;
+    @JdbcTypeCode(SqlTypes.JSON)
+    private Map<String, Object> carData;
     @Column(name = "CreatedDate")
     private LocalDateTime createdDate;
+    @Column(name = "CarVisitId")
+    private int carVisitId;
+
+    public int getCarVisitId() {
+        return carVisitId;
+    }
+
+    public void setCarVisitId(int carVisitId) {
+        this.carVisitId = carVisitId;
+    }
 
     public Integer getCarLogId() {
         return carLogId;
@@ -24,11 +38,11 @@ public class CarLog {
         this.carLogId = carLogId;
     }
 
-    public String getCarData() {
+    public Map<String, Object> getCarData() {
         return carData;
     }
 
-    public void setCarData(String carData) {
+    public void setCarData(Map<String, Object> carData) {
         this.carData = carData;
     }
 
