@@ -176,7 +176,7 @@ public class CarDetailsServiceImpl implements CarDetailService {
         CarVisit recentVisitExists = carVisitRepository.findByCarIdAndSiteIdAndCameraIdAndCreatedDateAfter(carDetail.getCarId(), site.getSiteId(), cameraConfig.getCameraId(), threeMinutesAgo);
 
         CarVisit carVisit = new CarVisit();
-        if (recentVisitExists != null) {
+        if (recentVisitExists == null) {
             carVisit.setCarId(carDetail.getCarId());
             carVisit.setTenantId(cameraConfig.getTenantId());
             carVisit.setSiteId(site.getSiteId());
