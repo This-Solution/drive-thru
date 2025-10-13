@@ -18,6 +18,6 @@ public interface CarVisitRepository extends JpaRepository<CarVisit, Integer> {
 
     List<CarVisit> findByCarId(Integer carId);
 
-    boolean existsByCarIdAndSiteIdAndCameraIdAndCreatedDateAfter(Integer carId, Integer siteId, Integer cameraId, LocalDateTime createdDate);
+    CarVisit findByCarIdAndSiteIdAndCameraIdAndCreatedDateAfter(Integer carId, Integer siteId, Integer cameraId, LocalDateTime createdDate);
 
 }

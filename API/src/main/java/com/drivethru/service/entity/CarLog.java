@@ -20,13 +20,13 @@ public class CarLog {
     @Column(name = "CreatedDate")
     private LocalDateTime createdDate;
     @Column(name = "CarVisitId")
-    private int carVisitId;
+    private Integer carVisitId;
 
-    public int getCarVisitId() {
+    public Integer getCarVisitId() {
         return carVisitId;
     }
 
-    public void setCarVisitId(int carVisitId) {
+    public void setCarVisitId(Integer carVisitId) {
         this.carVisitId = carVisitId;
     }
 

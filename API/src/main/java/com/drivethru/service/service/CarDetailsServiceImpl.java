@@ -173,10 +173,10 @@ public class CarDetailsServiceImpl implements CarDetailService {
         }
 
         LocalDateTime threeMinutesAgo = LocalDateTime.now().minusMinutes(3);
-        boolean recentVisitExists = carVisitRepository.existsByCarIdAndSiteIdAndCameraIdAndCreatedDateAfter(carDetail.getCarId(), site.getSiteId(), cameraConfig.getCameraId(), threeMinutesAgo);
+        CarVisit recentVisitExists = carVisitRepository.findByCarIdAndSiteIdAndCameraIdAndCreatedDateAfter(carDetail.getCarId(), site.getSiteId(), cameraConfig.getCameraId(), threeMinutesAgo);
 
         CarVisit carVisit = new CarVisit();
-        if (!recentVisitExists) {
+        if (recentVisitExists != null) {
             carVisit.setCarId(carDetail.getCarId());
             carVisit.setTenantId(cameraConfig.getTenantId());
             carVisit.setSiteId(site.getSiteId());
@@ -186,13 +186,22 @@ public class CarDetailsServiceImpl implements CarDetailService {
         }
         CarResponse carResponse = new CarResponse();
         carResponse.setCameraType(cameraType);
-        carResponse.setCarPlateNumber(matchingPlate);
+        if (matchingPlate != null) {
+            carResponse.setCarPlateNumber(matchingPlate);
+        } else {
+            carResponse.setCameraName(plateNumber);
+        }
         carResponse.setCameraName(cameraConfig.getCameraName());
 
         CarLog log = new CarLog();
         log.setCarData(carDetailJson);
         log.setCreatedDate(LocalDateTime.now());
-        log.setCarVisitId(carVisit.getCarVisitId());
+        if (recentVisitExists == null) {
+            log.setCarVisitId(carVisit.getCarVisitId());
+        } else {
+            log.setCarVisitId(recentVisitExists.getCarVisitId());
+        }
+
         carLogRepository.save(log);
 
         for (UserDetail user : userDetails) {
