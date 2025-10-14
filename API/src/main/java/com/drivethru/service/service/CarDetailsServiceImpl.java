@@ -189,7 +189,7 @@ public class CarDetailsServiceImpl implements CarDetailService {
         if (matchingPlate != null) {
             carResponse.setCarPlateNumber(matchingPlate);
         } else {
-            carResponse.setCameraName(plateNumber);
+            carResponse.setCarPlateNumber(plateNumber);
         }
         carResponse.setCameraName(cameraConfig.getCameraName());
 
