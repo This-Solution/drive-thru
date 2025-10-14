@@ -338,7 +338,7 @@ public class CarDetailsServiceImpl implements CarDetailService {
     public List<CurrentOrderItemResponse> getCurrentOrderDetails(CarDetailRequest carDetailRequest) {
         OrderDetail orderDetail = orderDetailRepository.findFirstByTenantIdAndCarPlateNumberOrderByCreatedDateDesc(carDetailRequest.getTenantId(), carDetailRequest.getCarPlateNumber());
         if (orderDetail == null) {
-            throw new CustomException(CustomErrorHolder.ORDER_NOT_FOUND);
+            return null;
         }
         Double totalPrice = Double.valueOf(orderDetail.getTotalPrice());
         List<OrderItem> orderItems = orderItemRepository.findByOrderId(orderDetail.getOrderId());
