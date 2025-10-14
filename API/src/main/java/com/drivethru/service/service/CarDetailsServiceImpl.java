@@ -303,7 +303,7 @@ public class CarDetailsServiceImpl implements CarDetailService {
             }
         }
 
-        if (Constants.LAN_CAMERA.equals(cameraType) && carVisits.size() == 1) {
+        if ((Constants.LAN_CAMERA.equals(cameraType) && carVisits.size() == 1) || (Constants.COUNTER_CAMERA.equals(cameraType) && carVisits.size() == 2)) {
             countLast30 = 0;
             redLast30 = 0;
             greenLast30 = 0;
