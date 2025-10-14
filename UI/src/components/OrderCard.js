@@ -36,9 +36,9 @@ const ShowCarDetails = ({ carDetails }) => {
 
   const handleClick = (e) => {
     if (e.detail === 3) {
-      setOpenCarDetailDialog(true)
+      setOpenCarDetailDialog(true);
     }
-  }
+  };
 
   return (
     <>
@@ -52,7 +52,7 @@ const ShowCarDetails = ({ carDetails }) => {
           }}
         >
           <ImageList variant='standard' cols={1} gap={2} onClick={(e) => handleClick(e)}>
-            <ImageListItem sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }} >
+            <ImageListItem sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
               <img src={carDetails.carImageUrl} alt={'car'} loading='lazy' style={{ width: '80%', height: 'auto', display: 'block' }} />
             </ImageListItem>
             <ImageListItem sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
@@ -476,17 +476,17 @@ const OrderCameraView = ({ cameraInfo, cameraReload }) => {
 const DeliveryCameraView = ({ cameraInfo, cameraReload }) => {
   const [currentOrders, setCurrentOrders] = useState([]);
   const [carDetails, setCarDetails] = useState({});
-  const { deliveryWindow, setDeliveryWindow } = useStomp();
+  const { deliveryWindow, setDeliveryWindow, orderWindow, setOrderWindow } = useStomp();
   const { user } = useSelector((state) => state.auth);
   const { lastCars } = useSelector((state) => state.lookup);
 
   const [isLoading, setIsLoading] = useState(true);
 
-  const fetchCarInformation = async (carPlateNumber = '') => {
+  const fetchCarInformation = async () => {
     setIsLoading(true);
     const payload = {
       tenantId: user.tenantId,
-      carPlateNumber: deliveryWindow[cameraInfo] ? deliveryWindow[cameraInfo] : carPlateNumber
+      carPlateNumber: deliveryWindow[cameraInfo]
     };
     const [carInfo, orderInfo] = await Promise.all([ApiService.getCarDetailsAsync(payload), ApiService.getCurrentOrderAsync(payload)]);
 
@@ -515,6 +515,10 @@ const DeliveryCameraView = ({ cameraInfo, cameraReload }) => {
   useEffect(() => {
     if (!isEmpty(deliveryWindow) && deliveryWindow[cameraInfo]) {
       fetchCarInformation();
+      if (!isEmpty(deliveryWindow) && !isEmpty(orderWindow)) {
+        const newObj = Object.fromEntries(Object.entries(orderWindow).filter(([key, value]) => value !== deliveryWindow[cameraInfo]));
+        setOrderWindow(newObj);
+      }
     }
     if (!deliveryWindow[cameraInfo]) {
       setCarDetails({});
@@ -524,7 +528,13 @@ const DeliveryCameraView = ({ cameraInfo, cameraReload }) => {
   return (
     <>
       {!isEmpty(carDetails) ? (
-        <OrderAndCarDetails carDetails={carDetails} cameraName={cameraInfo} currentOrders={currentOrders} cameraReload={cameraReload} />
+        <OrderAndCarDetails
+          key={carDetails.carId}
+          carDetails={carDetails}
+          cameraName={cameraInfo}
+          currentOrders={currentOrders}
+          cameraReload={cameraReload}
+        />
       ) : (
         <Stack pt={'calc(16px + 25%)'}>
           <Stack alignItems={'center'} justifyContent={'center'} spacing={2}>

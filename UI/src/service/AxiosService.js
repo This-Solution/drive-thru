@@ -57,7 +57,7 @@ axios.interceptors.response.use(
   },
   async (error) => {
     const originalRequest = error.config;
-    if (error.response.status === enums.ApiResult.ValidationError || error.response.status === enums.ApiResult.BadRequest) {
+    if (error.response && (error.response.status === enums.ApiResult.ValidationError || error.response.status === enums.ApiResult.BadRequest)) {
       return { data: null, error: formatValidationError(error.response.data) };
     }
 
