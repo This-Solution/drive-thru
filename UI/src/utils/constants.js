@@ -35,6 +35,7 @@ const constants = {
     TAS: 'Australia/Hobart',
     ACT: 'Australia/Sydney'
   },
+  reloadTime: 1000,
   dateFormat: 'dd/MM/yyyy',
   appName: 'Drive-thru',
   no_image: 'https://stprod0001ts.blob.core.windows.net/cjsales/no-image.jpg',

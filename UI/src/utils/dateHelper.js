@@ -84,6 +84,10 @@ const getTimeFromMinutes = (minutes) => {
   return dayjs(new Date()).add(minutes, 'minute').local().toDate();
 };
 
+const getTimeFromSeconds = (sec) => {
+  return dayjs(new Date()).add(sec, 'second').toDate();
+};
+
 const getMinutesFromTime = (time) => {
   return dayjs(time).diff(dayjs(time).startOf('day'), 'minute');
 };
@@ -99,7 +103,6 @@ function getTimeFormatForSearch(value) {
 function getTimeFormat(value) {
   return dayjs(`${value}Z`).local().format('HH:mm:ss');
 }
-
 
 export default {
   formatDate,
@@ -123,5 +126,6 @@ export default {
   getMinutesFromTime,
   convertTimeZone,
   getTimeFormat,
+  getTimeFromSeconds,
   getTimeFormatForSearch
 };

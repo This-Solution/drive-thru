@@ -1,26 +1,16 @@
 // context/StompContext.tsx
 import { Client } from '@stomp/stompjs';
-import { createContext, useContext, useEffect, useRef, useState } from 'react';
+import { createContext, useContext, useEffect, useState } from 'react';
 import { useSelector } from 'store';
 import constants from 'utils/constants';
-import enums from 'utils/enums';
 
 const StompContext = createContext(undefined);
 
 export const StompProvider = ({ children }) => {
   const [errorMessage, setErrorMessage] = useState('');
-  const [orderWindow, setOrderWindow] = useState({});
-  const [deliveryWindow, setDeliveryWindow] = useState({});
-  const [client, setClient] = useState(null);
+  const [carDetailFromCamera, setCarDetailFromCamera] = useState(null);
 
   const { user } = useSelector((state) => state.auth);
-  const clientRef = useRef(null);
-
-  // useEffect(() => {
-  //   if (client && user) {
-  //     console.log('subscribe is called')
-  //   }
-  // }, [client]);
 
   const handleMessage = (message) => {
     if (!message.body) return;
@@ -29,17 +19,15 @@ export const StompProvider = ({ children }) => {
       const cameraType = response.cameraType ?? '';
       const cameraName = response.cameraName ?? '';
       const carPlateNumber = response.carPlateNumber?.toString() ?? '';
-      if (cameraType === enums.cameraTypeConfig.L) {
-        setOrderWindow((prev) => ({
-          ...prev,
-          [cameraName]: carPlateNumber,
-        }));
-      } else if (cameraType === enums.cameraTypeConfig.C) {
-        setDeliveryWindow((prev) => ({
-          ...prev,
-          [cameraName]: carPlateNumber,
-        }));
+
+      const details = {
+        cameraType: cameraType,
+        cameraName: cameraName,
+        carPlateNumber: carPlateNumber
       }
+
+      setCarDetailFromCamera(details);
+
     } catch (e) {
       console.error('Error decoding STOMP message:', e);
     }
@@ -55,11 +43,9 @@ export const StompProvider = ({ children }) => {
       reconnectDelay: 5000,
       debug: (msg) => console.log('DEBUG:', msg),
 
-      onConnect: (frame) => {
+      onConnect: () => {
         console.log('Connected to WebSocket server!');
         client.subscribe(`/topic/send/${user.userId}`, handleMessage);
-
-        setClient(client);
       },
 
       onStompError: (frame) => {
@@ -85,12 +71,8 @@ export const StompProvider = ({ children }) => {
   return (
     <StompContext.Provider
       value={{
-        orderWindow,
-        setOrderWindow,
-        deliveryWindow,
-        setDeliveryWindow,
         errorMessage,
-        clientRef,
+        carDetailFromCamera
       }}
     >
       {children}
