@@ -12,12 +12,16 @@ const CarDetails = ({ cameraInfo }) => {
   const { carDetails } = useSelector((state) => state.carInfo);
 
   const carAndOrderInfo = useMemo(() => {
-    return carDetails.find((car) => car.cameraName === cameraInfo.cameraName);
+    if (!isEmpty(carDetails)) {
+      return carDetails.find((car) => car.cameraName === cameraInfo.cameraName);
+    } else {
+      return [];
+    }
   }, [carDetails]);
 
   return (
     <>
-      {!isEmpty(carAndOrderInfo) ? (
+      {!isEmpty(carAndOrderInfo) && !isEmpty(carAndOrderInfo.carDetails) ? (
         <>
           <ShowCarInfo carDetails={carAndOrderInfo.carDetails} />
           {carAndOrderInfo.lastOrders && carAndOrderInfo.lastOrders.length > 0 && (
