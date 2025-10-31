@@ -95,6 +95,13 @@ public class CarDetailsServiceImpl implements CarDetailService {
             throw new CustomException(CustomErrorHolder.FAILED_CONVERT_DATA);
         }
 
+        CarLog log = new CarLog();
+        carDetailJson.put("car_image_base64","");
+        carDetailJson.put("plate_image_base64","");
+        log.setCarData(carDetailJson);
+        log.setCreatedDate(LocalDateTime.now());
+        carLogRepository.save(log);
+
         Site site = siteRepository.findBySiteNameAndIsActiveTrue(siteName);
         if (site == null) {
             throw new CustomException(CustomErrorHolder.SITE_NOT_FOUND);
@@ -111,7 +118,12 @@ public class CarDetailsServiceImpl implements CarDetailService {
 
 
         List<UserDetail> userDetails = userDetailRepository.findBySiteIdAndIsActiveTrue(siteId);
-        Optional<CarDetail> existingCar = carDetailRepository.findByCarPlateNumber(matchingPlate);
+        Optional<CarDetail> existingCar;
+        if (matchingPlate == null) {
+            existingCar = carDetailRepository.findByCarPlateNumber(plateNumber);
+        } else {
+            existingCar = carDetailRepository.findByCarPlateNumber(matchingPlate);
+        }
 
         CarDetail carDetail;
 
@@ -193,9 +205,7 @@ public class CarDetailsServiceImpl implements CarDetailService {
         }
         carResponse.setCameraName(cameraConfig.getCameraName());
 
-        CarLog log = new CarLog();
-        log.setCarData(carDetailJson);
-        log.setCreatedDate(LocalDateTime.now());
+
         if (recentVisitExists == null) {
             log.setCarVisitId(carVisit.getCarVisitId());
         } else {
