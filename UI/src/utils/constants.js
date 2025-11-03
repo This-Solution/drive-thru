@@ -36,7 +36,7 @@ const constants = {
     ACT: 'Australia/Sydney'
   },
   reloadTime: 1000,
-  dateFormat: 'dd/MM/yyyy',
+  dateFormat: 'DD/MM/YYYY',
   appName: 'Drive-thru',
   no_image: 'https://stprod0001ts.blob.core.windows.net/cjsales/no-image.jpg',
   comboSizes: [0, 1, 2],
