@@ -29,12 +29,14 @@ public interface OrderItemRepository extends JpaRepository<OrderItem, Integer> {
             "INNER JOIN Sales.OrderDetail od ON oi.OrderId = od.OrderId " +
             "INNER JOIN Vehicle.CarDetail cd ON od.CarId = cd.CarId " +
             "WHERE od.SiteId = :siteId " +
+            "AND (:carPlateNumber IS NULL OR cd.CarPlateNumber = :carPlateNumber) " +
             "AND (:itemName IS NULL OR oi.Name = :itemName) " +
             "AND oi.CreatedDate BETWEEN :startTime AND :endTime",
             nativeQuery = true)
     List<OrderItemCarDetailProjection> findOrderItemsWithCarDetails(
             @Param("siteId") Integer siteId,
             @Param("itemName") String itemName,
+            @Param("carPlateNumber") String carPlateNumber,
             @Param("startTime") LocalDateTime startTime,
             @Param("endTime") LocalDateTime endTime
     );
