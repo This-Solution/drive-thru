@@ -168,8 +168,9 @@ const SearchOrder = () => {
                           <DatePicker
                             id='date'
                             name='date'
-                            value={formik.values.date}
+                            value={dayjs(formik.values.date, "DD/MM/YYYY")}
                             label='Date'
+                            inputFormat="DD/MM/YYYY"
                             onChange={(value) => formik.setFieldValue('date', value)}
                             renderInput={(params) => (
                               <TextField fullWidth {...params} error={Boolean(formik.touched.date && formik.errors.date)} />
