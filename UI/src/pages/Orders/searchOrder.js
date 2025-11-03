@@ -33,6 +33,7 @@ import CommentDialog from './commentdialog';
 import utils from 'utils/utils';
 import { GlobalFilter } from 'components/@extended/Table/ReactTableFilter';
 import dayjs from 'dayjs';
+import constants from 'utils/constants';
 
 const SearchOrder = () => {
   const theme = useTheme();
@@ -168,9 +169,9 @@ const SearchOrder = () => {
                           <DatePicker
                             id='date'
                             name='date'
-                            value={dayjs(formik.values.date, "DD/MM/YYYY")}
+                            value={dayjs(formik.values.date, constants.dateFormat)}
                             label='Date'
-                            inputFormat="DD/MM/YYYY"
+                            inputFormat={constants.dateFormat}
                             onChange={(value) => formik.setFieldValue('date', value)}
                             renderInput={(params) => (
                               <TextField fullWidth {...params} error={Boolean(formik.touched.date && formik.errors.date)} />
