@@ -96,8 +96,8 @@ public class CarDetailsServiceImpl implements CarDetailService {
         }
 
         CarLog log = new CarLog();
-        carDetailJson.put("car_image_base64","");
-        carDetailJson.put("plate_image_base64","");
+        carDetailJson.put("car_image_base64", "");
+        carDetailJson.put("plate_image_base64", "");
         log.setCarData(carDetailJson);
         log.setCreatedDate(LocalDateTime.now());
         carLogRepository.save(log);
@@ -139,16 +139,12 @@ public class CarDetailsServiceImpl implements CarDetailService {
                 try {
                     Path tempDir = Files.createTempDirectory("car-images");
 
-                    Path carImagePath = saveBase64Image(carImageBase64, "car_image.jpg", tempDir);
                     Path plateImagePath = saveBase64Image(plateImageBase64, "plate_image.jpg", tempDir);
 
-                    String carImageName = plateNumber + "_car.jpg";
                     String plateImageName = plateNumber + "_plate.jpg";
 
-                    String blobCarPath = azureFileUploaderService.uploadFile(currentDateFolder, carImageName, carImagePath);
                     String blobPlatePath = azureFileUploaderService.uploadFile(currentDateFolder, plateImageName, plateImagePath);
 
-                    carDetail.setCarImageUrl(blobCarPath);
                     carDetail.setPlateImageUrl(blobPlatePath);
                 } catch (Exception e) {
                     throw new CustomException(CustomErrorHolder.IMAGE_UPLOAD_FAILED);
