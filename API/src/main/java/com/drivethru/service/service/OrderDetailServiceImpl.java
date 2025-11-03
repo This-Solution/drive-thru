@@ -136,7 +136,7 @@ public class OrderDetailServiceImpl implements OrderDetailService {
     }
 
     @Override
-    public List<OrderItemCarDetailProjection> getOrderItems(Integer siteId, String itemName, String carPlateNumber, LocalDate localDate, String startTime, String endTime) {
+    public List<OrderItemCarDetailProjection> getOrderItems(Integer siteId, String itemName, LocalDate localDate, String startTime, String endTime) {
         if (itemName != null && itemName.trim().isEmpty()) {
             itemName = null;
         }
@@ -154,7 +154,7 @@ public class OrderDetailServiceImpl implements OrderDetailService {
         } else {
             actualEndTime = localDate.atTime(LocalTime.MAX);
         }
-        List<OrderItemCarDetailProjection> orderItems = orderItemRepository.findOrderItemsWithCarDetails(siteId, itemName, carPlateNumber, actualStartTime, actualEndTime);
+        List<OrderItemCarDetailProjection> orderItems = orderItemRepository.findOrderItemsWithCarDetails(siteId, itemName, actualStartTime, actualEndTime);
         return orderItems;
     }
 }

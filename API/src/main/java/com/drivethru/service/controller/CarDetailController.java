@@ -91,7 +91,7 @@ public class CarDetailController {
         String token = jwtHelper.cleanToken(authHeader);
         String siteId = jwtHelper.extractSiteId(token);
         ResponseObject<List<OrderItemCarDetailProjection>> responseObject = new ResponseObject<>();
-        List<OrderItemCarDetailProjection> orderItems = orderDetailService.getOrderItems(Integer.valueOf(siteId), itemName, carPlateNumber, localDate, startTime, endTime);
+        List<OrderItemCarDetailProjection> orderItems = orderDetailService.getOrderItems(Integer.valueOf(siteId), itemName, localDate, startTime, endTime);
         responseObject.setData(orderItems);
         return new ResponseEntity<>(responseObject, HttpStatus.OK);
     }
