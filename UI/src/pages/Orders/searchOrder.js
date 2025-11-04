@@ -34,6 +34,7 @@ import utils from 'utils/utils';
 import { GlobalFilter } from 'components/@extended/Table/ReactTableFilter';
 import dayjs from 'dayjs';
 import constants from 'utils/constants';
+import EmptyTable from 'components/@extended/Table/EmptyTable';
 
 const SearchOrder = () => {
   const theme = useTheme();
@@ -48,8 +49,8 @@ const SearchOrder = () => {
 
   const orderSchema = Yup.object().shape({
     date: Yup.date().nullable().required('Date is required.').typeError('Invalid date format.'),
-    openingTime: Yup.date().nullable().required('Opening time is required.').typeError('Invalid time format.'),
-    closingTime: Yup.date().nullable().required('Closing time is required.').typeError('Invalid time format.')
+    startTime: Yup.date().nullable().required('Opening time is required.').typeError('Invalid time format.'),
+    endTime: Yup.date().nullable().required('Closing time is required.').typeError('Invalid time format.')
   });
 
   useEffect(() => {
@@ -59,8 +60,8 @@ const SearchOrder = () => {
   const getOrderDetails = async (payload) => {
     const { data } = await apiService.getOrdersAsync(
       dateHelper.formatDate(payload.date),
-      dateHelper.getTimeFormatForSearch(payload.openingTime),
-      dateHelper.getTimeFormatForSearch(payload.closingTime),
+      dateHelper.getTimeFormatForSearch(payload.startTime),
+      dateHelper.getTimeFormatForSearch(payload.endTime),
       search
     );
     if (data) {
@@ -71,8 +72,8 @@ const SearchOrder = () => {
 
   const formik = useFormik({
     initialValues: {
-      openingTime: dateHelper.getTimeFromMinutes(0),
-      closingTime: dateHelper.getTimeFromMinutes(30),
+      startTime: dateHelper.getTimeFromHour(1),
+      endTime: dateHelper.getTimeFromHour(0),
       date: dateHelper.formatDate(new Date())
     },
     validationSchema: orderSchema,
@@ -184,33 +185,33 @@ const SearchOrder = () => {
 
                         <Grid item md={3}>
                           <TimePicker
-                            id='openingTime'
-                            name='openingTime'
+                            id='startTime'
+                            name='startTime'
                             label='Start Time'
-                            value={formik.values.openingTime}
-                            onChange={handleTimeChange('openingTime')}
+                            value={formik.values.startTime}
+                            onChange={handleTimeChange('startTime')}
                             renderInput={(params) => (
-                              <TextField {...params} fullWidth error={Boolean(formik.touched.openingTime && formik.errors.openingTime)} />
+                              <TextField {...params} fullWidth error={Boolean(formik.touched.startTime && formik.errors.startTime)} />
                             )}
                           />
-                          <FormHelperText error={Boolean(formik.touched.openingTime && formik.errors.openingTime)}>
-                            {formik.touched.openingTime && formik.errors.openingTime}
+                          <FormHelperText error={Boolean(formik.touched.startTime && formik.errors.startTime)}>
+                            {formik.touched.startTime && formik.errors.startTime}
                           </FormHelperText>
                         </Grid>
 
                         <Grid item md={3}>
                           <TimePicker
-                            id='closingTime'
-                            name='closingTime'
-                            label='Close Time'
-                            value={formik.values.closingTime}
-                            onChange={handleTimeChange('closingTime')}
+                            id='endTime'
+                            name='endTime'
+                            label='End Time'
+                            value={formik.values.endTime}
+                            onChange={handleTimeChange('endTime')}
                             renderInput={(params) => (
-                              <TextField {...params} fullWidth error={Boolean(formik.touched.closingTime && formik.errors.closingTime)} />
+                              <TextField {...params} fullWidth error={Boolean(formik.touched.endTime && formik.errors.endTime)} />
                             )}
                           />
-                          <FormHelperText error={Boolean(formik.touched.closingTime && formik.errors.closingTime)}>
-                            {formik.touched.closingTime && formik.errors.closingTime}
+                          <FormHelperText error={Boolean(formik.touched.endTime && formik.errors.endTime)}>
+                            {formik.touched.endTime && formik.errors.endTime}
                           </FormHelperText>
                         </Grid>
 
@@ -253,77 +254,88 @@ const SearchOrder = () => {
                 </Table>
               </TableContainer>
             ) :
-              groupedOrders &&
-              groupedOrders.map((order, index) => (
-                <Grid item md={12} key={order.orderId}>
-                  <TableContainer>
-                    <Table size='small'>
-                      <TableHead>
-                        <TableRow sx={{ backgroundColor: '#f5f5f5' }}>
-                          <TableCell />
-                          <TableCell>Order Date</TableCell>
-                          <TableCell>Plate Number</TableCell>
-                          <TableCell>Car Color</TableCell>
-                          <TableCell>Total</TableCell>
-                          <TableCell align='right'>Actions</TableCell>
-                        </TableRow>
-                      </TableHead>
+              groupedOrders && groupedOrders.length > 0 ?
+                groupedOrders.map((order, index) => (
+                  <Grid item md={12} key={order.orderId}>
+                    <TableContainer>
+                      <Table size='small'>
+                        <TableHead>
+                          <TableRow sx={{ backgroundColor: '#f5f5f5' }}>
+                            <TableCell />
+                            <TableCell>Order Date</TableCell>
+                            <TableCell>Plate Number</TableCell>
+                            <TableCell>Car Color</TableCell>
+                            <TableCell>Total</TableCell>
+                            <TableCell align='right'>Actions</TableCell>
+                          </TableRow>
+                        </TableHead>
 
-                      <TableBody>
-                        <TableRow hover>
-                          <TableCell>
-                            <IconButton size='small' onClick={() => handleToggle(index)}>
-                              {openIndex === index ? <UpOutlined /> : <DownOutlined />}
-                            </IconButton>
-                          </TableCell>
+                        <TableBody>
+                          <TableRow hover>
+                            <TableCell>
+                              <IconButton size='small' onClick={() => handleToggle(index)}>
+                                {openIndex === index ? <UpOutlined /> : <DownOutlined />}
+                              </IconButton>
+                            </TableCell>
 
-                          <TableCell>{dateHelper.formatDate(order.createdDate)}</TableCell>
-                          <TableCell>{order.carPlateNumber}</TableCell>
-                          <TableCell>{order.carColor}</TableCell>
-                          <TableCell>{order.totalPrice ? utils.formatCurrency(order.totalPrice) : 0}</TableCell>
-                          <TableCell align='right'>
-                            <IconButton
-                              size='small'
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                handleCommentClick(order);
-                              }}
-                            >
-                              <CommentIcon sx={{ color: theme.palette.primary.main }} />
-                            </IconButton>
-                          </TableCell>
-                        </TableRow>
-                        <TableRow>
-                          <TableCell style={{ paddingBottom: 0, paddingTop: 0 }} colSpan={5}>
-                            <Collapse in={openIndex === index} timeout='auto' unmountOnExit>
-                              <Box sx={{ margin: 2 }}>
-                                <Table size='small'>
-                                  <TableHead>
-                                    <TableRow>
-                                      <TableCell>Item Name</TableCell>
-                                      <TableCell align='center'>Quantity</TableCell>
-                                      <TableCell align='center'>Price ($)</TableCell>
-                                    </TableRow>
-                                  </TableHead>
-                                  <TableBody>
-                                    {order.items.map((item, i) => (
-                                      <TableRow key={i}>
-                                        <TableCell>{item.name}</TableCell>
-                                        <TableCell align='center'>{item.quantity}</TableCell>
-                                        <TableCell align='center'>{utils.formatCurrency(item.price)}</TableCell>
+                            <TableCell>{dateHelper.formatDate(order.createdDate)}</TableCell>
+                            <TableCell>{order.carPlateNumber}</TableCell>
+                            <TableCell>{order.carColor}</TableCell>
+                            <TableCell>{order.totalPrice ? utils.formatCurrency(order.totalPrice) : 0}</TableCell>
+                            <TableCell align='right'>
+                              <IconButton
+                                size='small'
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  handleCommentClick(order);
+                                }}
+                              >
+                                <CommentIcon sx={{ color: theme.palette.primary.main }} />
+                              </IconButton>
+                            </TableCell>
+                          </TableRow>
+                          <TableRow>
+                            <TableCell style={{ paddingBottom: 0, paddingTop: 0 }} colSpan={5}>
+                              <Collapse in={openIndex === index} timeout='auto' unmountOnExit>
+                                <Box sx={{ margin: 2 }}>
+                                  <Table size='small'>
+                                    <TableHead>
+                                      <TableRow>
+                                        <TableCell>Item Name</TableCell>
+                                        <TableCell align='center'>Quantity</TableCell>
+                                        <TableCell align='center'>Price ($)</TableCell>
                                       </TableRow>
-                                    ))}
-                                  </TableBody>
-                                </Table>
-                              </Box>
-                            </Collapse>
-                          </TableCell>
-                        </TableRow>
-                      </TableBody>
-                    </Table>
-                  </TableContainer>
-                </Grid>
-              ))
+                                    </TableHead>
+                                    <TableBody>
+                                      {order.items.map((item, i) => (
+                                        <TableRow key={i}>
+                                          <TableCell>{item.name}</TableCell>
+                                          <TableCell align='center'>{item.quantity}</TableCell>
+                                          <TableCell align='center'>{utils.formatCurrency(item.price)}</TableCell>
+                                        </TableRow>
+                                      ))}
+                                    </TableBody>
+                                  </Table>
+                                </Box>
+                              </Collapse>
+                            </TableCell>
+                          </TableRow>
+                        </TableBody>
+                      </Table>
+                    </TableContainer>
+                  </Grid>
+                )) :
+                <TableContainer>
+                  <Table>
+                    <TableBody>
+                      <TableRow>
+                        <TableCell colSpan={groupedOrders.length}>
+                          <EmptyTable msg='No data found.' />
+                        </TableCell>
+                      </TableRow>
+                    </TableBody>
+                  </Table>
+                </TableContainer>
             }
           </Grid>
         </Grid>
