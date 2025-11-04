@@ -80,8 +80,8 @@ function dateFromDay(year, day) {
   return new Date(date.setDate(day));
 }
 
-const getTimeFromMinutes = (minutes) => {
-  return dayjs(new Date()).add(minutes, 'minute').local().toDate();
+const getTimeFromHour = (hour) => {
+  return dayjs(new Date()).subtract(hour, 'hour').local().toDate();
 };
 
 const getTimeFromSeconds = (sec) => {
@@ -122,7 +122,7 @@ export default {
   convertMonthNumberToName,
   getWeekStartAndEnd,
   dateFromDay,
-  getTimeFromMinutes,
+  getTimeFromHour,
   getMinutesFromTime,
   convertTimeZone,
   getTimeFormat,
