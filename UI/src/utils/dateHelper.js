@@ -97,7 +97,7 @@ function convertTimeZone(value, timeZone = 'Australia/Melbourne') {
 };
 
 function getTimeFormatForSearch(value) {
-  return dayjs(value).local().format('HH:mm:ss');
+  return dayjs.utc(value).format('HH:mm:ss');
 }
 
 function getTimeFormat(value) {

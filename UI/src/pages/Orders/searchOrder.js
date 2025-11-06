@@ -74,7 +74,7 @@ const SearchOrder = () => {
     initialValues: {
       startTime: dateHelper.getTimeFromHour(1),
       endTime: dateHelper.getTimeFromHour(0),
-      date: dateHelper.formatDate(new Date())
+      date: dayjs()
     },
     validationSchema: orderSchema,
     onSubmit: async (values, { setSubmitting, setErrors }) => {
