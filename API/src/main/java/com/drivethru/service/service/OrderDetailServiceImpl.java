@@ -85,7 +85,7 @@ public class OrderDetailServiceImpl implements OrderDetailService {
         OrderDetail orderDetail = new OrderDetail();
         orderDetail.setTotalPrice(totalPrice);
         orderDetail.setSourceIp(webhookOrderRequest.getSource_ip());
-        orderDetail.setCreatedDate(utcNow);
+        orderDetail.setCreatedDate(LocalDateTime.now());
         orderDetail.setTenantId(tenant.getTenantId());
         orderDetail.setSiteId(cameraConfig.getSiteId());
         orderDetail.setCarId(carDetail.get().getCarId());
@@ -109,7 +109,7 @@ public class OrderDetailServiceImpl implements OrderDetailService {
                 orderItem.setName(name);
                 orderItem.setPrice(price);
                 orderItem.setQuantity(quantity);
-                orderItem.setCreatedDate(utcNow);
+                orderItem.setCreatedDate(LocalDateTime.now());
                 orderItemRepository.save(orderItem);
             }
         }
@@ -119,7 +119,7 @@ public class OrderDetailServiceImpl implements OrderDetailService {
         orderCarStatus.setCarId(carDetail.get().getCarId());
         orderCarStatus.setTenantId(tenant.getTenantId());
         orderCarStatus.setStatus(String.valueOf(CarColorStatus.GREEN));
-        orderCarStatus.setCreatedDate(utcNow);
+        orderCarStatus.setCreatedDate(LocalDateTime.now());
         orderCarStatusRepository.save(orderCarStatus);
         OrderLog log = new OrderLog();
         log.setOrderData("Received Webhook:\n"
