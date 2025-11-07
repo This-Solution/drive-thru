@@ -374,7 +374,7 @@ async function getSiteHoursAsync(siteId) {
   return await axios(config);
 }
 
-async function getOrdersAsync(date, startTime, endTime, search = '') {
+async function getOrdersAsync(date, startTime, endTime, search = '', sortBy = 'createdDate', sortDir = 'desc') {
   const config = {
     method: 'get',
     url: `/car`,
@@ -383,6 +383,8 @@ async function getOrdersAsync(date, startTime, endTime, search = '') {
       startTime: startTime,
       endTime: endTime,
       itemName: search,
+      sortBy: sortBy,
+      sortDir: sortDir
     },
   };
   return await axios(config);

@@ -47,6 +47,10 @@ function getFormatDate(value) {
   return date.format('DD/MM/YYYY HH:mm');
 }
 
+function getDateTimeFormat(value) {
+  return dayjs.utc(value).local().format('DD/MM/YYYY HH:mm');
+}
+
 const convertCurrentToUTC = (value) => {
   const offset = dayjs().utcOffset();
   return dayjs(value).subtract(offset, 'minutes');
@@ -127,5 +131,6 @@ export default {
   convertTimeZone,
   getTimeFormat,
   getTimeFromSeconds,
-  getTimeFormatForSearch
+  getTimeFormatForSearch,
+  getDateTimeFormat
 };
