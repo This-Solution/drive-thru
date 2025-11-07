@@ -35,12 +35,32 @@ import { GlobalFilter } from 'components/@extended/Table/ReactTableFilter';
 import dayjs from 'dayjs';
 import constants from 'utils/constants';
 import EmptyTable from 'components/@extended/Table/EmptyTable';
+import { TableHeadCustom } from 'components/TableCustomHeader';
+import { useTable } from 'components/use-table';
+
+const FILTEREDTABLEHEAD = [
+  { id: 'carId', label: '', width: '3%', sortBy: false },
+  { id: 'createdDate', label: 'Order Date', width: '10%' },
+  { id: 'carType', label: 'Car Type', width: '10%', sortBy: false },
+  { id: 'carPlateNumber', label: 'Plate Number', width: '10%', sortBy: false },
+  { id: 'carColor', label: 'Car Color', width: '10%' },
+  { id: 'totalPrice', label: 'Amount', width: '10%', align: 'right' },
+];
+
+const TABLEHEAD = [
+  ...FILTEREDTABLEHEAD,
+  { id: '', label: 'Action', width: '10%', sortBy: false, align: 'center' },
+];
 
 const SearchOrder = () => {
   const theme = useTheme();
+  const table = useTable();
   const matchDownMD = useMediaQuery(theme.breakpoints.down('md'));
   const navigate = useNavigate();
-  const [search, setSearch] = useState('');
+  const [filter, setFilter] = useState({
+    sortBy: 'createdDate',
+    sortDir: 'desc',
+  })
   const [orders, setOrders] = useState([]);
   const [openIndex, setOpenIndex] = useState(null);
   const [commentDialogOpen, setCommentDialogOpen] = useState(false);
@@ -55,14 +75,16 @@ const SearchOrder = () => {
 
   useEffect(() => {
     getOrderDetails(formik.values);
-  }, []);
+  }, [filter]);
 
   const getOrderDetails = async (payload) => {
     const { data } = await apiService.getOrdersAsync(
       dateHelper.formatDate(payload.date),
       dateHelper.getTimeFormatForSearch(payload.startTime),
       dateHelper.getTimeFormatForSearch(payload.endTime),
-      search
+      payload.search,
+      filter.sortBy,
+      filter.sortDir
     );
     if (data) {
       setOrders(data);
@@ -74,7 +96,8 @@ const SearchOrder = () => {
     initialValues: {
       startTime: dateHelper.getTimeFromHour(1),
       endTime: dateHelper.getTimeFromHour(0),
-      date: dayjs()
+      date: dayjs(),
+      search: ''
     },
     validationSchema: orderSchema,
     onSubmit: async (values, { setSubmitting, setErrors }) => {
@@ -87,10 +110,6 @@ const SearchOrder = () => {
       setSubmitting(false);
     }
   });
-
-  const handleSearchChange = (event) => {
-    setSearch(event.target.value);
-  };
 
   const handleCommentClick = (order) => {
     setSelectedOrder(order);
@@ -118,29 +137,12 @@ const SearchOrder = () => {
     setOpenIndex(openIndex === index ? null : index);
   };
 
-  const groupedOrders =
-    orders &&
-    Object.values(
-      orders.reduce((acc, item) => {
-        if (!acc[item.orderId]) {
-          acc[item.orderId] = {
-            carColor: item.carColor,
-            carId: item.carId,
-            carPlateNumber: item.carPlateNumber,
-            createdDate: item.createdDate,
-            totalPrice: item.totalPrice,
-            orderId: item.orderId,
-            items: []
-          };
-        }
-        acc[item.orderId].items.push({
-          name: item.name,
-          quantity: item.quantity,
-          price: item.price
-        });
-        return acc;
-      }, {})
-    );
+  const handleSort = (property) => {
+    const newOrder = table.orderBy === property && table.order === 'asc' ? 'desc' : 'asc';
+    table.setOrder(newOrder);
+    table.setOrderBy(property);
+    setFilter((pre) => ({ ...pre, sortBy: property, sortDir: newOrder }))
+  };
 
   return (
     <>
@@ -218,12 +220,14 @@ const SearchOrder = () => {
                         <Grid item md={3}>
                           <TextField
                             label='Search Orders'
+                            placeholder='Search By Item Name / Plate Number'
                             variant='outlined'
+                            name='search'
                             fullWidth
                             size='medium'
                             autoComplete='off'
-                            value={search}
-                            onChange={handleSearchChange}
+                            value={formik.values.search}
+                            onChange={formik.handleChange}
                           />
                         </Grid>
 
@@ -254,88 +258,95 @@ const SearchOrder = () => {
                 </Table>
               </TableContainer>
             ) :
-              groupedOrders && groupedOrders.length > 0 ?
-                groupedOrders.map((order, index) => (
-                  <Grid item md={12} key={order.orderId}>
-                    <TableContainer>
-                      <Table size='small'>
-                        <TableHead>
-                          <TableRow sx={{ backgroundColor: '#f5f5f5' }}>
-                            <TableCell />
-                            <TableCell>Order Date</TableCell>
-                            <TableCell>Plate Number</TableCell>
-                            <TableCell>Car Color</TableCell>
-                            <TableCell>Total</TableCell>
-                            <TableCell align='right'>Actions</TableCell>
-                          </TableRow>
-                        </TableHead>
-
-                        <TableBody>
-                          <TableRow hover>
-                            <TableCell>
-                              <IconButton size='small' onClick={() => handleToggle(index)}>
-                                {openIndex === index ? <UpOutlined /> : <DownOutlined />}
-                              </IconButton>
-                            </TableCell>
-
-                            <TableCell>{dateHelper.formatDate(order.createdDate)}</TableCell>
-                            <TableCell>{order.carPlateNumber}</TableCell>
-                            <TableCell>{order.carColor}</TableCell>
-                            <TableCell>{order.totalPrice ? utils.formatCurrency(order.totalPrice) : 0}</TableCell>
-                            <TableCell align='right'>
-                              <IconButton
-                                size='small'
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  handleCommentClick(order);
-                                }}
-                              >
-                                <CommentIcon sx={{ color: theme.palette.primary.main }} />
-                              </IconButton>
-                            </TableCell>
-                          </TableRow>
-                          <TableRow>
-                            <TableCell style={{ paddingBottom: 0, paddingTop: 0 }} colSpan={5}>
-                              <Collapse in={openIndex === index} timeout='auto' unmountOnExit>
-                                <Box sx={{ margin: 2 }}>
-                                  <Table size='small'>
-                                    <TableHead>
-                                      <TableRow>
-                                        <TableCell>Item Name</TableCell>
-                                        <TableCell align='center'>Quantity</TableCell>
-                                        <TableCell align='center'>Price ($)</TableCell>
-                                      </TableRow>
-                                    </TableHead>
-                                    <TableBody>
-                                      {order.items.map((item, i) => (
-                                        <TableRow key={i}>
-                                          <TableCell>{item.name}</TableCell>
-                                          <TableCell align='center'>{item.quantity}</TableCell>
-                                          <TableCell align='center'>{utils.formatCurrency(item.price)}</TableCell>
+              <>
+                <Grid item md={12} >
+                  <TableContainer>
+                    <Table size='small'>
+                      <TableHeadCustom
+                        order={table.order}
+                        orderBy={table.orderBy}
+                        headCells={TABLEHEAD}
+                        onSort={handleSort}
+                        sx={{
+                          backgroundColor: '#F0F0F0'
+                        }}
+                      />
+                      <TableBody>
+                        {orders && orders.length > 0 ?
+                          orders.map((order, index) => (<>
+                            <TableRow hover>
+                              <TableCell>
+                                <IconButton size='small' onClick={() => handleToggle(index)}>
+                                  {openIndex === index ? <UpOutlined /> : <DownOutlined />}
+                                </IconButton>
+                              </TableCell>
+                              <TableCell>{dateHelper.getDateTimeFormat(order.createdDate)}</TableCell>
+                              <TableCell>{order.carType}</TableCell>
+                              <TableCell>{order.carPlateNumber}</TableCell>
+                              <TableCell>{order.carColor}</TableCell>
+                              <TableCell align='right'>{order.totalPrice ? utils.formatCurrency(order.totalPrice) : 0}</TableCell>
+                              <TableCell align='center'>
+                                <IconButton
+                                  size='small'
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    handleCommentClick(order);
+                                  }}
+                                >
+                                  <CommentIcon sx={{ color: theme.palette.primary.main }} />
+                                </IconButton>
+                              </TableCell>
+                            </TableRow>
+                            <TableRow>
+                              <TableCell style={{ paddingBottom: 0, paddingTop: 0, paddingLeft: '150px', alignItems: 'center' }} colSpan={4}>
+                                <Collapse in={openIndex === index} timeout='auto' unmountOnExit>
+                                  <Box sx={{ margin: 2 }}>
+                                    <Table size='small' sx={{ border: '1px solid #F0F0F0' }}>
+                                      <TableHead>
+                                        <TableRow sx={{
+                                          backgroundColor: '#F0F0F0'
+                                        }}>
+                                          <TableCell >Item Name</TableCell>
+                                          <TableCell >Quantity</TableCell>
+                                          <TableCell align='right'>Price ($)</TableCell>
                                         </TableRow>
-                                      ))}
-                                    </TableBody>
-                                  </Table>
-                                </Box>
-                              </Collapse>
+                                      </TableHead>
+                                      <TableBody>
+                                        {order.orderItemData && order.orderItemData.length > 0 && order.orderItemData.map((item, i) => (
+                                          <TableRow key={i}>
+                                            <TableCell >{item.name}</TableCell>
+                                            <TableCell >{item.quantity}</TableCell>
+                                            <TableCell align='right'>{utils.formatCurrency(item.price)}</TableCell>
+                                          </TableRow>
+                                        ))}
+                                      </TableBody>
+                                    </Table>
+                                  </Box>
+                                </Collapse>
+                              </TableCell>
+                            </TableRow>
+                          </>)) :
+
+                          <TableRow>
+                            <TableCell colSpan={7} // Ensure colSpan is at least 1 if orders is empty
+                              style={{
+                                textAlign: 'center',
+                                verticalAlign: 'middle'
+                              }}>
+                              <EmptyTable msg='No data found.' />
                             </TableCell>
                           </TableRow>
-                        </TableBody>
-                      </Table>
-                    </TableContainer>
-                  </Grid>
-                )) :
-                <TableContainer>
-                  <Table>
-                    <TableBody>
-                      <TableRow>
-                        <TableCell colSpan={groupedOrders.length}>
-                          <EmptyTable msg='No data found.' />
-                        </TableCell>
-                      </TableRow>
-                    </TableBody>
-                  </Table>
-                </TableContainer>
+                        }
+                      </TableBody>
+                    </Table>
+                  </TableContainer>
+                </Grid>
+                <Grid item md={12}>
+                  <Stack direction={'row'} justifyContent={'end'} spacing={1}>
+                    <Typography variant='h6' color="text.secondary">Total Orders :-</Typography>
+                    <Typography variant='h6'>{orders && orders.length > 0 ? orders[0].totalCount : 0}</Typography>
+                  </Stack>
+                </Grid></>
             }
           </Grid>
         </Grid>
