@@ -81,7 +81,7 @@ public class CarDetailController {
     }
 
     @GetMapping
-    public ResponseEntity<ResponseObject<List<OrderItemCarDetailProjection>>> getOrderBySiteId(
+    public ResponseEntity<ResponseObject<List<CarOrderResponseDTO>>> getOrderBySiteId(
             @RequestParam(value = "itemName", required = false) String itemName,
             @RequestParam(value = "carPlateNumber", required = false) String carPlateNumber,
             @RequestParam(value = "date") @DateTimeFormat(pattern = "dd/MM/yyyy") LocalDate localDate,
@@ -90,8 +90,8 @@ public class CarDetailController {
         String authHeader = httpServletRequest.getHeader(HttpHeaders.AUTHORIZATION);
         String token = jwtHelper.cleanToken(authHeader);
         String siteId = jwtHelper.extractSiteId(token);
-        ResponseObject<List<OrderItemCarDetailProjection>> responseObject = new ResponseObject<>();
-        List<OrderItemCarDetailProjection> orderItems = orderDetailService.getOrderItems(Integer.valueOf(siteId), itemName, localDate, startTime, endTime);
+        ResponseObject<List<CarOrderResponseDTO>> responseObject = new ResponseObject<>();
+        List<CarOrderResponseDTO> orderItems = orderDetailService.getOrderItems(Integer.valueOf(siteId), itemName, localDate, startTime, endTime);
         responseObject.setData(orderItems);
         return new ResponseEntity<>(responseObject, HttpStatus.OK);
     }

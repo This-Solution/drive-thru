@@ -1,6 +1,7 @@
 package com.drivethru.service.service;
 
 import com.drivethru.service.constant.Constants;
+import com.drivethru.service.dto.CarOrderResponseDTO;
 import com.drivethru.service.dto.OrderItemCarDetailProjection;
 import com.drivethru.service.dto.WebhookOrderRequest;
 import com.drivethru.service.entity.*;
@@ -8,7 +9,6 @@ import com.drivethru.service.entity.types.CarColorStatus;
 import com.drivethru.service.entity.types.OrderStatus;
 import com.drivethru.service.error.CustomErrorHolder;
 import com.drivethru.service.error.CustomException;
-import com.drivethru.service.helper.DateAndTimeHelper;
 import com.drivethru.service.repository.*;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,8 +26,7 @@ import java.nio.charset.StandardCharsets;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
-import java.util.Optional;
-import java.util.List;
+import java.util.*;
 
 @Service
 public class OrderDetailServiceImpl implements OrderDetailService {
@@ -136,7 +135,7 @@ public class OrderDetailServiceImpl implements OrderDetailService {
     }
 
     @Override
-    public List<OrderItemCarDetailProjection> getOrderItems(Integer siteId, String itemName, LocalDate localDate, String startTime, String endTime) {
+    public List<CarOrderResponseDTO> getOrderItems(Integer siteId, String itemName, LocalDate localDate, String startTime, String endTime) {
         if (itemName != null && itemName.trim().isEmpty()) {
             itemName = null;
         }
@@ -155,6 +154,31 @@ public class OrderDetailServiceImpl implements OrderDetailService {
             actualEndTime = localDate.atTime(LocalTime.MAX);
         }
         List<OrderItemCarDetailProjection> orderItems = orderItemRepository.findOrderItemsWithCarDetails(siteId, itemName, actualStartTime, actualEndTime);
-        return orderItems;
+
+        Map<Integer, CarOrderResponseDTO> order = new LinkedHashMap<>();
+
+        for (OrderItemCarDetailProjection item : orderItems) {
+            CarOrderResponseDTO dto = order.computeIfAbsent(
+                    item.getOrderId(), id -> {
+                        CarOrderResponseDTO d = new CarOrderResponseDTO();
+                        d.setOrderId(item.getOrderId());
+                        d.setCarId(item.getCarId());
+                        d.setCarPlateNumber(item.getCarPlateNumber());
+                        d.setCarColor(item.getCarColor());
+                        d.setTotalPrice(item.getTotalPrice());
+                        d.setCreatedDate(item.getCreatedDate());
+                        d.setOrderItemData(new ArrayList<>());
+                        return d;
+                    }
+            );
+            CarOrderResponseDTO.OrderItemDTO orderItem = new CarOrderResponseDTO.OrderItemDTO();
+            orderItem.setOrderItemId(item.getOrderItemId());
+            orderItem.setName(item.getName());
+            orderItem.setQuantity(item.getQuantity());
+            orderItem.setPrice(item.getPrice());
+            dto.getOrderItemData().add(orderItem);
+        }
+
+        return new ArrayList<>(order.values());
     }
 }
