@@ -23,6 +23,7 @@ public interface OrderItemRepository extends JpaRepository<OrderItem, Integer> {
             "oi.CreatedDate AS createdDate, " +
             "cd.CarPlateNumber AS carPlateNumber, " +
             "cd.CarColor AS carColor, " +
+            "cd.CarType AS carType, " +
             "cd.CarId AS carId, " +
             "od.TotalPrice AS totalPrice "+
             "FROM Sales.OrderItem oi " +

@@ -4,14 +4,32 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 public class CarOrderResponseDTO {
+    private int totalCount;
     private String carPlateNumber;
     private String carColor;
     private Double totalPrice;
     private Integer orderId;
     private Integer carId;
+    private String carType;
     private LocalDateTime createdDate;
     private List<OrderItemDTO> orderItemData;
 
+    public String getCarType() {
+        return carType;
+    }
+
+    public void setCarType(String carType) {
+        this.carType = carType;
+    }
+
+
+    public int getTotalCount() {
+        return totalCount;
+    }
+
+    public void setTotalCount(int totalCount) {
+        this.totalCount = totalCount;
+    }
 
     public String getCarPlateNumber() {
         return carPlateNumber;

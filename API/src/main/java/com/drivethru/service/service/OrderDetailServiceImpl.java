@@ -167,6 +167,7 @@ public class OrderDetailServiceImpl implements OrderDetailService {
                         d.setCarColor(item.getCarColor());
                         d.setTotalPrice(item.getTotalPrice());
                         d.setCreatedDate(item.getCreatedDate());
+                        d.setCarType(item.getCarType());
                         d.setOrderItemData(new ArrayList<>());
                         return d;
                     }
@@ -178,7 +179,11 @@ public class OrderDetailServiceImpl implements OrderDetailService {
             orderItem.setPrice(item.getPrice());
             dto.getOrderItemData().add(orderItem);
         }
-
-        return new ArrayList<>(order.values());
+        List<CarOrderResponseDTO> data = new ArrayList<>(order.values());
+        int totalCount = data.size();
+        for (CarOrderResponseDTO dto : data) {
+            dto.setTotalCount(totalCount);
+        }
+        return data;
     }
 }
