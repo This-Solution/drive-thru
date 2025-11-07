@@ -23,9 +23,7 @@ import javax.xml.parsers.DocumentBuilderFactory;
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.LocalTime;
+import java.time.*;
 import java.util.*;
 
 @Service
@@ -63,6 +61,7 @@ public class OrderDetailServiceImpl implements OrderDetailService {
     public void createdOrder(WebhookOrderRequest webhookOrderRequest) {
         Double totalPrice;
         Document doc;
+        LocalDateTime utcNow = Instant.now().atZone(ZoneOffset.UTC).toLocalDateTime();
         try {
             DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
             DocumentBuilder builder = factory.newDocumentBuilder();
@@ -86,7 +85,7 @@ public class OrderDetailServiceImpl implements OrderDetailService {
         OrderDetail orderDetail = new OrderDetail();
         orderDetail.setTotalPrice(totalPrice);
         orderDetail.setSourceIp(webhookOrderRequest.getSource_ip());
-        orderDetail.setCreatedDate(LocalDateTime.now());
+        orderDetail.setCreatedDate(utcNow);
         orderDetail.setTenantId(tenant.getTenantId());
         orderDetail.setSiteId(cameraConfig.getSiteId());
         orderDetail.setCarId(carDetail.get().getCarId());
@@ -110,7 +109,7 @@ public class OrderDetailServiceImpl implements OrderDetailService {
                 orderItem.setName(name);
                 orderItem.setPrice(price);
                 orderItem.setQuantity(quantity);
-                orderItem.setCreatedDate(LocalDateTime.now());
+                orderItem.setCreatedDate(utcNow);
                 orderItemRepository.save(orderItem);
             }
         }
@@ -120,7 +119,7 @@ public class OrderDetailServiceImpl implements OrderDetailService {
         orderCarStatus.setCarId(carDetail.get().getCarId());
         orderCarStatus.setTenantId(tenant.getTenantId());
         orderCarStatus.setStatus(String.valueOf(CarColorStatus.GREEN));
-        orderCarStatus.setCreatedDate(LocalDateTime.now());
+        orderCarStatus.setCreatedDate(utcNow);
         orderCarStatusRepository.save(orderCarStatus);
         OrderLog log = new OrderLog();
         log.setOrderData("Received Webhook:\n"
