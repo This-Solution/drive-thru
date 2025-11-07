@@ -135,7 +135,7 @@ public class OrderDetailServiceImpl implements OrderDetailService {
     }
 
     @Override
-    public List<CarOrderResponseDTO> getOrderItems(Integer siteId, String itemName, LocalDate localDate, String startTime, String endTime) {
+    public List<CarOrderResponseDTO> getOrderItems(Integer siteId, String itemName, LocalDate localDate, String startTime, String endTime, String sortBy, String sortDir) {
         if (itemName != null && itemName.trim().isEmpty()) {
             itemName = null;
         }
@@ -153,7 +153,7 @@ public class OrderDetailServiceImpl implements OrderDetailService {
         } else {
             actualEndTime = localDate.atTime(LocalTime.MAX);
         }
-        List<OrderItemCarDetailProjection> orderItems = orderItemRepository.findOrderItemsWithCarDetails(siteId, itemName, actualStartTime, actualEndTime);
+        List<OrderItemCarDetailProjection> orderItems = orderItemRepository.findOrderItemsWithCarDetails(siteId, itemName, actualStartTime, actualEndTime, sortBy, sortDir);
 
         Map<Integer, CarOrderResponseDTO> order = new LinkedHashMap<>();
 

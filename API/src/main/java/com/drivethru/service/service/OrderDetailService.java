@@ -12,5 +12,5 @@ import java.util.List;
 public interface OrderDetailService {
     void createdOrder(WebhookOrderRequest webhookOrderRequest);
 
-    List<CarOrderResponseDTO> getOrderItems(Integer siteId, String itemName, LocalDate localDate, String startTime, String endTime);
+    List<CarOrderResponseDTO> getOrderItems(Integer siteId, String itemName, LocalDate localDate, String startTime, String endTime, String sortBy, String sortDir);
 }

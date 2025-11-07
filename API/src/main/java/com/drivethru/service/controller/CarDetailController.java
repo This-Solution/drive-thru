@@ -86,12 +86,14 @@ public class CarDetailController {
             @RequestParam(value = "carPlateNumber", required = false) String carPlateNumber,
             @RequestParam(value = "date") @DateTimeFormat(pattern = "dd/MM/yyyy") LocalDate localDate,
             @RequestParam(required = false) String startTime,
-            @RequestParam(required = false) String endTime, HttpServletRequest httpServletRequest) {
+            @RequestParam(required = false) String endTime,
+            @RequestParam(required = false) String sortBy,
+            @RequestParam(required = false) String sortDir, HttpServletRequest httpServletRequest) {
         String authHeader = httpServletRequest.getHeader(HttpHeaders.AUTHORIZATION);
         String token = jwtHelper.cleanToken(authHeader);
         String siteId = jwtHelper.extractSiteId(token);
         ResponseObject<List<CarOrderResponseDTO>> responseObject = new ResponseObject<>();
-        List<CarOrderResponseDTO> orderItems = orderDetailService.getOrderItems(Integer.valueOf(siteId), itemName, localDate, startTime, endTime);
+        List<CarOrderResponseDTO> orderItems = orderDetailService.getOrderItems(Integer.valueOf(siteId), itemName, localDate, startTime, endTime, sortBy, sortDir);
         responseObject.setData(orderItems);
         return new ResponseEntity<>(responseObject, HttpStatus.OK);
     }
